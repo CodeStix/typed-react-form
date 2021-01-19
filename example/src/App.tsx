@@ -1,10 +1,32 @@
 import React from 'react'
+import { AnyListener, Listener, useForm } from './StateForm'
 
-import { ExampleComponent } from 'react-state-form'
-import 'react-state-form/dist/index.css'
+export default function App() {
+    let defaultValues = {
+        firstName: 'Stijn',
+        lastName: 'Rogiest'
+    }
 
-const App = () => {
-  return <ExampleComponent text="Create React Library Example 😄" />
+    const form = useForm(defaultValues)
+
+    return (
+        <form>
+            <AnyListener
+                form={form}
+                render={({ values }) => (
+                    <pre>{JSON.stringify(values, null, 2)}</pre>
+                )}
+            />
+            <Listener
+                form={form}
+                name='firstName'
+                render={({ value, setValue }) => (
+                    <input
+                        value={value}
+                        onChange={(ev) => setValue(ev.target.value)}
+                    />
+                )}
+            />
+        </form>
+    )
 }
-
-export default App
