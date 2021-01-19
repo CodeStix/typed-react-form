@@ -31,21 +31,12 @@ type AnyListenersMap = {
     [key: string]: AnyListener
 }
 
-type Listener<TValue> = (
-    value: TValue,
-    error: ErrorType<TValue> | undefined,
-    isDefault: boolean,
-    dirty: boolean | undefined
-) => void
-type ListenersMap<T extends ObjectOrArray> = {
-    [TKey in KeyType<T>]?: ListenerIdMap<T, TKey>
+type Listener = (isDefault: boolean) => void
+type ListenerIdMap = {
+    [key: string]: Listener
 }
-type ListenerIdMap<
-    T extends ObjectOrArray,
-    U extends KeyType<T>,
-    V extends T[U] = T[U]
-> = {
-    [key: string]: Listener<V>
+type ListenersMap<T extends ObjectOrArray> = {
+    [TKey in KeyType<T>]?: ListenerIdMap
 }
 
 type DirtyMap<T extends ObjectOrArray> = {
@@ -113,10 +104,7 @@ export class FormState<T extends ObjectOrArray> {
         return Object.keys(this.errors).length > 0 //some((key) => this.errors[key as KeyType<T>])
     }
 
-    public listen<U extends KeyType<T>, V extends T[U]>(
-        key: U,
-        listener: Listener<V>
-    ): string {
+    public listen<U extends KeyType<T>>(key: U, listener: Listener): string {
         let setters = this.listeners[key]
         if (!setters) {
             setters = {}
@@ -292,12 +280,11 @@ export class FormState<T extends ObjectOrArray> {
         let listeners = this.listeners[key]
         if (listeners) {
             // Call all listeners for the set field
-            let value = this.values[key]
-            let dirty = this.dirty[key]
-            let error = this.errors[key]
+            // let value = this.values[key]
+            // let dirty = this.dirty[key]
+            // let error = this.errors[key]
             Object.keys(listeners!).forEach((id) => {
-                if (id !== skipId)
-                    listeners![id](value, error, isDefault ?? false, dirty)
+                if (id !== skipId) listeners![id](isDefault ?? false)
             })
         }
     }
@@ -382,11 +369,11 @@ export function useFormValue<
     }))
 
     useEffect(() => {
-        let id = form.listen(name, (value, error, dirty) =>
+        let id = form.listen(name, (_isDefault) =>
             setValue({
-                value,
-                error,
-                dirty,
+                value: form.values[name],
+                error: form.errors[name],
+                dirty: form.dirty[name],
                 isSubmitting: form.state.isSubmitting,
                 setValue: (value: TValue) => form.setValue(name, value)
             })
@@ -454,37 +441,37 @@ export type MultiListenerProps<
     }) => React.ReactNode
 }
 
-export function MultiListener<
-    T extends ObjectOrArray,
-    TKeys extends KeyType<T>[]
->(props: MultiListenerProps<T, TKeys>) {
-    const form = props.form
-    const [, setRender] = useState(0)
+// export function MultiListener<
+//     T extends ObjectOrArray,
+//     TKeys extends KeyType<T>[]
+// >(props: MultiListenerProps<T, TKeys>) {
+//     const form = props.form
+//     const [, setRender] = useState(0)
 
-    useEffect(() => {
-        let ids = props.names.map((name) =>
-            form.listen(name, () => setRender((r) => r + 1))
-        )
-        return () => ids.forEach((id, i) => form.ignore(props.names[i], id))
-    }, [form]) // props.names
+//     useEffect(() => {
+//         let ids = props.names.map((name) =>
+//             form.listen(name, () => setRender((r) => r + 1))
+//         )
+//         return () => ids.forEach((id, i) => form.ignore(props.names[i], id))
+//     }, [form]) // props.names
 
-    return (
-        <>
-            {props.render({
-                values: form.values,
-                errors: form.errors,
-                dirty: form.dirty,
-                isSubmitting: form.state.isSubmitting,
-                setValues: (newValues) => {
-                    Object.keys(newValues).forEach((keyString) => {
-                        let key = keyString as KeyType<T>
-                        form.setValue(key, newValues[key]!)
-                    })
-                }
-            })}
-        </>
-    )
-}
+//     return (
+//         <>
+//             {props.render({
+//                 values: form.values,
+//                 errors: form.errors,
+//                 dirty: form.dirty,
+//                 isSubmitting: form.state.isSubmitting,
+//                 setValues: (newValues) => {
+//                     Object.keys(newValues).forEach((keyString) => {
+//                         let key = keyString as KeyType<T>
+//                         form.setValue(key, newValues[key]!)
+//                     })
+//                 }
+//             })}
+//         </>
+//     )
+// }
 
 export type FormProps<T extends ObjectOrArray> = {
     values: T
@@ -542,10 +529,10 @@ export function useChildForm<
             deepCopy(parent.values[name]),
             parent.errors[name] as any
         )
-        let parentId = parent.listen(name, (val, errors, isDefault) => {
+        let parentId = parent.listen(name, (isDefault) => {
             ref.current.setValues(
-                val,
-                (errors as any) ?? {},
+                parent.values[name],
+                (parent.errors[name] as any) ?? {},
                 isDefault,
                 parent.state,
                 id
