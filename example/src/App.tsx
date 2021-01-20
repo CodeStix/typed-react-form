@@ -19,7 +19,7 @@ function FormVisualize<T, TError, TState extends object>(props: {
                 <VisualRender>
                     <div style={{ background: '#eee' }}>
                         <pre>{JSON.stringify(values, null, 2)}</pre>
-                        {props.form.isDirty && (
+                        {props.form.dirty && (
                             <p>
                                 <strong>DIRTY</strong>
                             </p>
@@ -70,7 +70,7 @@ export default function App() {
                 onSubmit={async (ev) => {
                     ev.preventDefault()
                     form.validate()
-                    if (form.anyError) return
+                    if (form.error) return
                     console.log('submit', form.values)
                     form.setState({ isSubmitting: true })
                     await new Promise((res) => setTimeout(res, 1000))

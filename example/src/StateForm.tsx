@@ -146,7 +146,7 @@ export class FormState<
     /**
      * Returns true if any field on this form or any child form is marked as dirty. (Not parent forms)
      */
-    public get isDirty(): boolean {
+    public get dirty(): boolean {
         // return true if some field was marked as dirty
         if (
             Object.keys(this._dirtyMap).some(
@@ -166,7 +166,7 @@ export class FormState<
     /**
      * Returns true if any error is set on this form or any child form. (Not parent forms)
      */
-    public get anyError(): boolean {
+    public get error(): boolean {
         return Object.keys(this._errorMap).length > 0 //some((key) => this.errors[key as KeyType<T>])
     }
 
@@ -552,7 +552,7 @@ export function useChildForm<
             parent.setValueInternal(
                 name,
                 ref.current!.values,
-                ref.current!.isDirty,
+                ref.current!.dirty,
                 ref.current!.errorMap as ErrorType<TValue, TError>,
                 parentId
             )
