@@ -58,6 +58,8 @@ export class FormState<
     public errors: ErrorMap<T, TError> = {}
     public state: TState
 
+    public validateOnChange: boolean = true
+
     private validator: FormValidator<T, TError> = () => ({})
     private listeners: ListenersMap<T> = {}
     private anyListeners: AnyListenersMap = {}
@@ -67,7 +69,8 @@ export class FormState<
         initialValues: T,
         defaultValues: T,
         state: TState,
-        validator: FormValidator<T, TError> = () => ({})
+        validator: FormValidator<T, TError>,
+        validateOnChange: boolean
     ) {
         if (!defaultValues || !initialValues)
             throw new Error(
@@ -76,6 +79,7 @@ export class FormState<
         this.state = state
         this.values = initialValues
         this.defaultValues = defaultValues
+        this.validateOnChange = validateOnChange
         this.formId = FormState.currentId++
         this.validator = validator
     }
@@ -187,7 +191,7 @@ export class FormState<
             if (error === null || Object.keys(error).length === 0)
                 delete this.errors[key]
             else this.errors[key] = error
-        } else {
+        } else if (this.validateOnChange) {
             this.errors = this.validator(this.values)
         }
 
@@ -195,13 +199,16 @@ export class FormState<
         this.fireAnyListeners(false, skipId)
     }
 
+    public validate() {
+        this.setErrors(this.validator(this.values))
+    }
+
     /**
      * Sets errors for a form.
      * @param errors The errors to set in this form, leave undefined to use the forms validator. Will also trigger child and parent forms.
      * @param skipId The field listener to skip.
      */
-    public setErrors(errors?: ErrorMap<T, TError>, skipId?: string) {
-        if (errors === undefined) errors = this.validator(this.values)
+    public setErrors(errors: ErrorMap<T, TError>, skipId?: string) {
         if (
             Object.keys(this.errors).length === 0 &&
             Object.keys(errors).length === 0
@@ -430,7 +437,8 @@ export function useForm<T, TError = string, TState extends object = {}>(
     values: T,
     defaultState: TState = {} as any,
     validator: FormValidator<T, TError> = () => ({}),
-    validateOnMount = false
+    validateOnMount = false,
+    validateOnChange = true
 ) {
     let ref = useRef<FormState<T, TError, TState> | null>(null)
 
@@ -439,7 +447,8 @@ export function useForm<T, TError = string, TState extends object = {}>(
             memberCopy(values),
             values,
             defaultState,
-            validator
+            validator,
+            validateOnChange
         )
     }
 
@@ -459,7 +468,8 @@ export function useChildForm<
 >(
     parent: FormState<TParent, TError, TState>,
     name: TKey,
-    validator: FormValidator<TValue, TError> = () => ({})
+    validator: FormValidator<TValue, TError> = () => ({}),
+    validateOnChange = true
 ) {
     let ref = useRef<FormState<TValue, TError, TState> | null>(null)
 
@@ -468,7 +478,8 @@ export function useChildForm<
             memberCopy(parent.values[name]),
             parent.defaultValues[name] ?? parent.values[name],
             parent.state,
-            validator
+            validator,
+            validateOnChange
         )
     }
 

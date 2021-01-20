@@ -15,7 +15,7 @@ function FormVisualize<T, TError, TState extends object>(props: {
     return (
         <AnyListener
             form={props.form}
-            render={({ values }) => (
+            render={({ values, errors }) => (
                 <VisualRender>
                     <div style={{ background: '#eee' }}>
                         <pre>{JSON.stringify(values, null, 2)}</pre>
@@ -24,6 +24,7 @@ function FormVisualize<T, TError, TState extends object>(props: {
                                 <strong>DIRTY</strong>
                             </p>
                         )}
+                        <pre>{JSON.stringify(errors, null, 2)}</pre>
                     </div>
                 </VisualRender>
             )}
@@ -46,15 +47,22 @@ export default function App() {
     const form = useForm(
         defaultValues,
         { isSubmitting: false },
-        (_values) => ({
-            todo: [
-                {
-                    title: 'not good!'
-                }
-            ]
-        }),
+        (values) =>
+            values.todo
+                .filter((e) => e.title.length < 5)
+                .reduce((prev, _val, index) => {
+                    let l = prev['todo']
+                    if (!l) {
+                        l = {}
+                        prev['todo'] = l
+                    }
+                    l[index] = { title: 'title must be longer' }
+                    return prev
+                }, {}),
         true
     )
+
+    form.validateOnChange = false
 
     return (
         <VisualRender>
@@ -62,6 +70,8 @@ export default function App() {
                 style={{ margin: '3em' }}
                 onSubmit={async (ev) => {
                     ev.preventDefault()
+                    form.validate()
+                    if (form.anyError) return
                     console.log('submit', form.values)
                     form.setState({ isSubmitting: true })
                     await new Promise((res) => setTimeout(res, 1000))
@@ -98,6 +108,7 @@ export default function App() {
                                         })}
                                         render={(form) => (
                                             <li>
+                                                <FormVisualize form={form} />
                                                 <Listener
                                                     form={form}
                                                     name='title'
