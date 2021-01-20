@@ -33,6 +33,8 @@ type DirtyMap<T extends ObjectOrArray> = {
     [TKey in KeyOf<T>]?: boolean
 }
 
+export type FormValidator<T, TError> = (values: T) => ErrorMap<T, TError>
+
 // clones only the lower-most object
 function memberCopy<T>(value: T): T {
     if (Array.isArray(value)) {
@@ -55,14 +57,18 @@ export class FormState<
     public dirty: DirtyMap<T> = {}
     public errors: ErrorMap<T, TError> = {}
     public state: TState
-    public validate: (values: T) => ErrorMap<T, TError> = () => ({})
 
-    // private stateListeners: StateListenersMap = {};
+    private validator: FormValidator<T, TError> = () => ({})
     private listeners: ListenersMap<T> = {}
     private anyListeners: AnyListenersMap = {}
     private static currentId = 0
 
-    constructor(initialValues: T, defaultValues: T, state: TState) {
+    constructor(
+        initialValues: T,
+        defaultValues: T,
+        state: TState,
+        validator: FormValidator<T, TError> = () => ({})
+    ) {
         if (!defaultValues || !initialValues)
             throw new Error(
                 'FormState.constructor: initialValues or defaultValues is null'
@@ -71,6 +77,7 @@ export class FormState<
         this.values = initialValues
         this.defaultValues = defaultValues
         this.formId = FormState.currentId++
+        this.validator = validator
     }
 
     public get isDirty(): boolean {
@@ -181,7 +188,7 @@ export class FormState<
                 delete this.errors[key]
             else this.errors[key] = error
         } else {
-            this.errors = this.validate(this.values)
+            this.errors = this.validator(this.values)
         }
 
         this.fireListener(key, false, skipId)
@@ -194,7 +201,7 @@ export class FormState<
      * @param skipId The field listener to skip.
      */
     public setErrors(errors?: ErrorMap<T, TError>, skipId?: string) {
-        if (errors === undefined) errors = this.validate(this.values)
+        if (errors === undefined) errors = this.validator(this.values)
         if (
             Object.keys(this.errors).length === 0 &&
             Object.keys(errors).length === 0
@@ -244,7 +251,7 @@ export class FormState<
             this.values = setValues
         }
         if (errors !== undefined) this.errors = errors
-        else this.errors = this.validate(this.values)
+        else this.errors = this.validator(this.values)
         if (state !== undefined) this.state = state
 
         if (!this.values) {
@@ -405,6 +412,7 @@ export type ChildFormProps<
     parent: FormState<TParent, TError, TState>
     name: TKey
     render: (form: FormState<TValue, TError, TState>) => JSX.Element
+    validator?: FormValidator<TValue, TError>
 }
 
 export function ChildForm<
@@ -414,13 +422,14 @@ export function ChildForm<
     TError,
     TState extends object
 >(props: ChildFormProps<TParent, TKey, TValue, TError, TState>) {
-    const childForm = useChildForm(props.parent, props.name)
+    const childForm = useChildForm(props.parent, props.name, props.validator)
     return props.render(childForm)
 }
 
-export function useForm<T, TError, TState extends object>(
+export function useForm<T, TError = string, TState extends object = {}>(
     values: T,
-    defaultState: TState = {} as any
+    defaultState: TState = {} as any,
+    validator: FormValidator<T, TError> = () => ({})
 ) {
     let ref = useRef<FormState<T, TError, TState> | null>(null)
 
@@ -428,7 +437,8 @@ export function useForm<T, TError, TState extends object>(
         ref.current = new FormState<T, TError, TState>(
             memberCopy(values),
             values,
-            defaultState
+            defaultState,
+            validator
         )
     }
 
@@ -445,14 +455,19 @@ export function useChildForm<
     TValue extends TParent[TKey],
     TError,
     TState extends object
->(parent: FormState<TParent, TError, TState>, name: TKey) {
+>(
+    parent: FormState<TParent, TError, TState>,
+    name: TKey,
+    validator: FormValidator<TValue, TError> = () => ({})
+) {
     let ref = useRef<FormState<TValue, TError, TState> | null>(null)
 
     if (!ref.current) {
         ref.current = new FormState<TValue, TError, TState>(
             memberCopy(parent.values[name]),
             parent.defaultValues[name] ?? parent.values[name],
-            parent.state
+            parent.state,
+            validator
         )
     }
 

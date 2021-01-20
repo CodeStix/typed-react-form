@@ -79,6 +79,12 @@ export default function App() {
                                         key={i}
                                         parent={form}
                                         name={i}
+                                        validator={(values) => ({
+                                            title:
+                                                values.title.length < 5
+                                                    ? 'pick a longer title'
+                                                    : undefined
+                                        })}
                                         render={(form) => (
                                             <li>
                                                 <Listener
@@ -86,9 +92,17 @@ export default function App() {
                                                     name='title'
                                                     render={({
                                                         value,
-                                                        setValue
+                                                        setValue,
+                                                        error
                                                     }) => (
                                                         <VisualRender>
+                                                            {error && (
+                                                                <p>
+                                                                    <i>
+                                                                        {error}
+                                                                    </i>
+                                                                </p>
+                                                            )}
                                                             <input
                                                                 disabled={
                                                                     form.state
