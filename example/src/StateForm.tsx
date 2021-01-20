@@ -218,6 +218,13 @@ export class FormState<
         this.fireAnyListeners(false)
     }
 
+    public setDirty(key: KeyOf<T>, dirty: boolean, skipId?: string) {
+        if (this._dirtyMap[key] === dirty) return
+        this._dirtyMap[key] = dirty
+        this.fireListener(key, false, skipId)
+        this.fireAnyListeners(false, skipId)
+    }
+
     /**
      * Set a value the advanced way.
      * @param key The field name to set.
@@ -287,7 +294,7 @@ export class FormState<
     }
 
     /**
-     *
+     * Set all the values in this form, notifies parent and child forms. Also calculate dirty values fields.
      * @param setValues The values to set in this form, will also notify parent and child forms.
      * @param errors The errors to set on this form, leave undefined to use the validator.
      * @param isDefault Are these values the default values of the form?
@@ -331,7 +338,8 @@ export class FormState<
         for (let i = 0; i < keys.length; i++) {
             let name = keys[i] as KeyOf<T>
             let value = this._values[name]
-            if (typeof value === 'object' || Array.isArray(value)) continue // do not
+            // Do not compare objects and arrays, they are set dirty using setValueInternal
+            if (typeof value === 'object' || Array.isArray(value)) continue
             this._dirtyMap[name] = this._defaultValues[name] !== value
         }
     }
@@ -682,26 +690,20 @@ export function ArrayField<
         form.setValues([] as any, {})
     }
 
-    function move(index: number, newIndex: number) {
-        throw new Error('Move not implemented.')
-        if (index === newIndex) return
-        let values = [...form.values]
-        values.splice(newIndex, 0, values.splice(index, 1)[0])
-        let errors = { ...form.errorMap } as any
-        if (newIndex > index) {
-            let e = errors[index]
-            for (let i = index; i < newIndex; i++) {
-                errors[i] = errors[i + 1]
-            }
-            errors[newIndex] = e
-        } else {
-            let e = errors[index]
-            for (let i = newIndex; i > index; i--) {
-                errors[i] = errors[i - 1]
-            }
-            errors[newIndex] = e
+    function move(from: number, to: number) {
+        if (to === from) return
+        let newArr = [...form.values] as T
+        let newErr = { ...form.errorMap } as ErrorMap<T, TError>
+        var target = newArr[from]
+        var targetErr = newErr[from]
+        var increment = to < from ? -1 : 1
+        for (var k = from; k !== to; k += increment) {
+            newArr[k] = newArr[k + increment]
+            newErr[k] = newErr[k + increment]
         }
-        form.setValues(values as any, errors)
+        newArr[to] = target
+        newErr[to] = targetErr
+        form.setValues(newArr, newErr)
     }
 
     function swap(index: number, newIndex: number) {

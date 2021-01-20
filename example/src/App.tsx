@@ -91,7 +91,7 @@ export default function App() {
                 <ArrayField
                     name='todo'
                     parent={form}
-                    render={({ values, append, remove, form }) => (
+                    render={({ values, append, remove, form, move }) => (
                         <VisualRender>
                             <ul>
                                 {values.map((_, i) => (
@@ -107,7 +107,7 @@ export default function App() {
                                         })}
                                         render={(form) => (
                                             <li>
-                                                <FormVisualize form={form} />
+                                                {/* <FormVisualize form={form} /> */}
                                                 <Listener
                                                     form={form}
                                                     name='title'
@@ -151,15 +151,9 @@ export default function App() {
                                                 </button>
                                                 <button
                                                     type='button'
-                                                    onClick={() =>
-                                                        form.setState({
-                                                            isSubmitting: !form
-                                                                .state
-                                                                .isSubmitting
-                                                        })
-                                                    }
+                                                    onClick={() => move(i, 0)}
                                                 >
-                                                    notify
+                                                    to top
                                                 </button>
                                             </li>
                                         )}
@@ -169,14 +163,10 @@ export default function App() {
                             <button
                                 type='button'
                                 onClick={() => {
-                                    let input = window.prompt(
-                                        'Enter new todo item'
-                                    )
-                                    if (input)
-                                        append({
-                                            title: input,
-                                            id: '' + new Date().getTime()
-                                        })
+                                    append({
+                                        title: '',
+                                        id: '' + new Date().getTime()
+                                    })
                                 }}
                             >
                                 Add todo item
