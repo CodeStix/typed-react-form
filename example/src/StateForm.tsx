@@ -4,26 +4,42 @@ type ObjectOrArray = {
     [TIndex in number | string]: any
 }
 
-// How it works: https://github.com/microsoft/TypeScript/issues/28046
-type ArrayToStringType<T> = T extends ReadonlyArray<infer ElementType>
-    ? ElementType
-    : never
-
 // https://stackoverflow.com/questions/50837171/remove-properties-of-a-type-from-another-type
 type OnlyPropertiesOfType<T, U> = {
     [P in keyof T]: Exclude<T[P], undefined> extends U ? T[P] : never
 }
-export type KeyType<T> = T extends any[] ? number : keyof T
-type KeyTypes<T extends ObjectOrArray, TKeys extends any[]> = {
-    // KeyType<T>[]
-    [U in ArrayToStringType<TKeys>]: T[U]
-}
+/**
+ * The keys of a type T, when T is an array then it returns number (to index the array), otherwise, a key of the object.
+ */
+export type KeyOf<T> = T extends any[] ? number : keyof T
 
-type ErrorType<T, TError = string> = T extends ObjectOrArray
-    ? ErrorMap<T>
+/**
+ * The keys of a type T, but only of the fields that are an object or an array
+ */
+export type ObjectKeyOf<T> = {
+    [P in keyof T]: T[P] extends ObjectOrArray ? P : never
+}[keyof T]
+export type ArrayKeyOf<T> = {
+    [P in keyof T]: T[P] extends Array<any> ? P : never
+}[keyof T]
+
+/**
+ * Returns an object consisting of T's fields that are in the TKeys array
+ */
+// type KeyTypes<T extends ObjectOrArray, TKeys extends any[]> = {
+//     // KeyType<T>[]
+//     [U in ArrayToStringType<TKeys>]: T[U]
+// }
+// How it works: https://github.com/microsoft/TypeScript/issues/28046
+// type ArrayToStringType<T> = T extends ReadonlyArray<infer ElementType>
+//     ? ElementType
+//     : never
+
+type ErrorType<T, TError> = T extends ObjectOrArray
+    ? ErrorMap<T, TError>
     : TError
-type ErrorMap<T extends ObjectOrArray> = {
-    [TKey in KeyType<T>]?: ErrorType<T[TKey]>
+type ErrorMap<T extends ObjectOrArray, TError> = {
+    [TKey in KeyOf<T>]?: ErrorType<T[TKey], TError>
 }
 
 type AnyListener = (setValuesWasUsed: boolean) => void
@@ -36,11 +52,11 @@ type ListenerIdMap = {
     [key: string]: Listener
 }
 type ListenersMap<T extends ObjectOrArray> = {
-    [TKey in KeyType<T>]?: ListenerIdMap
+    [TKey in KeyOf<T>]?: ListenerIdMap
 }
 
 type DirtyMap<T extends ObjectOrArray> = {
-    [TKey in KeyType<T>]?: boolean
+    [TKey in KeyOf<T>]?: boolean
 }
 
 type State = {
@@ -65,14 +81,14 @@ function deepCopy<T>(value: T): T {
     return JSON.parse(JSON.stringify(value))
 }
 
-export class FormState<T extends ObjectOrArray> {
+export class FormState<T extends ObjectOrArray, TError = string> {
     public values: T
     public dirty: DirtyMap<T> = {}
     public defaultValues: T
-    public errors: ErrorMap<T> = {}
+    public errors: ErrorMap<T, TError> = {}
     public formId: number
     public state: State = { isSubmitting: false }
-    public validate: (values: T) => ErrorMap<T> = () => ({})
+    public validate: (values: T) => ErrorMap<T, TError> = () => ({})
 
     // private stateListeners: StateListenersMap = {};
     private listeners: ListenersMap<T> = {}
@@ -93,7 +109,7 @@ export class FormState<T extends ObjectOrArray> {
     public get isDirty(): boolean {
         return (
             Object.keys(this.dirty).some(
-                (key) => this.dirty[key as KeyType<T>]
+                (key) => this.dirty[key as KeyOf<T>]
             ) ||
             Object.keys(this.values).length !==
                 Object.keys(this.defaultValues).length
@@ -104,7 +120,7 @@ export class FormState<T extends ObjectOrArray> {
         return Object.keys(this.errors).length > 0 //some((key) => this.errors[key as KeyType<T>])
     }
 
-    public listen<U extends KeyType<T>>(key: U, listener: Listener): string {
+    public listen(key: KeyOf<T>, listener: Listener): string {
         let setters = this.listeners[key]
         if (!setters) {
             setters = {}
@@ -135,7 +151,7 @@ export class FormState<T extends ObjectOrArray> {
         delete this.anyListeners[id]
     }
 
-    public ignore<U extends KeyType<T>>(key: U, id: string) {
+    public ignore(key: KeyOf<T>, id: string) {
         let setters = this.listeners[key]
         if (!setters) {
             console.warn('Ignore was called for no reason', key, id)
@@ -149,7 +165,7 @@ export class FormState<T extends ObjectOrArray> {
      * @param key The field name to set.
      * @param value The new field value.
      */
-    public setValue<U extends KeyType<T>, V extends T[U]>(key: U, value: V) {
+    public setValue<U extends KeyOf<T>>(key: U, value: T[U]) {
         if (
             (value !== null && typeof value === 'object') ||
             Array.isArray(value)
@@ -166,7 +182,7 @@ export class FormState<T extends ObjectOrArray> {
      * Remove errors and dirty values for a field.
      * @param key The field name to remove errors and dirty for.
      */
-    public unsetValue<U extends KeyType<T>>(key: U) {
+    public unsetValue(key: KeyOf<T>) {
         delete this.dirty[key]
         delete this.errors[key]
         this.fireListener(key)
@@ -181,11 +197,11 @@ export class FormState<T extends ObjectOrArray> {
      * @param error The error this field emits, leave undefined to use the forms validator, set null to signal no error.
      * @param skipId The field listener to skip.
      */
-    public setValueInternal<U extends KeyType<T>, V extends T[U]>(
+    public setValueInternal<U extends KeyOf<T>, V extends T[U]>(
         key: U,
         value: V,
         dirty: boolean,
-        error?: ErrorType<V> | null,
+        error?: ErrorType<V, TError> | null,
         skipId?: string
     ) {
         this.values[key] = value
@@ -207,7 +223,7 @@ export class FormState<T extends ObjectOrArray> {
      * @param errors The errors to set in this form, leave undefined to use the forms validator. Will also trigger child and parent forms.
      * @param skipId The field listener to skip.
      */
-    public setErrors(errors?: ErrorMap<T>, skipId?: string) {
+    public setErrors(errors?: ErrorMap<T, TError>, skipId?: string) {
         if (errors === undefined) errors = this.validate(this.values)
         if (
             Object.keys(this.errors).length === 0 &&
@@ -220,9 +236,12 @@ export class FormState<T extends ObjectOrArray> {
         this.fireAnyListeners(true, skipId)
     }
 
-    public setError<U extends KeyType<T>>(name: U, error: string) {
+    public setError<U extends KeyOf<T>>(
+        name: U,
+        error: ErrorType<T[U], TError>
+    ) {
         if (this.errors[name] === error) return
-        this.errors[name] = error as any
+        this.errors[name] = error
         this.fireAllNormalListeners(false)
         this.fireAnyListeners(true)
     }
@@ -237,7 +256,7 @@ export class FormState<T extends ObjectOrArray> {
      */
     public setValues(
         setValues: T,
-        errors?: ErrorMap<T>,
+        errors?: ErrorMap<T, TError>,
         isDefault?: boolean,
         state?: State,
         skipId?: string
@@ -265,24 +284,17 @@ export class FormState<T extends ObjectOrArray> {
         // Recalculate dirty values
         let keys = Object.keys(this.values)
         for (let i = 0; i < keys.length; i++) {
-            let name = keys[i] as KeyType<T>
+            let name = keys[i] as KeyOf<T>
             let value = this.values[name]
             if (typeof value === 'object' || Array.isArray(value)) continue // do not
             this.dirty[name] = this.defaultValues[name] !== value
         }
     }
 
-    private fireListener<U extends KeyType<T>>(
-        key: U,
-        isDefault?: boolean,
-        skipId?: string
-    ) {
+    private fireListener(key: KeyOf<T>, isDefault?: boolean, skipId?: string) {
         let listeners = this.listeners[key]
         if (listeners) {
             // Call all listeners for the set field
-            // let value = this.values[key]
-            // let dirty = this.dirty[key]
-            // let error = this.errors[key]
             Object.keys(listeners!).forEach((id) => {
                 if (id !== skipId) listeners![id](isDefault ?? false)
             })
@@ -292,7 +304,7 @@ export class FormState<T extends ObjectOrArray> {
     private fireAllNormalListeners(isDefault?: boolean, skipId?: string) {
         // Call all listeners for each set field
         Object.keys(this.values).forEach((keyString) => {
-            this.fireListener(keyString as KeyType<T>, isDefault, skipId)
+            this.fireListener(keyString as KeyOf<T>, isDefault, skipId)
         })
     }
 
@@ -304,12 +316,12 @@ export class FormState<T extends ObjectOrArray> {
     }
 }
 
-export type AnyListenerProps<T extends ObjectOrArray> = {
-    form: FormState<T>
+export type AnyListenerProps<T extends ObjectOrArray, TError> = {
+    form: FormState<T, TError>
     onlyOnSetValues?: boolean
     render: (props: {
         values: T
-        errors: ErrorMap<T>
+        errors: ErrorMap<T, TError>
         dirty: DirtyMap<T>
         isDirty: boolean
         anyError: boolean
@@ -318,8 +330,8 @@ export type AnyListenerProps<T extends ObjectOrArray> = {
     }) => React.ReactNode
 }
 
-export function AnyListener<T extends ObjectOrArray>(
-    props: AnyListenerProps<T>
+export function AnyListener<T extends ObjectOrArray, TError>(
+    props: AnyListenerProps<T, TError>
 ) {
     const form = props.form
     const [, setRender] = useState(0)
@@ -347,9 +359,9 @@ export function AnyListener<T extends ObjectOrArray>(
     )
 }
 
-export type UseFormValues<TValue> = {
+export type UseFormValues<TValue, TError> = {
     value: TValue
-    error?: ErrorType<TValue>
+    error?: ErrorType<TValue, TError>
     dirty?: boolean
     isSubmitting: boolean
     setValue: (value: TValue) => void
@@ -357,9 +369,10 @@ export type UseFormValues<TValue> = {
 
 export function useFormValue<
     T extends ObjectOrArray,
-    TKey extends KeyType<T>,
-    TValue extends T[TKey]
->(form: FormState<T>, name: TKey): UseFormValues<TValue> {
+    TKey extends KeyOf<T>,
+    TValue extends T[TKey],
+    TError
+>(form: FormState<T, TError>, name: TKey): UseFormValues<TValue, TError> {
     const [value, setValue] = useState(() => ({
         value: form.values[name],
         error: form.errors[name],
@@ -386,15 +399,16 @@ export function useFormValue<
 
 export type ListenerProps<
     T extends ObjectOrArray,
-    TKey extends KeyType<T>,
-    TValue extends T[TKey]
+    TKey extends KeyOf<T>,
+    TValue extends T[TKey],
+    TError
 > = {
-    form: FormState<T>
+    form: FormState<T, TError>
     name: TKey
     render: (props: {
         value: TValue
         dirty?: boolean
-        error?: ErrorType<TValue>
+        error?: ErrorType<TValue, TError>
         isSubmitting: boolean
         setValue: (value: TValue) => void
     }) => React.ReactNode
@@ -402,9 +416,10 @@ export type ListenerProps<
 
 export function Listener<
     T extends ObjectOrArray,
-    TKey extends KeyType<T>,
-    TValue extends T[TKey]
->(props: ListenerProps<T, TKey, TValue>) {
+    TKey extends KeyOf<T>,
+    TValue extends T[TKey],
+    TError
+>(props: ListenerProps<T, TKey, TValue, TError>) {
     const form = props.form
     const [, setRender] = useState(0)
 
@@ -426,20 +441,20 @@ export function Listener<
     )
 }
 
-export type MultiListenerProps<
-    T extends ObjectOrArray,
-    TKeys extends KeyType<T>[]
-> = {
-    form: FormState<T>
-    names: TKeys
-    render: (props: {
-        values: KeyTypes<T, TKeys>
-        errors: KeyTypes<ErrorMap<T>, TKeys>
-        dirty: KeyTypes<DirtyMap<T>, TKeys>
-        isSubmitting: boolean
-        setValues: (values: Partial<T>) => void
-    }) => React.ReactNode
-}
+// export type MultiListenerProps<
+//     T extends ObjectOrArray,
+//     TKeys extends KeyOf<T>[]
+// > = {
+//     form: FormState<T>
+//     names: TKeys
+//     render: (props: {
+//         values: KeyTypes<T, TKeys>
+//         errors: KeyTypes<ErrorMap<T>, TKeys>
+//         dirty: KeyTypes<DirtyMap<T>, TKeys>
+//         isSubmitting: boolean
+//         setValues: (values: Partial<T>) => void
+//     }) => React.ReactNode
+// }
 
 // export function MultiListener<
 //     T extends ObjectOrArray,
@@ -485,7 +500,7 @@ export function Form<T extends ObjectOrArray>(props: FormProps<T>) {
 
 export type ChildFormProps<
     TParent extends ObjectOrArray,
-    TKey extends KeyType<TParent>,
+    TKey extends KeyOf<TParent>,
     TValue extends TParent[TKey]
 > = {
     parent: FormState<TParent>
@@ -495,7 +510,7 @@ export type ChildFormProps<
 
 export function ChildForm<
     TParent extends ObjectOrArray,
-    TKey extends KeyType<TParent>,
+    TKey extends KeyOf<TParent>,
     TValue extends TParent[TKey]
 >(props: ChildFormProps<TParent, TKey, TValue>) {
     const childForm = useChildForm(props.parent, props.name)
@@ -514,11 +529,12 @@ export function useForm<T>(values: T) {
 
 export function useChildForm<
     TParent extends ObjectOrArray,
-    TKey extends KeyType<TParent>,
-    TValue extends TParent[TKey]
->(parent: FormState<TParent>, name: TKey) {
+    TKey extends KeyOf<TParent>,
+    TValue extends TParent[TKey],
+    TParentError
+>(parent: FormState<TParent, TParentError>, name: TKey) {
     let ref = useRef(
-        new FormState<TValue>(
+        new FormState<TValue, TParentError>(
             deepCopy(parent.values[name]),
             parent.defaultValues[name]
         )
@@ -527,12 +543,12 @@ export function useChildForm<
     useEffect(() => {
         ref.current.setValues(
             deepCopy(parent.values[name]),
-            parent.errors[name] as any
+            parent.errors[name]
         )
         let parentId = parent.listen(name, (isDefault) => {
             ref.current.setValues(
                 parent.values[name],
-                (parent.errors[name] as any) ?? {},
+                parent.errors[name] ?? {},
                 isDefault,
                 parent.state,
                 id
@@ -543,7 +559,7 @@ export function useChildForm<
                 name,
                 ref.current.values,
                 ref.current.isDirty,
-                ref.current.errors as any,
+                ref.current.errors as ErrorType<TValue, TParentError>,
                 parentId
             )
         })
@@ -600,7 +616,7 @@ export function yupErrorsToErrorMap(
 
 export type ErrorFieldProps<T extends ObjectOrArray> = {
     form: FormState<T>
-    name: KeyType<T>
+    name: KeyOf<T>
     as: (props: { children: React.ReactNode }) => JSX.Element
 }
 
@@ -642,13 +658,14 @@ export function ErrorField<T extends ObjectOrArray>(props: ErrorFieldProps<T>) {
 
 export type ArrayFieldProps<
     TParent extends ObjectOrArray,
-    TKey extends KeyType<OnlyPropertiesOfType<TParent, any[]>>,
-    T extends TParent[TKey]
+    TKey extends KeyOf<TParent>,
+    T extends TParent[TKey],
+    TParentError
 > = {
-    parent: FormState<TParent>
+    parent: FormState<TParent, TParentError>
     name: TKey
     render: (props: {
-        form: FormState<T>
+        form: FormState<T, TParentError>
         values: T
         setValues: (values: T) => void
         remove: (index: number) => void
@@ -661,10 +678,11 @@ export type ArrayFieldProps<
 
 export function ArrayField<
     TParent extends ObjectOrArray,
-    TKey extends KeyType<OnlyPropertiesOfType<TParent, any[]>>,
-    T extends TParent[TKey]
->(props: ArrayFieldProps<TParent, TKey, T>) {
-    const form = useChildForm<OnlyPropertiesOfType<TParent, any[]>, TKey, T>(
+    TKey extends KeyOf<TParent>,
+    T extends TParent[TKey],
+    TParentError
+>(props: ArrayFieldProps<TParent, TKey, T, TParentError>) {
+    const form = useChildForm<TParent, TKey, T, TParentError>(
         props.parent,
         props.name
     )
