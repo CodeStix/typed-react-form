@@ -1,39 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
 
-type ObjectOrArray = {
+export type ObjectOrArray = {
     [TIndex in number | string]: any
 }
 
-// https://stackoverflow.com/questions/50837171/remove-properties-of-a-type-from-another-type
-// type OnlyPropertiesOfType<T, U> = {
-//     [P in keyof T]: Exclude<T[P], undefined> extends U ? T[P] : never
-// }
 /**
  * The keys of a type T, when T is an array then it returns number (to index the array), otherwise, a key of the object.
  */
 export type KeyOf<T> = T extends any[] ? number : keyof T
-
-/**
- * The keys of a type T, but only of the fields that are an object or an array
- */
-export type ObjectKeyOf<T> = {
-    [P in keyof T]: T[P] extends ObjectOrArray ? P : never
-}[keyof T]
-export type ArrayKeyOf<T> = {
-    [P in keyof T]: T[P] extends Array<any> ? P : never
-}[keyof T]
-
-/**
- * Returns an object consisting of T's fields that are in the TKeys array
- */
-// type KeyTypes<T extends ObjectOrArray, TKeys extends any[]> = {
-//     // KeyType<T>[]
-//     [U in ArrayToStringType<TKeys>]: T[U]
-// }
-// How it works: https://github.com/microsoft/TypeScript/issues/28046
-// type ArrayToStringType<T> = T extends ReadonlyArray<infer ElementType>
-//     ? ElementType
-//     : never
 
 type ErrorType<T, TError> = T extends ObjectOrArray
     ? ErrorMap<T, TError>
@@ -62,25 +36,6 @@ type DirtyMap<T extends ObjectOrArray> = {
 type State = {
     isSubmitting: boolean
 }
-// type StateListener = (state: State) => void
-// type StateListenersMap = {
-//     [key: string]: StateListener
-// }
-
-// type PartialDirtyMap<T extends ObjectOrArray> = {
-//     [TKey in OnlyPropertiesOfType<T, ObjectOrArray>]?: boolean;
-// };
-
-// function copy<T extends ObjectOrArray>(obj: T): T {
-//     if (Array.isArray(obj)) return [...(obj as any)] as any;
-//     else if (typeof obj === "object") return { ...obj };
-//     else throw new Error("copy was called for no reason");
-// }
-
-// clones the entire tree
-// function deepCopy<T>(value: T): T {
-//     return JSON.parse(JSON.stringify(value))
-// }
 
 // clones only the lower-most object
 function memberCopy<T>(value: T): T {
@@ -370,7 +325,6 @@ export function AnyListener<T extends ObjectOrArray, TError>(
     props: AnyListenerProps<T, TError>
 ) {
     const values = useAnyListener(props.form, props.onlyOnSetValues)
-
     return <>{props.render(values)}</>
 }
 
@@ -459,53 +413,6 @@ export function useListener<
         setValue: (value: T[TKey]) => form.setValue(name, value)
     }
 }
-
-// export type MultiListenerProps<
-//     T extends ObjectOrArray,
-//     TKeys extends KeyOf<T>[]
-// > = {
-//     form: FormState<T>
-//     names: TKeys
-//     render: (props: {
-//         values: KeyTypes<T, TKeys>
-//         errors: KeyTypes<ErrorMap<T>, TKeys>
-//         dirty: KeyTypes<DirtyMap<T>, TKeys>
-//         isSubmitting: boolean
-//         setValues: (values: Partial<T>) => void
-//     }) => React.ReactNode
-// }
-
-// export function MultiListener<
-//     T extends ObjectOrArray,
-//     TKeys extends KeyType<T>[]
-// >(props: MultiListenerProps<T, TKeys>) {
-//     const form = props.form
-//     const [, setRender] = useState(0)
-
-//     useEffect(() => {
-//         let ids = props.names.map((name) =>
-//             form.listen(name, () => setRender((r) => r + 1))
-//         )
-//         return () => ids.forEach((id, i) => form.ignore(props.names[i], id))
-//     }, [form]) // props.names
-
-//     return (
-//         <>
-//             {props.render({
-//                 values: form.values,
-//                 errors: form.errors,
-//                 dirty: form.dirty,
-//                 isSubmitting: form.state.isSubmitting,
-//                 setValues: (newValues) => {
-//                     Object.keys(newValues).forEach((keyString) => {
-//                         let key = keyString as KeyType<T>
-//                         form.setValue(key, newValues[key]!)
-//                     })
-//                 }
-//             })}
-//         </>
-//     )
-// }
 
 export type FormProps<T extends ObjectOrArray> = {
     values: T
@@ -651,36 +558,6 @@ export function ErrorField<T extends ObjectOrArray>(props: ErrorFieldProps<T>) {
     if (!error) return null
     return props.as({ children: error })
 }
-
-// export type InputProps<
-//     T extends ObjectOrArray,
-//     TKey extends KeyType<T>,
-//     TInput extends HTMLInputElement | HTMLTextAreaElement
-// > = Omit<HTMLProps<TInput>, "form" | "as"> & {
-//     form: FormState<T>;
-//     name: TKey;
-//     as: (props: {
-//         value: any;
-//         dirty?: boolean;
-//         error?: ErrorType<T[TKey]>;
-//         onChange: (ev: React.ChangeEvent<TInput>) => void;
-//     }) => JSX.Element | null;
-//     transformValue?: (ev: React.ChangeEvent<TInput>) => T[TKey];
-// };
-
-// export function InputField<T extends ObjectOrArray, TKey extends KeyType<T>, TInput extends HTMLInputElement>(
-//     props: InputProps<T, TKey, TInput>
-// ) {
-//     const { transformValue, name, form, as, ...rest } = props;
-//     const setter = useCallback(
-//         (ev: React.ChangeEvent<TInput>) => {
-//             form.setValue(name, transformValue ? transformValue(ev) : (ev.target.value as any));
-//         },
-//         [transformValue]
-//     );
-//     const { value, dirty, error } = useFormValue(form, name);
-//     return <props.as value={value} error={error} dirty={dirty} onChange={setter} {...rest} />;
-// }
 
 export type ArrayFieldProps<
     TParent extends ObjectOrArray,
