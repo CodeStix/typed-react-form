@@ -275,8 +275,11 @@ export class FormState<T extends ObjectOrArray, TError = string> {
         state?: State,
         skipId?: string
     ) {
-        if (errors === null) throw new Error('errors is null')
-        if (setValues === undefined) throw new Error('setValues is undefined')
+        if (errors === null)
+            throw new Error(
+                'errors is null, use undefined to not set any errors'
+            )
+        if (!setValues) throw new Error('setValues is undefined')
         if (isDefault) {
             this.defaultValues = setValues
             this.values = memberCopy(setValues)
@@ -288,7 +291,10 @@ export class FormState<T extends ObjectOrArray, TError = string> {
         else this.errors = this.validate(this.values)
         if (state !== undefined) this.state = state
 
-        if (!this.values) return
+        if (!this.values) {
+            throw new Error('this.values is null after setValues')
+        }
+
         this.fireAllNormalListeners(isDefault, skipId)
         this.recalculateDirty()
         this.fireAnyListeners(true, skipId)
@@ -561,10 +567,6 @@ export function useChildForm<
     }
 
     useEffect(() => {
-        ref.current!.setValues(
-            memberCopy(parent.values[name]),
-            parent.errors[name]
-        )
         let parentId = parent.listen(name, (isDefault) => {
             ref.current!.setValues(
                 parent.values[name],
@@ -583,6 +585,11 @@ export function useChildForm<
                 parentId
             )
         })
+        ref.current!.setValues(
+            memberCopy(parent.values[name]),
+            parent.errors[name]
+        )
+
         let i = ref.current!
         return () => {
             i.ignoreAny(id)
