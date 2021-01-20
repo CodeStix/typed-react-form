@@ -51,19 +51,38 @@ export class FormState<
     TError = string,
     TState extends {} = {}
 > {
-    public formId: number
-    public values: T
-    public defaultValues: T
-    public dirty: DirtyMap<T> = {}
-    public errors: ErrorMap<T, TError> = {}
-    public state: TState
-
+    public readonly formId: number
     public validateOnChange: boolean = true
+    public validator: FormValidator<T, TError> = () => ({})
 
-    private validator: FormValidator<T, TError> = () => ({})
-    private listeners: ListenersMap<T> = {}
     private anyListeners: AnyListenersMap = {}
+    private listeners: ListenersMap<T> = {}
+    private _values: T
+    private _defaultValues: T
+    private _dirtyMap: DirtyMap<T> = {}
+    private _errorMap: ErrorMap<T, TError> = {}
+    private _state: TState
     private static currentId = 0
+
+    public get values() {
+        return this._values
+    }
+
+    public get defaultValues() {
+        return this._defaultValues
+    }
+
+    public get dirtyMap() {
+        return this._dirtyMap
+    }
+
+    public get errorMap() {
+        return this._errorMap
+    }
+
+    public get state() {
+        return this._state
+    }
 
     constructor(
         initialValues: T,
@@ -76,9 +95,9 @@ export class FormState<
             throw new Error(
                 'FormState.constructor: initialValues or defaultValues is null'
             )
-        this.state = state
-        this.values = initialValues
-        this.defaultValues = defaultValues
+        this._state = state
+        this._values = initialValues
+        this._defaultValues = defaultValues
         this.validateOnChange = validateOnChange
         this.formId = FormState.currentId++
         this.validator = validator
@@ -129,12 +148,16 @@ export class FormState<
      */
     public get isDirty(): boolean {
         // return true if some field was marked as dirty
-        if (Object.keys(this.dirty).some((key) => this.dirty[key as KeyOf<T>]))
+        if (
+            Object.keys(this._dirtyMap).some(
+                (key) => this._dirtyMap[key as KeyOf<T>]
+            )
+        )
             return true
 
         // return true if a field was added or removed
-        let valueKeys = Object.keys(this.values)
-        if (valueKeys.length !== Object.keys(this.defaultValues).length)
+        let valueKeys = Object.keys(this._values)
+        if (valueKeys.length !== Object.keys(this._defaultValues).length)
             return true
 
         return false
@@ -144,7 +167,7 @@ export class FormState<
      * Returns true if any error is set on this form or any child form. (Not parent forms)
      */
     public get anyError(): boolean {
-        return Object.keys(this.errors).length > 0 //some((key) => this.errors[key as KeyType<T>])
+        return Object.keys(this._errorMap).length > 0 //some((key) => this.errors[key as KeyType<T>])
     }
 
     /**
@@ -152,7 +175,7 @@ export class FormState<
      * @param state The new state
      */
     public setState(state: TState) {
-        this.state = state
+        this._state = state
         this.fireAllNormalListeners(false)
         this.fireAnyListeners(false)
     }
@@ -162,7 +185,7 @@ export class FormState<
      * @param values The new default values, leave undefined to use the original default values.
      */
     public reset(values?: T) {
-        this.setValues(values ?? this.defaultValues, {}, true)
+        this.setValues(values ?? this._defaultValues, {}, true)
     }
 
     /**
@@ -180,8 +203,8 @@ export class FormState<
                 'Do not pass objects to setValue, use setValueInternal instead. When passing objects here, they will always be treated as dirty.'
             )
         }
-        if (this.values[key] === value) return
-        this.setValueInternal(key, value, this.defaultValues[key] !== value)
+        if (this._values[key] === value) return
+        this.setValueInternal(key, value, this._defaultValues[key] !== value)
     }
 
     /**
@@ -189,8 +212,8 @@ export class FormState<
      * @param key The field name to remove errors and dirty flags for.
      */
     public unsetValue(key: KeyOf<T>) {
-        delete this.dirty[key]
-        delete this.errors[key]
+        delete this._dirtyMap[key]
+        delete this._errorMap[key]
         this.fireListener(key)
         this.fireAnyListeners(false)
     }
@@ -210,14 +233,14 @@ export class FormState<
         error?: ErrorType<V, TError> | null | undefined,
         skipId?: string
     ) {
-        this.values[key] = value
-        this.dirty[key] = dirty
+        this._values[key] = value
+        this._dirtyMap[key] = dirty
         if (error !== undefined) {
             if (error === null || Object.keys(error).length === 0)
-                delete this.errors[key]
-            else this.errors[key] = error
+                delete this._errorMap[key]
+            else this._errorMap[key] = error
         } else if (this.validateOnChange) {
-            this.errors = this.validator(this.values)
+            this._errorMap = this.validator(this._values)
         }
 
         this.fireListener(key, false, skipId)
@@ -228,7 +251,7 @@ export class FormState<
      * Force validation on this form. This is not needed when validateOnChange is enabled.
      */
     public validate() {
-        this.setErrors(this.validator(this.values))
+        this.setErrors(this.validator(this._values))
     }
 
     /**
@@ -238,11 +261,11 @@ export class FormState<
      */
     public setErrors(errors: ErrorMap<T, TError>, skipId?: string) {
         if (
-            Object.keys(this.errors).length === 0 &&
+            Object.keys(this._errorMap).length === 0 &&
             Object.keys(errors).length === 0
         )
             return
-        this.errors = errors
+        this._errorMap = errors
 
         this.fireAllNormalListeners(false, skipId)
         this.fireAnyListeners(true, skipId)
@@ -257,8 +280,8 @@ export class FormState<
         name: U,
         error: ErrorType<T[U], TError>
     ) {
-        if (this.errors[name] === error) return
-        this.errors[name] = error
+        if (this._errorMap[name] === error) return
+        this._errorMap[name] = error
         this.fireAllNormalListeners(false)
         this.fireAnyListeners(true)
     }
@@ -285,17 +308,17 @@ export class FormState<
         if (!setValues) throw new Error('setValues is undefined')
 
         if (isDefault) {
-            this.defaultValues = setValues
-            this.values = memberCopy(setValues)
-            this.dirty = {}
+            this._defaultValues = setValues
+            this._values = memberCopy(setValues)
+            this._dirtyMap = {}
         } else {
-            this.values = setValues
+            this._values = setValues
         }
 
-        if (errors !== undefined) this.errors = errors
-        else this.errors = this.validator(this.values)
+        if (errors !== undefined) this._errorMap = errors
+        else this._errorMap = this.validator(this._values)
 
-        if (state !== undefined) this.state = state
+        if (state !== undefined) this._state = state
 
         this.fireAllNormalListeners(isDefault, skipId)
         this.recalculateDirty()
@@ -304,12 +327,12 @@ export class FormState<
 
     private recalculateDirty() {
         // Recalculate dirty values
-        let keys = Object.keys(this.values)
+        let keys = Object.keys(this._values)
         for (let i = 0; i < keys.length; i++) {
             let name = keys[i] as KeyOf<T>
-            let value = this.values[name]
+            let value = this._values[name]
             if (typeof value === 'object' || Array.isArray(value)) continue // do not
-            this.dirty[name] = this.defaultValues[name] !== value
+            this._dirtyMap[name] = this._defaultValues[name] !== value
         }
     }
 
@@ -325,7 +348,7 @@ export class FormState<
 
     private fireAllNormalListeners(isDefault?: boolean, skipId?: string) {
         // Call all listeners for each set field
-        Object.keys(this.values).forEach((keyString) => {
+        Object.keys(this._values).forEach((keyString) => {
             this.fireListener(keyString as KeyOf<T>, isDefault, skipId)
         })
     }
@@ -417,8 +440,8 @@ export function useListener<
     }, [form, name])
 
     return {
-        dirty: form.dirty[name],
-        error: form.errors[name],
+        dirty: form.dirtyMap[name],
+        error: form.errorMap[name],
         value: form.values[name],
         state: form.state,
         setValue: (value: T[TKey]) => form.setValue(name, value)
@@ -519,7 +542,7 @@ export function useChildForm<
         let parentId = parent.listen(name, (isDefault) => {
             ref.current!.setValues(
                 parent.values[name],
-                parent.errors[name] ?? undefined, // undefined causes validate, {} sets no errors and causes no validation
+                parent.errorMap[name] ?? undefined, // undefined causes validate, {} sets no errors and causes no validation
                 isDefault,
                 parent.state,
                 id
@@ -530,13 +553,13 @@ export function useChildForm<
                 name,
                 ref.current!.values,
                 ref.current!.isDirty,
-                ref.current!.errors as ErrorType<TValue, TError>,
+                ref.current!.errorMap as ErrorType<TValue, TError>,
                 parentId
             )
         })
         ref.current!.setValues(
             memberCopy(parent.values[name]),
-            parent.errors[name]
+            parent.errorMap[name]
         )
 
         let i = ref.current!
@@ -650,7 +673,7 @@ export function ArrayField<
     function remove(index: number) {
         let newValues = [...form.values]
         newValues.splice(index, 1)
-        let newErrors = { ...form.errors }
+        let newErrors = { ...form.errorMap }
         delete (newErrors as any)[index]
         form.setValues(newValues as any, newErrors)
     }
@@ -664,7 +687,7 @@ export function ArrayField<
         if (index === newIndex) return
         let values = [...form.values]
         values.splice(newIndex, 0, values.splice(index, 1)[0])
-        let errors = { ...form.errors } as any
+        let errors = { ...form.errorMap } as any
         if (newIndex > index) {
             let e = errors[index]
             for (let i = index; i < newIndex; i++) {
@@ -684,7 +707,7 @@ export function ArrayField<
     function swap(index: number, newIndex: number) {
         let values = [...form.values]
         ;[values[index], values[newIndex]] = [values[newIndex], values[index]]
-        let errors = { ...form.errors } as any
+        let errors = { ...form.errorMap } as any
         ;[errors[index], errors[newIndex]] = [errors[newIndex], errors[index]]
         form.setValues(values as any, errors)
     }

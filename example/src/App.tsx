@@ -15,7 +15,7 @@ function FormVisualize<T, TError, TState extends object>(props: {
     return (
         <AnyListener
             form={props.form}
-            render={({ values, errors }) => (
+            render={({ values, errorMap }) => (
                 <VisualRender>
                     <div style={{ background: '#eee' }}>
                         <pre>{JSON.stringify(values, null, 2)}</pre>
@@ -24,7 +24,7 @@ function FormVisualize<T, TError, TState extends object>(props: {
                                 <strong>DIRTY</strong>
                             </p>
                         )}
-                        <pre>{JSON.stringify(errors, null, 2)}</pre>
+                        <pre>{JSON.stringify(errorMap, null, 2)}</pre>
                     </div>
                 </VisualRender>
             )}
@@ -59,10 +59,9 @@ export default function App() {
                     l[index] = { title: 'title must be longer' }
                     return prev
                 }, {}),
+        true,
         true
     )
-
-    form.validateOnChange = false
 
     return (
         <VisualRender>
