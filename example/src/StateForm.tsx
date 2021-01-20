@@ -429,7 +429,8 @@ export function ChildForm<
 export function useForm<T, TError = string, TState extends object = {}>(
     values: T,
     defaultState: TState = {} as any,
-    validator: FormValidator<T, TError> = () => ({})
+    validator: FormValidator<T, TError> = () => ({}),
+    validateOnMount = false
 ) {
     let ref = useRef<FormState<T, TError, TState> | null>(null)
 
@@ -443,8 +444,8 @@ export function useForm<T, TError = string, TState extends object = {}>(
     }
 
     useEffect(() => {
-        ref.current!.setValues(values, {}, true)
-    }, [values])
+        ref.current!.setValues(values, validateOnMount ? undefined : {}, true)
+    }, [values, validateOnMount])
 
     return ref.current!
 }
@@ -475,7 +476,7 @@ export function useChildForm<
         let parentId = parent.listen(name, (isDefault) => {
             ref.current!.setValues(
                 parent.values[name],
-                parent.errors[name] ?? {},
+                parent.errors[name] ?? undefined, // undefined causes validate, {} sets no errors and causes no validation
                 isDefault,
                 parent.state,
                 id

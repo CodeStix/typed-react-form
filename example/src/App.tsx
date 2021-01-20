@@ -37,13 +37,24 @@ export default function App() {
         lastName: 'Rogiest',
         todo: [
             {
-                title: 'not epic',
+                title: '',
                 id: 'asdjfklasdfjklasdljkf'
             }
         ]
     })
 
-    const form = useForm(defaultValues, { isSubmitting: false })
+    const form = useForm(
+        defaultValues,
+        { isSubmitting: false },
+        (_values) => ({
+            todo: [
+                {
+                    title: 'not good!'
+                }
+            ]
+        }),
+        true
+    )
 
     return (
         <VisualRender>
