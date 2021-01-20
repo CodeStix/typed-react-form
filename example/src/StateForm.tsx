@@ -77,8 +77,20 @@ type State = {
 //     else throw new Error("copy was called for no reason");
 // }
 
-function deepCopy<T>(value: T): T {
-    return JSON.parse(JSON.stringify(value))
+// clones the entire tree
+// function deepCopy<T>(value: T): T {
+//     return JSON.parse(JSON.stringify(value))
+// }
+
+// clones only the lower-most object
+function memberCopy<T>(value: T): T {
+    if (Array.isArray(value)) {
+        return [...value] as any
+    } else if (typeof value === 'object') {
+        return { ...value }
+    } else {
+        throw new Error('Can only member-copy arrays and objects.')
+    }
 }
 
 export class FormState<T extends ObjectOrArray, TError = string> {
@@ -96,30 +108,26 @@ export class FormState<T extends ObjectOrArray, TError = string> {
     private static currentId = 0
 
     constructor(initialValues: T, defaultValues: T) {
+        if (!defaultValues || !initialValues)
+            throw new Error(
+                'FormState.constructor: initialValues or defaultValues is null'
+            )
         this.values = initialValues
         this.defaultValues = defaultValues
         this.formId = FormState.currentId++
     }
 
-    public setupForm(values: T, defaultValues?: T) {
-        if (defaultValues === undefined) {
-            this.defaultValues = defaultValues ?? values
-            this.values = deepCopy(values)
-        } else {
-            this.values = values
-            this.defaultValues = defaultValues
-        }
-        this.formId = FormState.currentId++
-    }
-
     public get isDirty(): boolean {
-        return (
-            Object.keys(this.dirty).some(
-                (key) => this.dirty[key as KeyOf<T>]
-            ) ||
-            Object.keys(this.values).length !==
-                Object.keys(this.defaultValues).length
-        )
+        // return true if some field was marked as dirty
+        if (Object.keys(this.dirty).some((key) => this.dirty[key as KeyOf<T>]))
+            return true
+
+        // return true if a field was added or removed
+        let valueKeys = Object.keys(this.values)
+        if (valueKeys.length !== Object.keys(this.defaultValues).length)
+            return true
+
+        return false
     }
 
     public get anyError(): boolean {
@@ -271,7 +279,7 @@ export class FormState<T extends ObjectOrArray, TError = string> {
         if (setValues === undefined) throw new Error('setValues is undefined')
         if (isDefault) {
             this.defaultValues = setValues
-            this.values = deepCopy(setValues)
+            this.values = memberCopy(setValues)
             this.dirty = {}
         } else {
             this.values = setValues
@@ -527,7 +535,7 @@ export function useForm<T>(values: T) {
     let ref = useRef<FormState<T> | null>(null)
 
     if (!ref.current) {
-        ref.current = new FormState<T>(deepCopy(values), values)
+        ref.current = new FormState<T>(memberCopy(values), values)
     }
 
     useEffect(() => {
@@ -547,14 +555,14 @@ export function useChildForm<
 
     if (!ref.current) {
         ref.current = new FormState<TValue, TParentError>(
-            deepCopy(parent.values[name]),
-            parent.defaultValues[name]
+            memberCopy(parent.values[name]),
+            parent.defaultValues[name] ?? parent.values[name]
         )
     }
 
     useEffect(() => {
         ref.current!.setValues(
-            deepCopy(parent.values[name]),
+            memberCopy(parent.values[name]),
             parent.errors[name]
         )
         let parentId = parent.listen(name, (isDefault) => {
