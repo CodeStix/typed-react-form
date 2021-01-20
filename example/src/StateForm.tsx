@@ -95,15 +95,9 @@ export class FormState<T extends ObjectOrArray, TError = string> {
     private anyListeners: AnyListenersMap = {}
     private static currentId = 0
 
-    constructor(values: T, defaultValues?: T) {
-        if (defaultValues === undefined) {
-            throw new Error('defaultValues is undefined')
-            this.defaultValues = defaultValues ?? values
-            this.values = deepCopy(values)
-        } else {
-            this.values = values
-            this.defaultValues = defaultValues
-        }
+    constructor(initialValues: T, defaultValues: T) {
+        this.values = initialValues
+        this.defaultValues = defaultValues
         this.formId = FormState.currentId++
     }
 
