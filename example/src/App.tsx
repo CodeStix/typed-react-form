@@ -150,6 +150,18 @@ export default function App() {
                                                 >
                                                     remove
                                                 </button>
+                                                <button
+                                                    type='button'
+                                                    onClick={() =>
+                                                        form.setState({
+                                                            isSubmitting: !form
+                                                                .state
+                                                                .isSubmitting
+                                                        })
+                                                    }
+                                                >
+                                                    notify
+                                                </button>
                                             </li>
                                         )}
                                     />

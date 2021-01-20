@@ -84,50 +84,6 @@ export class FormState<
         this.validator = validator
     }
 
-    public get isDirty(): boolean {
-        // return true if some field was marked as dirty
-        if (Object.keys(this.dirty).some((key) => this.dirty[key as KeyOf<T>]))
-            return true
-
-        // return true if a field was added or removed
-        let valueKeys = Object.keys(this.values)
-        if (valueKeys.length !== Object.keys(this.defaultValues).length)
-            return true
-
-        return false
-    }
-
-    public get anyError(): boolean {
-        return Object.keys(this.errors).length > 0 //some((key) => this.errors[key as KeyType<T>])
-    }
-
-    public listen(key: KeyOf<T>, listener: Listener): string {
-        let setters = this.listeners[key]
-        if (!setters) {
-            setters = {}
-            this.listeners[key] = setters
-        }
-        let id = '' + FormState.currentId++
-        setters[id] = listener
-        return id
-    }
-
-    public listenAny(listener: AnyListener) {
-        let id = '' + FormState.currentId++
-        this.anyListeners[id] = listener
-        return id
-    }
-
-    public setState(state: TState) {
-        this.state = state
-        this.fireAllNormalListeners(false)
-        this.fireAnyListeners(false)
-    }
-
-    public reset(values?: T) {
-        this.setValues(values ?? this.defaultValues, {}, true)
-    }
-
     public ignoreAny(id: string) {
         delete this.anyListeners[id]
     }
@@ -142,7 +98,76 @@ export class FormState<
     }
 
     /**
+     * Invokes a callback when a specified field changes.
+     * @param key The field to listen to.
+     * @param listener The callback to invoke when the field changes.
+     * @returns An id to pass to `ignore()` when you don't want to listen to the field anymore.
+     */
+    public listen(key: KeyOf<T>, listener: Listener): string {
+        let setters = this.listeners[key]
+        if (!setters) {
+            setters = {}
+            this.listeners[key] = setters
+        }
+        let id = '' + FormState.currentId++
+        setters[id] = listener
+        return id
+    }
+
+    /**
+     * Invokes a callback when any field on this form has changed.
+     * @param listener The callback to invoke.
+     */
+    public listenAny(listener: AnyListener) {
+        let id = '' + FormState.currentId++
+        this.anyListeners[id] = listener
+        return id
+    }
+
+    /**
+     * Returns true if any field on this form or any child form is marked as dirty. (Not parent forms)
+     */
+    public get isDirty(): boolean {
+        // return true if some field was marked as dirty
+        if (Object.keys(this.dirty).some((key) => this.dirty[key as KeyOf<T>]))
+            return true
+
+        // return true if a field was added or removed
+        let valueKeys = Object.keys(this.values)
+        if (valueKeys.length !== Object.keys(this.defaultValues).length)
+            return true
+
+        return false
+    }
+
+    /**
+     * Returns true if any error is set on this form or any child form. (Not parent forms)
+     */
+    public get anyError(): boolean {
+        return Object.keys(this.errors).length > 0 //some((key) => this.errors[key as KeyType<T>])
+    }
+
+    /**
+     * Sets the state on this form, will notify child forms. (PARENT FORMS COULD BE NOTIFIED TOO IN A FUTURE VERSION)
+     * @param state The new state
+     */
+    public setState(state: TState) {
+        this.state = state
+        this.fireAllNormalListeners(false)
+        this.fireAnyListeners(false)
+    }
+
+    /**
+     * Resets this form, and child forms, back to its unchanged state.
+     * @param values The new default values, leave undefined to use the original default values.
+     */
+    public reset(values?: T) {
+        this.setValues(values ?? this.defaultValues, {}, true)
+    }
+
+    /**
      * Sets a value on the form, will use the builtin validator. For manual validation, use setValueInternal.
+     * When settings object/array fields, you should use setValueInternal instead, as object/array fields cannot be dirty-checked by value (will always mark dirty when the reference has changed).
      * @param key The field name to set.
      * @param value The new field value.
      */
@@ -161,7 +186,7 @@ export class FormState<
 
     /**
      * Remove errors and dirty values for a field.
-     * @param key The field name to remove errors and dirty for.
+     * @param key The field name to remove errors and dirty flags for.
      */
     public unsetValue(key: KeyOf<T>) {
         delete this.dirty[key]
@@ -175,14 +200,14 @@ export class FormState<
      * @param key The field name to set.
      * @param value The new value of the field.
      * @param dirty Is this field dirty?
-     * @param error The error this field emits, leave undefined to use the forms validator, set null to signal no error.
+     * @param error The error in this field, leave undefined to use the forms validator, use null to clear errors on this field.
      * @param skipId The field listener to skip.
      */
     public setValueInternal<U extends KeyOf<T>, V extends T[U]>(
         key: U,
         value: V,
         dirty: boolean,
-        error?: ErrorType<V, TError> | null,
+        error?: ErrorType<V, TError> | null | undefined,
         skipId?: string
     ) {
         this.values[key] = value
@@ -199,13 +224,16 @@ export class FormState<
         this.fireAnyListeners(false, skipId)
     }
 
+    /**
+     * Force validation on this form. This is not needed when validateOnChange is enabled.
+     */
     public validate() {
         this.setErrors(this.validator(this.values))
     }
 
     /**
-     * Sets errors for a form.
-     * @param errors The errors to set in this form, leave undefined to use the forms validator. Will also trigger child and parent forms.
+     * Sets errors in this form, also notifies parent and child forms.
+     * @param errors The errors to set in this form.
      * @param skipId The field listener to skip.
      */
     public setErrors(errors: ErrorMap<T, TError>, skipId?: string) {
@@ -220,6 +248,11 @@ export class FormState<
         this.fireAnyListeners(true, skipId)
     }
 
+    /**
+     * Sets an error for a field in this form, also notifies parent and child forms.
+     * @param name The field name to set an error for.
+     * @param error The error to set on said field.
+     */
     public setError<U extends KeyOf<T>>(
         name: U,
         error: ErrorType<T[U], TError>
@@ -250,6 +283,7 @@ export class FormState<
                 'errors is null, use undefined to not set any errors'
             )
         if (!setValues) throw new Error('setValues is undefined')
+
         if (isDefault) {
             this.defaultValues = setValues
             this.values = memberCopy(setValues)
@@ -257,13 +291,11 @@ export class FormState<
         } else {
             this.values = setValues
         }
+
         if (errors !== undefined) this.errors = errors
         else this.errors = this.validator(this.values)
-        if (state !== undefined) this.state = state
 
-        if (!this.values) {
-            throw new Error('this.values is null after setValues')
-        }
+        if (state !== undefined) this.state = state
 
         this.fireAllNormalListeners(isDefault, skipId)
         this.recalculateDirty()
