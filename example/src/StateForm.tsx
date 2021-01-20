@@ -328,44 +328,6 @@ export function AnyListener<T extends ObjectOrArray, TError>(
     return <>{props.render(values)}</>
 }
 
-export type UseFormValues<TValue, TError> = {
-    value: TValue
-    error?: ErrorType<TValue, TError>
-    dirty?: boolean
-    isSubmitting: boolean
-    setValue: (value: TValue) => void
-}
-
-export function useFormValue<
-    T extends ObjectOrArray,
-    TKey extends KeyOf<T>,
-    TValue extends T[TKey],
-    TError
->(form: FormState<T, TError>, name: TKey): UseFormValues<TValue, TError> {
-    const [value, setValue] = useState(() => ({
-        value: form.values[name],
-        error: form.errors[name],
-        dirty: form.dirty[name],
-        isSubmitting: form.state.isSubmitting,
-        setValue: (value: TValue) => form.setValue(name, value)
-    }))
-
-    useEffect(() => {
-        let id = form.listen(name, (_isDefault) =>
-            setValue({
-                value: form.values[name],
-                error: form.errors[name],
-                dirty: form.dirty[name],
-                isSubmitting: form.state.isSubmitting,
-                setValue: (value: TValue) => form.setValue(name, value)
-            })
-        )
-        return () => form.ignore(name, id)
-    }, [form, name])
-
-    return value
-}
-
 export type ListenerProps<
     T extends ObjectOrArray,
     TKey extends KeyOf<T>,
@@ -554,7 +516,7 @@ export type ErrorFieldProps<T extends ObjectOrArray> = {
 }
 
 export function ErrorField<T extends ObjectOrArray>(props: ErrorFieldProps<T>) {
-    const { error } = useFormValue(props.form, props.name)
+    const { error } = useListener(props.form, props.name)
     if (!error) return null
     return props.as({ children: error })
 }
