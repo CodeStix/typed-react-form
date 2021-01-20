@@ -429,7 +429,7 @@ export type ListenerProps<
         value: TValue
         dirty?: boolean
         error?: ErrorType<TValue, TError>
-        isSubmitting: boolean
+        state: State
         setValue: (value: TValue) => void
     }) => React.ReactNode
 }
@@ -440,25 +440,29 @@ export function Listener<
     TValue extends T[TKey],
     TError
 >(props: ListenerProps<T, TKey, TValue, TError>) {
-    const form = props.form
+    const values = useListener(props.form, props.name)
+    return <>{props.render(values)}</>
+}
+
+export function useListener<
+    T extends ObjectOrArray,
+    TKey extends KeyOf<T>,
+    TError
+>(form: FormState<T, TError>, name: TKey) {
     const [, setRender] = useState(0)
 
     useEffect(() => {
-        let id = form.listen(props.name, () => setRender((r) => r + 1))
-        return () => form.ignore(props.name, id)
-    }, [form, props.name])
+        let id = form.listen(name, () => setRender((r) => r + 1))
+        return () => form.ignore(name, id)
+    }, [form, name])
 
-    return (
-        <>
-            {props.render({
-                dirty: form.dirty[props.name],
-                error: form.errors[props.name],
-                value: form.values[props.name],
-                isSubmitting: form.state.isSubmitting,
-                setValue: (value) => form.setValue(props.name, value)
-            })}
-        </>
-    )
+    return {
+        dirty: form.dirty[name],
+        error: form.errors[name],
+        value: form.values[name],
+        state: form.state,
+        setValue: (value: T[TKey]) => form.setValue(name, value)
+    }
 }
 
 // export type MultiListenerProps<

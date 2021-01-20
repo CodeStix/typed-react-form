@@ -81,16 +81,10 @@ export default function App() {
                                                     name='title'
                                                     render={({
                                                         value,
-                                                        setValue,
-                                                        dirty
+                                                        setValue
                                                     }) => (
                                                         <VisualRender>
                                                             <input
-                                                                style={{
-                                                                    background: dirty
-                                                                        ? '#f99'
-                                                                        : '#fff'
-                                                                }}
                                                                 value={value}
                                                                 onChange={(
                                                                     ev
