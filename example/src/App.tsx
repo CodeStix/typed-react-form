@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { AnyListener, ArrayField, Listener, useForm } from './StateForm'
 
 export default function App() {
-    let defaultValues = {
+    const [defaultValues, setDefaultValues] = useState({
         firstName: 'Stijn',
         lastName: 'Rogiest',
         todo: [
@@ -10,12 +10,19 @@ export default function App() {
                 title: 'not epic'
             }
         ]
-    }
+    })
 
     const form = useForm(defaultValues)
 
     return (
-        <form style={{ margin: '3em' }}>
+        <form
+            style={{ margin: '3em' }}
+            onSubmit={(ev) => {
+                ev.preventDefault()
+                setDefaultValues(form.values)
+                console.log('submit', form.values)
+            }}
+        >
             <Listener
                 form={form}
                 name='firstName'
@@ -60,9 +67,21 @@ export default function App() {
             <AnyListener
                 form={form}
                 render={({ values }) => (
-                    <pre>{JSON.stringify(values, null, 2)}</pre>
+                    <>
+                        <pre>{JSON.stringify(values, null, 2)}</pre>
+                        {form.isDirty && (
+                            <p>
+                                <strong>DIRTY</strong>
+                            </p>
+                        )}
+                    </>
                 )}
             />
+
+            <button>submit</button>
+            <button type='button' onClick={() => form.reset()}>
+                reset
+            </button>
         </form>
     )
 }

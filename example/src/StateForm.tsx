@@ -5,9 +5,9 @@ type ObjectOrArray = {
 }
 
 // https://stackoverflow.com/questions/50837171/remove-properties-of-a-type-from-another-type
-type OnlyPropertiesOfType<T, U> = {
-    [P in keyof T]: Exclude<T[P], undefined> extends U ? T[P] : never
-}
+// type OnlyPropertiesOfType<T, U> = {
+//     [P in keyof T]: Exclude<T[P], undefined> extends U ? T[P] : never
+// }
 /**
  * The keys of a type T, when T is an array then it returns number (to index the array), otherwise, a key of the object.
  */
@@ -82,11 +82,11 @@ function deepCopy<T>(value: T): T {
 }
 
 export class FormState<T extends ObjectOrArray, TError = string> {
-    public values: T
+    public formId!: number
+    public values!: T
+    public defaultValues!: T
     public dirty: DirtyMap<T> = {}
-    public defaultValues: T
     public errors: ErrorMap<T, TError> = {}
-    public formId: number
     public state: State = { isSubmitting: false }
     public validate: (values: T) => ErrorMap<T, TError> = () => ({})
 
@@ -96,6 +96,18 @@ export class FormState<T extends ObjectOrArray, TError = string> {
     private static currentId = 0
 
     constructor(values: T, defaultValues?: T) {
+        if (defaultValues === undefined) {
+            throw new Error('defaultValues is undefined')
+            this.defaultValues = defaultValues ?? values
+            this.values = deepCopy(values)
+        } else {
+            this.values = values
+            this.defaultValues = defaultValues
+        }
+        this.formId = FormState.currentId++
+    }
+
+    public setupForm(values: T, defaultValues?: T) {
         if (defaultValues === undefined) {
             this.defaultValues = defaultValues ?? values
             this.values = deepCopy(values)
@@ -518,13 +530,17 @@ export function ChildForm<
 }
 
 export function useForm<T>(values: T) {
-    let ref = useRef(new FormState<T>(deepCopy(values), values))
+    let ref = useRef<FormState<T> | null>(null)
+
+    if (!ref.current) {
+        ref.current = new FormState<T>(deepCopy(values), values)
+    }
 
     useEffect(() => {
-        ref.current.setValues(values, {}, true)
+        ref.current!.setValues(values, {}, true)
     }, [values])
 
-    return ref.current
+    return ref.current!
 }
 
 export function useChildForm<
@@ -533,20 +549,22 @@ export function useChildForm<
     TValue extends TParent[TKey],
     TParentError
 >(parent: FormState<TParent, TParentError>, name: TKey) {
-    let ref = useRef(
-        new FormState<TValue, TParentError>(
+    let ref = useRef<FormState<TValue, TParentError> | null>(null)
+
+    if (!ref.current) {
+        ref.current = new FormState<TValue, TParentError>(
             deepCopy(parent.values[name]),
             parent.defaultValues[name]
         )
-    )
+    }
 
     useEffect(() => {
-        ref.current.setValues(
+        ref.current!.setValues(
             deepCopy(parent.values[name]),
             parent.errors[name]
         )
         let parentId = parent.listen(name, (isDefault) => {
-            ref.current.setValues(
+            ref.current!.setValues(
                 parent.values[name],
                 parent.errors[name] ?? {},
                 isDefault,
@@ -554,16 +572,16 @@ export function useChildForm<
                 id
             )
         })
-        let id = ref.current.listenAny(() => {
+        let id = ref.current!.listenAny(() => {
             parent.setValueInternal(
                 name,
-                ref.current.values,
-                ref.current.isDirty,
-                ref.current.errors as ErrorType<TValue, TParentError>,
+                ref.current!.values,
+                ref.current!.isDirty,
+                ref.current!.errors as ErrorType<TValue, TParentError>,
                 parentId
             )
         })
-        let i = ref.current
+        let i = ref.current!
         return () => {
             i.ignoreAny(id)
             parent.ignore(name, parentId)
@@ -571,7 +589,7 @@ export function useChildForm<
         }
     }, [parent, name])
 
-    return ref.current
+    return ref.current!
 }
 
 export function yupValidator<T>(
