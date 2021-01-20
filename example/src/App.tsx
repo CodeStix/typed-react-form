@@ -9,7 +9,9 @@ import {
 } from './StateForm'
 import { VisualRender } from './VisualRender'
 
-function FormVisualize<T>(props: { form: FormState<T> }) {
+function FormVisualize<T, TError, TState extends object>(props: {
+    form: FormState<T, TError, TState>
+}) {
     return (
         <AnyListener
             form={props.form}
@@ -41,16 +43,19 @@ export default function App() {
         ]
     })
 
-    const form = useForm(defaultValues)
+    const form = useForm(defaultValues, { isSubmitting: false })
 
     return (
         <VisualRender>
             <form
                 style={{ margin: '3em' }}
-                onSubmit={(ev) => {
+                onSubmit={async (ev) => {
                     ev.preventDefault()
-                    setDefaultValues(form.values)
                     console.log('submit', form.values)
+                    form.setState({ isSubmitting: true })
+                    await new Promise((res) => setTimeout(res, 1000))
+                    form.setState({ isSubmitting: false })
+                    setDefaultValues(form.values)
                 }}
             >
                 <Listener
@@ -85,6 +90,10 @@ export default function App() {
                                                     }) => (
                                                         <VisualRender>
                                                             <input
+                                                                disabled={
+                                                                    form.state
+                                                                        .isSubmitting
+                                                                }
                                                                 value={value}
                                                                 onChange={(
                                                                     ev
@@ -131,10 +140,21 @@ export default function App() {
 
                 <FormVisualize form={form} />
 
-                <button>submit</button>
-                <button type='button' onClick={() => form.reset()}>
-                    reset
-                </button>
+                <AnyListener
+                    form={form}
+                    render={({ state: { isSubmitting } }) => (
+                        <>
+                            <button disabled={isSubmitting}>submit</button>
+                            <button
+                                disabled={isSubmitting}
+                                type='button'
+                                onClick={() => form.reset()}
+                            >
+                                reset
+                            </button>
+                        </>
+                    )}
+                />
             </form>
         </VisualRender>
     )

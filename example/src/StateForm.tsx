@@ -33,10 +33,6 @@ type DirtyMap<T extends ObjectOrArray> = {
     [TKey in KeyOf<T>]?: boolean
 }
 
-type State = {
-    isSubmitting: boolean
-}
-
 // clones only the lower-most object
 function memberCopy<T>(value: T): T {
     if (Array.isArray(value)) {
@@ -48,13 +44,17 @@ function memberCopy<T>(value: T): T {
     }
 }
 
-export class FormState<T extends ObjectOrArray, TError = string> {
-    public formId!: number
-    public values!: T
-    public defaultValues!: T
+export class FormState<
+    T extends ObjectOrArray,
+    TError = string,
+    TState extends {} = {}
+> {
+    public formId: number
+    public values: T
+    public defaultValues: T
     public dirty: DirtyMap<T> = {}
     public errors: ErrorMap<T, TError> = {}
-    public state: State = { isSubmitting: false }
+    public state: TState
     public validate: (values: T) => ErrorMap<T, TError> = () => ({})
 
     // private stateListeners: StateListenersMap = {};
@@ -62,11 +62,12 @@ export class FormState<T extends ObjectOrArray, TError = string> {
     private anyListeners: AnyListenersMap = {}
     private static currentId = 0
 
-    constructor(initialValues: T, defaultValues: T) {
+    constructor(initialValues: T, defaultValues: T, state: TState) {
         if (!defaultValues || !initialValues)
             throw new Error(
                 'FormState.constructor: initialValues or defaultValues is null'
             )
+        this.state = state
         this.values = initialValues
         this.defaultValues = defaultValues
         this.formId = FormState.currentId++
@@ -106,7 +107,7 @@ export class FormState<T extends ObjectOrArray, TError = string> {
         return id
     }
 
-    public setState(state: State) {
+    public setState(state: TState) {
         this.state = state
         this.fireAllNormalListeners(false)
         this.fireAnyListeners(false)
@@ -227,7 +228,7 @@ export class FormState<T extends ObjectOrArray, TError = string> {
         setValues: T,
         errors?: ErrorMap<T, TError>,
         isDefault?: boolean,
-        state?: State,
+        state?: TState,
         skipId?: string
     ) {
         if (errors === null)
@@ -291,10 +292,11 @@ export class FormState<T extends ObjectOrArray, TError = string> {
     }
 }
 
-export function useAnyListener<T extends ObjectOrArray, TError>(
-    form: FormState<T, TError>,
-    onlyOnSetValues: boolean = false
-) {
+export function useAnyListener<
+    T extends ObjectOrArray,
+    TError,
+    TState extends object
+>(form: FormState<T, TError, TState>, onlyOnSetValues: boolean = false) {
     const [, setRender] = useState(0)
 
     useEffect(() => {
@@ -307,23 +309,21 @@ export function useAnyListener<T extends ObjectOrArray, TError>(
     return form
 }
 
-export type AnyListenerProps<T extends ObjectOrArray, TError> = {
-    form: FormState<T, TError>
+export type AnyListenerProps<
+    T extends ObjectOrArray,
+    TError,
+    TState extends object
+> = {
+    form: FormState<T, TError, TState>
     onlyOnSetValues?: boolean
-    render: (props: {
-        values: T
-        errors: ErrorMap<T, TError>
-        dirty: DirtyMap<T>
-        isDirty: boolean
-        anyError: boolean
-        state: State
-        setValues: (values: T) => void
-    }) => React.ReactNode
+    render: (props: FormState<T, TError, TState>) => React.ReactNode
 }
 
-export function AnyListener<T extends ObjectOrArray, TError>(
-    props: AnyListenerProps<T, TError>
-) {
+export function AnyListener<
+    T extends ObjectOrArray,
+    TError,
+    TState extends object
+>(props: AnyListenerProps<T, TError, TState>) {
     const values = useAnyListener(props.form, props.onlyOnSetValues)
     return <>{props.render(values)}</>
 }
@@ -332,15 +332,16 @@ export type ListenerProps<
     T extends ObjectOrArray,
     TKey extends KeyOf<T>,
     TValue extends T[TKey],
-    TError
+    TError,
+    TState extends object
 > = {
-    form: FormState<T, TError>
+    form: FormState<T, TError, TState>
     name: TKey
     render: (props: {
         value: TValue
         dirty?: boolean
         error?: ErrorType<TValue, TError>
-        state: State
+        state: TState
         setValue: (value: TValue) => void
     }) => React.ReactNode
 }
@@ -349,8 +350,9 @@ export function Listener<
     T extends ObjectOrArray,
     TKey extends KeyOf<T>,
     TValue extends T[TKey],
-    TError
->(props: ListenerProps<T, TKey, TValue, TError>) {
+    TError,
+    TState extends object
+>(props: ListenerProps<T, TKey, TValue, TError, TState>) {
     const values = useListener(props.form, props.name)
     return <>{props.render(values)}</>
 }
@@ -358,8 +360,9 @@ export function Listener<
 export function useListener<
     T extends ObjectOrArray,
     TKey extends KeyOf<T>,
-    TError
->(form: FormState<T, TError>, name: TKey) {
+    TError,
+    TState extends object
+>(form: FormState<T, TError, TState>, name: TKey) {
     const [, setRender] = useState(0)
 
     useEffect(() => {
@@ -376,40 +379,57 @@ export function useListener<
     }
 }
 
-export type FormProps<T extends ObjectOrArray> = {
+export type FormProps<
+    T extends ObjectOrArray,
+    TError,
+    TState extends object
+> = {
     values: T
-    render: (form: FormState<T>) => React.ReactNode
+    render: (form: FormState<T, TError, TState>) => React.ReactNode
 }
 
-export function Form<T extends ObjectOrArray>(props: FormProps<T>) {
-    const form = useForm(props.values)
+export function Form<T extends ObjectOrArray, TError, TState extends object>(
+    props: FormProps<T, TError, TState>
+) {
+    const form = useForm<T, TError, TState>(props.values)
     return props.render(form)
 }
 
 export type ChildFormProps<
     TParent extends ObjectOrArray,
     TKey extends KeyOf<TParent>,
-    TValue extends TParent[TKey]
+    TValue extends TParent[TKey],
+    TError,
+    TState extends object
 > = {
-    parent: FormState<TParent>
+    parent: FormState<TParent, TError, TState>
     name: TKey
-    render: (form: FormState<TValue>) => JSX.Element
+    render: (form: FormState<TValue, TError, TState>) => JSX.Element
 }
 
 export function ChildForm<
     TParent extends ObjectOrArray,
     TKey extends KeyOf<TParent>,
-    TValue extends TParent[TKey]
->(props: ChildFormProps<TParent, TKey, TValue>) {
+    TValue extends TParent[TKey],
+    TError,
+    TState extends object
+>(props: ChildFormProps<TParent, TKey, TValue, TError, TState>) {
     const childForm = useChildForm(props.parent, props.name)
     return props.render(childForm)
 }
 
-export function useForm<T>(values: T) {
-    let ref = useRef<FormState<T> | null>(null)
+export function useForm<T, TError, TState extends object>(
+    values: T,
+    defaultState: TState = {} as any
+) {
+    let ref = useRef<FormState<T, TError, TState> | null>(null)
 
     if (!ref.current) {
-        ref.current = new FormState<T>(memberCopy(values), values)
+        ref.current = new FormState<T, TError, TState>(
+            memberCopy(values),
+            values,
+            defaultState
+        )
     }
 
     useEffect(() => {
@@ -423,14 +443,16 @@ export function useChildForm<
     TParent extends ObjectOrArray,
     TKey extends KeyOf<TParent>,
     TValue extends TParent[TKey],
-    TParentError
->(parent: FormState<TParent, TParentError>, name: TKey) {
-    let ref = useRef<FormState<TValue, TParentError> | null>(null)
+    TError,
+    TState extends object
+>(parent: FormState<TParent, TError, TState>, name: TKey) {
+    let ref = useRef<FormState<TValue, TError, TState> | null>(null)
 
     if (!ref.current) {
-        ref.current = new FormState<TValue, TParentError>(
+        ref.current = new FormState<TValue, TError, TState>(
             memberCopy(parent.values[name]),
-            parent.defaultValues[name] ?? parent.values[name]
+            parent.defaultValues[name] ?? parent.values[name],
+            parent.state
         )
     }
 
@@ -449,7 +471,7 @@ export function useChildForm<
                 name,
                 ref.current!.values,
                 ref.current!.isDirty,
-                ref.current!.errors as ErrorType<TValue, TParentError>,
+                ref.current!.errors as ErrorType<TValue, TError>,
                 parentId
             )
         })
@@ -509,13 +531,21 @@ export function yupErrorsToErrorMap(
     return obj
 }
 
-export type ErrorFieldProps<T extends ObjectOrArray> = {
-    form: FormState<T>
+export type ErrorFieldProps<
+    T extends ObjectOrArray,
+    TError,
+    TState extends object
+> = {
+    form: FormState<T, TError, TState>
     name: KeyOf<T>
     as: (props: { children: React.ReactNode }) => JSX.Element
 }
 
-export function ErrorField<T extends ObjectOrArray>(props: ErrorFieldProps<T>) {
+export function ErrorField<
+    T extends ObjectOrArray,
+    TError,
+    TState extends object
+>(props: ErrorFieldProps<T, TError, TState>) {
     const { error } = useListener(props.form, props.name)
     if (!error) return null
     return props.as({ children: error })
@@ -525,12 +555,13 @@ export type ArrayFieldProps<
     TParent extends ObjectOrArray,
     TKey extends KeyOf<TParent>,
     T extends TParent[TKey],
-    TParentError
+    TError,
+    TState extends object
 > = {
-    parent: FormState<TParent, TParentError>
+    parent: FormState<TParent, TError, TState>
     name: TKey
     render: (props: {
-        form: FormState<T, TParentError>
+        form: FormState<T, TError, TState>
         values: T
         setValues: (values: T) => void
         remove: (index: number) => void
@@ -545,9 +576,10 @@ export function ArrayField<
     TParent extends ObjectOrArray,
     TKey extends KeyOf<TParent>,
     T extends TParent[TKey],
-    TParentError
->(props: ArrayFieldProps<TParent, TKey, T, TParentError>) {
-    const form = useChildForm<TParent, TKey, T, TParentError>(
+    TError,
+    TState extends object
+>(props: ArrayFieldProps<TParent, TKey, T, TError, TState>) {
+    const form = useChildForm<TParent, TKey, T, TError, TState>(
         props.parent,
         props.name
     )
