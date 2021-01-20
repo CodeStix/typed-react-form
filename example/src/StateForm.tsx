@@ -336,6 +336,22 @@ export class FormState<T extends ObjectOrArray, TError = string> {
     }
 }
 
+export function useAnyListener<T extends ObjectOrArray, TError>(
+    form: FormState<T, TError>,
+    onlyOnSetValues: boolean = false
+) {
+    const [, setRender] = useState(0)
+
+    useEffect(() => {
+        let id = form.listenAny((setValuesWasUsed) => {
+            if (!onlyOnSetValues || setValuesWasUsed) setRender((r) => r + 1)
+        })
+        return () => form.ignoreAny(id)
+    }, [form, onlyOnSetValues])
+
+    return form
+}
+
 export type AnyListenerProps<T extends ObjectOrArray, TError> = {
     form: FormState<T, TError>
     onlyOnSetValues?: boolean
@@ -345,7 +361,7 @@ export type AnyListenerProps<T extends ObjectOrArray, TError> = {
         dirty: DirtyMap<T>
         isDirty: boolean
         anyError: boolean
-        isSubmitting: boolean
+        state: State
         setValues: (values: T) => void
     }) => React.ReactNode
 }
@@ -353,30 +369,9 @@ export type AnyListenerProps<T extends ObjectOrArray, TError> = {
 export function AnyListener<T extends ObjectOrArray, TError>(
     props: AnyListenerProps<T, TError>
 ) {
-    const form = props.form
-    const [, setRender] = useState(0)
+    const values = useAnyListener(props.form, props.onlyOnSetValues)
 
-    useEffect(() => {
-        let id = form.listenAny((setValuesWasUsed) => {
-            if (!props.onlyOnSetValues || setValuesWasUsed)
-                setRender((r) => r + 1)
-        })
-        return () => form.ignoreAny(id)
-    }, [form, props.onlyOnSetValues])
-
-    return (
-        <>
-            {props.render({
-                errors: form.errors,
-                dirty: form.dirty,
-                values: form.values,
-                isDirty: form.isDirty,
-                anyError: form.anyError,
-                isSubmitting: form.state.isSubmitting,
-                setValues: (newValues) => form.setValues(newValues)
-            })}
-        </>
-    )
+    return <>{props.render(values)}</>
 }
 
 export type UseFormValues<TValue, TError> = {
