@@ -675,11 +675,11 @@ export function ArrayField<
     )
 
     function append(value: T[number]) {
-        form.setValues([...form.values, value] as any)
+        form.setValues([...(form.values as any), value] as any)
     }
 
     function remove(index: number) {
-        let newValues = [...form.values]
+        let newValues = [...(form.values as any)]
         newValues.splice(index, 1)
         let newErrors = { ...form.errorMap }
         delete (newErrors as any)[index]
@@ -692,7 +692,7 @@ export function ArrayField<
 
     function move(from: number, to: number) {
         if (to === from) return
-        let newArr = [...form.values] as T
+        let newArr = [...(form.values as any)] as T
         let newErr = { ...form.errorMap } as ErrorMap<T, TError>
         var target = newArr[from]
         var targetErr = newErr[from]
@@ -707,9 +707,9 @@ export function ArrayField<
     }
 
     function swap(index: number, newIndex: number) {
-        let values = [...form.values]
+        let values = [...(form.values as any)]
         ;[values[index], values[newIndex]] = [values[newIndex], values[index]]
-        let errors = { ...form.errorMap } as any
+        let errors = { ...form.errorMap }
         ;[errors[index], errors[newIndex]] = [errors[newIndex], errors[index]]
         form.setValues(values as any, errors)
     }

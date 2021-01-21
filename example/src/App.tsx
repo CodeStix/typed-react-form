@@ -6,7 +6,7 @@ import {
     FormState,
     Listener,
     useForm
-} from './StateForm'
+} from 'react-state-form'
 import { VisualRender } from './VisualRender'
 
 function FormVisualize<T, TError, TState extends object>(props: {
