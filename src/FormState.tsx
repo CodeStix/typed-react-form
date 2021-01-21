@@ -1,48 +1,48 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from "react";
 
 export type ObjectOrArray = {
-    [TIndex in number | string]: any
-}
+    [TIndex in number | string]: any;
+};
 
 /**
  * The keys of a type T, when T is an array then it returns number (to index the array), otherwise, a key of the object.
  */
-export type KeyOf<T> = T extends any[] ? number : keyof T
+export type KeyOf<T> = T extends any[] ? number : keyof T;
 
 type ErrorType<T, TError> = T extends ObjectOrArray
     ? ErrorMap<T, TError>
-    : TError
+    : TError;
 type ErrorMap<T extends ObjectOrArray, TError> = {
-    [TKey in KeyOf<T>]?: ErrorType<T[TKey], TError>
-}
+    [TKey in KeyOf<T>]?: ErrorType<T[TKey], TError>;
+};
 
-type AnyListener = (setValuesWasUsed: boolean) => void
+type AnyListener = (setValuesWasUsed: boolean) => void;
 type AnyListenersMap = {
-    [key: string]: AnyListener
-}
+    [key: string]: AnyListener;
+};
 
-type Listener = (isDefault: boolean) => void
+type Listener = (isDefault: boolean) => void;
 type ListenerIdMap = {
-    [key: string]: Listener
-}
+    [key: string]: Listener;
+};
 type ListenersMap<T extends ObjectOrArray> = {
-    [TKey in KeyOf<T>]?: ListenerIdMap
-}
+    [TKey in KeyOf<T>]?: ListenerIdMap;
+};
 
 type DirtyMap<T extends ObjectOrArray> = {
-    [TKey in KeyOf<T>]?: boolean
-}
+    [TKey in KeyOf<T>]?: boolean;
+};
 
-export type FormValidator<T, TError> = (values: T) => ErrorMap<T, TError>
+export type FormValidator<T, TError> = (values: T) => ErrorMap<T, TError>;
 
 // clones only the lower-most object
 function memberCopy<T>(value: T): T {
     if (Array.isArray(value)) {
-        return [...value] as any
-    } else if (typeof value === 'object') {
-        return { ...value }
+        return [...value] as any;
+    } else if (typeof value === "object") {
+        return { ...value };
     } else {
-        throw new Error('Can only member-copy arrays and objects.')
+        throw new Error("Can only member-copy arrays and objects.");
     }
 }
 
@@ -51,37 +51,37 @@ export class FormState<
     TError = string,
     TState extends {} = {}
 > {
-    public readonly formId: number
-    public validateOnChange: boolean = true
-    public validator: FormValidator<T, TError> = () => ({})
+    public readonly formId: number;
+    public validateOnChange: boolean = true;
+    public validator: FormValidator<T, TError> = () => ({});
 
-    private anyListeners: AnyListenersMap = {}
-    private listeners: ListenersMap<T> = {}
-    private _values: T
-    private _defaultValues: T
-    private _dirtyMap: DirtyMap<T> = {}
-    private _errorMap: ErrorMap<T, TError> = {}
-    private _state: TState
-    private static currentId = 0
+    private anyListeners: AnyListenersMap = {};
+    private listeners: ListenersMap<T> = {};
+    private _values: T;
+    private _defaultValues: T;
+    private _dirtyMap: DirtyMap<T> = {};
+    private _errorMap: ErrorMap<T, TError> = {};
+    private _state: TState;
+    private static currentId = 0;
 
     public get values() {
-        return this._values
+        return this._values;
     }
 
     public get defaultValues() {
-        return this._defaultValues
+        return this._defaultValues;
     }
 
     public get dirtyMap() {
-        return this._dirtyMap
+        return this._dirtyMap;
     }
 
     public get errorMap() {
-        return this._errorMap
+        return this._errorMap;
     }
 
     public get state() {
-        return this._state
+        return this._state;
     }
 
     constructor(
@@ -93,27 +93,27 @@ export class FormState<
     ) {
         if (!defaultValues || !initialValues)
             throw new Error(
-                'FormState.constructor: initialValues or defaultValues is null'
-            )
-        this._state = state
-        this._values = initialValues
-        this._defaultValues = defaultValues
-        this.validateOnChange = validateOnChange
-        this.formId = FormState.currentId++
-        this.validator = validator
+                "FormState.constructor: initialValues or defaultValues is null"
+            );
+        this._state = state;
+        this._values = initialValues;
+        this._defaultValues = defaultValues;
+        this.validateOnChange = validateOnChange;
+        this.formId = FormState.currentId++;
+        this.validator = validator;
     }
 
     public ignoreAny(id: string) {
-        delete this.anyListeners[id]
+        delete this.anyListeners[id];
     }
 
     public ignore(key: KeyOf<T>, id: string) {
-        let setters = this.listeners[key]
+        let setters = this.listeners[key];
         if (!setters) {
-            console.warn('Ignore was called for no reason', key, id)
-            return
+            console.warn("Ignore was called for no reason", key, id);
+            return;
         }
-        delete setters[id]
+        delete setters[id];
     }
 
     /**
@@ -123,14 +123,14 @@ export class FormState<
      * @returns An id to pass to `ignore()` when you don't want to listen to the field anymore.
      */
     public listen(key: KeyOf<T>, listener: Listener): string {
-        let setters = this.listeners[key]
+        let setters = this.listeners[key];
         if (!setters) {
-            setters = {}
-            this.listeners[key] = setters
+            setters = {};
+            this.listeners[key] = setters;
         }
-        let id = '' + FormState.currentId++
-        setters[id] = listener
-        return id
+        let id = "" + FormState.currentId++;
+        setters[id] = listener;
+        return id;
     }
 
     /**
@@ -138,9 +138,9 @@ export class FormState<
      * @param listener The callback to invoke.
      */
     public listenAny(listener: AnyListener) {
-        let id = '' + FormState.currentId++
-        this.anyListeners[id] = listener
-        return id
+        let id = "" + FormState.currentId++;
+        this.anyListeners[id] = listener;
+        return id;
     }
 
     /**
@@ -153,21 +153,21 @@ export class FormState<
                 (key) => this._dirtyMap[key as KeyOf<T>]
             )
         )
-            return true
+            return true;
 
         // return true if a field was added or removed
-        let valueKeys = Object.keys(this._values)
+        let valueKeys = Object.keys(this._values);
         if (valueKeys.length !== Object.keys(this._defaultValues).length)
-            return true
+            return true;
 
-        return false
+        return false;
     }
 
     /**
      * Returns true if any error is set on this form or any child form. (Not parent forms)
      */
     public get error(): boolean {
-        return Object.keys(this._errorMap).length > 0 //some((key) => this.errors[key as KeyType<T>])
+        return Object.keys(this._errorMap).length > 0; //some((key) => this.errors[key as KeyType<T>])
     }
 
     /**
@@ -175,9 +175,9 @@ export class FormState<
      * @param state The new state
      */
     public setState(state: TState) {
-        this._state = state
-        this.fireAllNormalListeners(false)
-        this.fireAnyListeners(false)
+        this._state = state;
+        this.fireAllNormalListeners(false);
+        this.fireAnyListeners(false);
     }
 
     /**
@@ -185,7 +185,7 @@ export class FormState<
      * @param values The new default values, leave undefined to use the original default values.
      */
     public reset(values?: T) {
-        this.setValues(values ?? this._defaultValues, {}, true)
+        this.setValues(values ?? this._defaultValues, {}, true);
     }
 
     /**
@@ -196,15 +196,15 @@ export class FormState<
      */
     public setValue<U extends KeyOf<T>>(key: U, value: T[U]) {
         if (
-            (value !== null && typeof value === 'object') ||
+            (value !== null && typeof value === "object") ||
             Array.isArray(value)
         ) {
             console.warn(
-                'Do not pass objects to setValue, use setValueInternal instead. When passing objects here, they will always be treated as dirty.'
-            )
+                "Do not pass objects to setValue, use setValueInternal instead. When passing objects here, they will always be treated as dirty."
+            );
         }
-        if (this._values[key] === value) return
-        this.setValueInternal(key, value, this._defaultValues[key] !== value)
+        if (this._values[key] === value) return;
+        this.setValueInternal(key, value, this._defaultValues[key] !== value);
     }
 
     /**
@@ -212,17 +212,17 @@ export class FormState<
      * @param key The field name to remove errors and dirty flags for.
      */
     public unsetValue(key: KeyOf<T>) {
-        delete this._dirtyMap[key]
-        delete this._errorMap[key]
-        this.fireListener(key)
-        this.fireAnyListeners(false)
+        delete this._dirtyMap[key];
+        delete this._errorMap[key];
+        this.fireListener(key);
+        this.fireAnyListeners(false);
     }
 
     public setDirty(key: KeyOf<T>, dirty: boolean, skipId?: string) {
-        if (this._dirtyMap[key] === dirty) return
-        this._dirtyMap[key] = dirty
-        this.fireListener(key, false, skipId)
-        this.fireAnyListeners(false, skipId)
+        if (this._dirtyMap[key] === dirty) return;
+        this._dirtyMap[key] = dirty;
+        this.fireListener(key, false, skipId);
+        this.fireAnyListeners(false, skipId);
     }
 
     /**
@@ -240,25 +240,25 @@ export class FormState<
         error?: ErrorType<V, TError> | null | undefined,
         skipId?: string
     ) {
-        this._values[key] = value
-        this._dirtyMap[key] = dirty
+        this._values[key] = value;
+        this._dirtyMap[key] = dirty;
         if (error !== undefined) {
             if (error === null || Object.keys(error).length === 0)
-                delete this._errorMap[key]
-            else this._errorMap[key] = error
+                delete this._errorMap[key];
+            else this._errorMap[key] = error;
         } else if (this.validateOnChange) {
-            this._errorMap = this.validator(this._values)
+            this._errorMap = this.validator(this._values);
         }
 
-        this.fireListener(key, false, skipId)
-        this.fireAnyListeners(false, skipId)
+        this.fireListener(key, false, skipId);
+        this.fireAnyListeners(false, skipId);
     }
 
     /**
      * Force validation on this form. This is not needed when validateOnChange is enabled.
      */
     public validate() {
-        this.setErrors(this.validator(this._values))
+        this.setErrors(this.validator(this._values));
     }
 
     /**
@@ -271,11 +271,11 @@ export class FormState<
             Object.keys(this._errorMap).length === 0 &&
             Object.keys(errors).length === 0
         )
-            return
-        this._errorMap = errors
+            return;
+        this._errorMap = errors;
 
-        this.fireAllNormalListeners(false, skipId)
-        this.fireAnyListeners(true, skipId)
+        this.fireAllNormalListeners(false, skipId);
+        this.fireAnyListeners(true, skipId);
     }
 
     /**
@@ -287,10 +287,10 @@ export class FormState<
         name: U,
         error: ErrorType<T[U], TError>
     ) {
-        if (this._errorMap[name] === error) return
-        this._errorMap[name] = error
-        this.fireAllNormalListeners(false)
-        this.fireAnyListeners(true)
+        if (this._errorMap[name] === error) return;
+        this._errorMap[name] = error;
+        this.fireAllNormalListeners(false);
+        this.fireAnyListeners(true);
     }
 
     /**
@@ -310,62 +310,62 @@ export class FormState<
     ) {
         if (errors === null)
             throw new Error(
-                'errors is null, use undefined to not set any errors'
-            )
-        if (!setValues) throw new Error('setValues is undefined')
+                "errors is null, use undefined to not set any errors"
+            );
+        if (!setValues) throw new Error("setValues is undefined");
 
         if (isDefault) {
-            this._defaultValues = setValues
-            this._values = memberCopy(setValues)
-            this._dirtyMap = {}
+            this._defaultValues = setValues;
+            this._values = memberCopy(setValues);
+            this._dirtyMap = {};
         } else {
-            this._values = setValues
+            this._values = setValues;
         }
 
-        if (errors !== undefined) this._errorMap = errors
-        else this._errorMap = this.validator(this._values)
+        if (errors !== undefined) this._errorMap = errors;
+        else this._errorMap = this.validator(this._values);
 
-        if (state !== undefined) this._state = state
+        if (state !== undefined) this._state = state;
 
-        this.fireAllNormalListeners(isDefault, skipId)
-        this.recalculateDirty()
-        this.fireAnyListeners(true, skipId)
+        this.fireAllNormalListeners(isDefault, skipId);
+        this.recalculateDirty();
+        this.fireAnyListeners(true, skipId);
     }
 
     private recalculateDirty() {
         // Recalculate dirty values
-        let keys = Object.keys(this._values)
+        let keys = Object.keys(this._values);
         for (let i = 0; i < keys.length; i++) {
-            let name = keys[i] as KeyOf<T>
-            let value = this._values[name]
+            let name = keys[i] as KeyOf<T>;
+            let value = this._values[name];
             // Do not compare objects and arrays, they are set dirty using setValueInternal
-            if (typeof value === 'object' || Array.isArray(value)) continue
-            this._dirtyMap[name] = this._defaultValues[name] !== value
+            if (typeof value === "object" || Array.isArray(value)) continue;
+            this._dirtyMap[name] = this._defaultValues[name] !== value;
         }
     }
 
     private fireListener(key: KeyOf<T>, isDefault?: boolean, skipId?: string) {
-        let listeners = this.listeners[key]
+        let listeners = this.listeners[key];
         if (listeners) {
             // Call all listeners for the set field
             Object.keys(listeners!).forEach((id) => {
-                if (id !== skipId) listeners![id](isDefault ?? false)
-            })
+                if (id !== skipId) listeners![id](isDefault ?? false);
+            });
         }
     }
 
     private fireAllNormalListeners(isDefault?: boolean, skipId?: string) {
         // Call all listeners for each set field
         Object.keys(this._values).forEach((keyString) => {
-            this.fireListener(keyString as KeyOf<T>, isDefault, skipId)
-        })
+            this.fireListener(keyString as KeyOf<T>, isDefault, skipId);
+        });
     }
 
     private fireAnyListeners(setValuesWasUsed: boolean, skipId?: string) {
         // Call all listeners that listen for any change
         Object.keys(this.anyListeners).forEach((id) => {
-            if (id !== skipId) this.anyListeners[id](setValuesWasUsed)
-        })
+            if (id !== skipId) this.anyListeners[id](setValuesWasUsed);
+        });
     }
 }
 
@@ -374,16 +374,16 @@ export function useAnyListener<
     TError,
     TState extends object
 >(form: FormState<T, TError, TState>, onlyOnSetValues: boolean = false) {
-    const [, setRender] = useState(0)
+    const [, setRender] = useState(0);
 
     useEffect(() => {
         let id = form.listenAny((setValuesWasUsed) => {
-            if (!onlyOnSetValues || setValuesWasUsed) setRender((r) => r + 1)
-        })
-        return () => form.ignoreAny(id)
-    }, [form, onlyOnSetValues])
+            if (!onlyOnSetValues || setValuesWasUsed) setRender((r) => r + 1);
+        });
+        return () => form.ignoreAny(id);
+    }, [form, onlyOnSetValues]);
 
-    return form
+    return form;
 }
 
 export type AnyListenerProps<
@@ -391,18 +391,18 @@ export type AnyListenerProps<
     TError,
     TState extends object
 > = {
-    form: FormState<T, TError, TState>
-    onlyOnSetValues?: boolean
-    render: (props: FormState<T, TError, TState>) => React.ReactNode
-}
+    form: FormState<T, TError, TState>;
+    onlyOnSetValues?: boolean;
+    render: (props: FormState<T, TError, TState>) => React.ReactNode;
+};
 
 export function AnyListener<
     T extends ObjectOrArray,
     TError,
     TState extends object
 >(props: AnyListenerProps<T, TError, TState>) {
-    const values = useAnyListener(props.form, props.onlyOnSetValues)
-    return <>{props.render(values)}</>
+    const values = useAnyListener(props.form, props.onlyOnSetValues);
+    return <>{props.render(values)}</>;
 }
 
 export type ListenerProps<
@@ -412,16 +412,16 @@ export type ListenerProps<
     TError,
     TState extends object
 > = {
-    form: FormState<T, TError, TState>
-    name: TKey
+    form: FormState<T, TError, TState>;
+    name: TKey;
     render: (props: {
-        value: TValue
-        dirty?: boolean
-        error?: ErrorType<TValue, TError>
-        state: TState
-        setValue: (value: TValue) => void
-    }) => React.ReactNode
-}
+        value: TValue;
+        dirty?: boolean;
+        error?: ErrorType<TValue, TError>;
+        state: TState;
+        setValue: (value: TValue) => void;
+    }) => React.ReactNode;
+};
 
 export function Listener<
     T extends ObjectOrArray,
@@ -430,8 +430,8 @@ export function Listener<
     TError,
     TState extends object
 >(props: ListenerProps<T, TKey, TValue, TError, TState>) {
-    const values = useListener(props.form, props.name)
-    return <>{props.render(values)}</>
+    const values = useListener(props.form, props.name);
+    return <>{props.render(values)}</>;
 }
 
 export function useListener<
@@ -440,12 +440,12 @@ export function useListener<
     TError,
     TState extends object
 >(form: FormState<T, TError, TState>, name: TKey) {
-    const [, setRender] = useState(0)
+    const [, setRender] = useState(0);
 
     useEffect(() => {
-        let id = form.listen(name, () => setRender((r) => r + 1))
-        return () => form.ignore(name, id)
-    }, [form, name])
+        let id = form.listen(name, () => setRender((r) => r + 1));
+        return () => form.ignore(name, id);
+    }, [form, name]);
 
     return {
         dirty: form.dirtyMap[name],
@@ -453,7 +453,7 @@ export function useListener<
         value: form.values[name],
         state: form.state,
         setValue: (value: T[TKey]) => form.setValue(name, value)
-    }
+    };
 }
 
 export type FormProps<
@@ -461,15 +461,15 @@ export type FormProps<
     TError,
     TState extends object
 > = {
-    values: T
-    render: (form: FormState<T, TError, TState>) => React.ReactNode
-}
+    values: T;
+    render: (form: FormState<T, TError, TState>) => React.ReactNode;
+};
 
 export function Form<T extends ObjectOrArray, TError, TState extends object>(
     props: FormProps<T, TError, TState>
 ) {
-    const form = useForm<T, TError, TState>(props.values)
-    return props.render(form)
+    const form = useForm<T, TError, TState>(props.values);
+    return props.render(form);
 }
 
 export type ChildFormProps<
@@ -479,11 +479,11 @@ export type ChildFormProps<
     TError,
     TState extends object
 > = {
-    parent: FormState<TParent, TError, TState>
-    name: TKey
-    render: (form: FormState<TValue, TError, TState>) => JSX.Element
-    validator?: FormValidator<TValue, TError>
-}
+    parent: FormState<TParent, TError, TState>;
+    name: TKey;
+    render: (form: FormState<TValue, TError, TState>) => JSX.Element;
+    validator?: FormValidator<TValue, TError>;
+};
 
 export function ChildForm<
     TParent extends ObjectOrArray,
@@ -492,8 +492,8 @@ export function ChildForm<
     TError,
     TState extends object
 >(props: ChildFormProps<TParent, TKey, TValue, TError, TState>) {
-    const childForm = useChildForm(props.parent, props.name, props.validator)
-    return props.render(childForm)
+    const childForm = useChildForm(props.parent, props.name, props.validator);
+    return props.render(childForm);
 }
 
 export function useForm<T, TError = string, TState extends object = {}>(
@@ -503,7 +503,7 @@ export function useForm<T, TError = string, TState extends object = {}>(
     validateOnMount = false,
     validateOnChange = true
 ) {
-    let ref = useRef<FormState<T, TError, TState> | null>(null)
+    let ref = useRef<FormState<T, TError, TState> | null>(null);
 
     if (!ref.current) {
         ref.current = new FormState<T, TError, TState>(
@@ -512,14 +512,14 @@ export function useForm<T, TError = string, TState extends object = {}>(
             defaultState,
             validator,
             validateOnChange
-        )
+        );
     }
 
     useEffect(() => {
-        ref.current!.setValues(values, validateOnMount ? undefined : {}, true)
-    }, [values, validateOnMount])
+        ref.current!.setValues(values, validateOnMount ? undefined : {}, true);
+    }, [values, validateOnMount]);
 
-    return ref.current!
+    return ref.current!;
 }
 
 export function useChildForm<
@@ -534,7 +534,7 @@ export function useChildForm<
     validator: FormValidator<TValue, TError> = () => ({}),
     validateOnChange = true
 ) {
-    let ref = useRef<FormState<TValue, TError, TState> | null>(null)
+    let ref = useRef<FormState<TValue, TError, TState> | null>(null);
 
     if (!ref.current) {
         ref.current = new FormState<TValue, TError, TState>(
@@ -543,7 +543,7 @@ export function useChildForm<
             parent.state,
             validator,
             validateOnChange
-        )
+        );
     }
 
     useEffect(() => {
@@ -554,8 +554,8 @@ export function useChildForm<
                 isDefault,
                 parent.state,
                 id
-            )
-        })
+            );
+        });
         let id = ref.current!.listenAny(() => {
             parent.setValueInternal(
                 name,
@@ -563,22 +563,22 @@ export function useChildForm<
                 ref.current!.dirty,
                 ref.current!.errorMap as ErrorType<TValue, TError>,
                 parentId
-            )
-        })
+            );
+        });
         ref.current!.setValues(
             memberCopy(parent.values[name]),
             parent.errorMap[name]
-        )
+        );
 
-        let i = ref.current!
+        let i = ref.current!;
         return () => {
-            i.ignoreAny(id)
-            parent.ignore(name, parentId)
-            parent.unsetValue(name)
-        }
-    }, [parent, name])
+            i.ignoreAny(id);
+            parent.ignore(name, parentId);
+            parent.unsetValue(name);
+        };
+    }, [parent, name]);
 
-    return ref.current!
+    return ref.current!;
 }
 
 export function yupValidator<T>(
@@ -587,38 +587,38 @@ export function yupValidator<T>(
 ) {
     return (values: T) => {
         try {
-            schema.validateSync(values, { abortEarly: false })
-            return {}
+            schema.validateSync(values, { abortEarly: false });
+            return {};
         } catch (ex) {
-            return yupErrorsToErrorMap(ex.inner, transform)
+            return yupErrorsToErrorMap(ex.inner, transform);
         }
-    }
+    };
 }
 
 export function yupErrorsToErrorMap(
     errors: any[],
     transform: (message: any) => any = (s) => s
 ) {
-    let obj = {} as any
+    let obj = {} as any;
     for (let i = 0; i < errors.length; i++) {
-        let err = errors[i]
-        let pathSegments = [...err.path.matchAll(/(\w+)/gi)].map((e) => e[0])
-        let o = obj
+        let err = errors[i];
+        let pathSegments = [...err.path.matchAll(/(\w+)/gi)].map((e) => e[0]);
+        let o = obj;
         for (let j = 0; j < pathSegments.length; j++) {
-            let key = pathSegments[j]
-            let oo = o[key]
+            let key = pathSegments[j];
+            let oo = o[key];
             if (!oo) {
-                oo = {}
-                o[key] = oo
+                oo = {};
+                o[key] = oo;
             }
             if (j === pathSegments.length - 1) {
-                o[key] = transform(err.message)
+                o[key] = transform(err.message);
             } else {
-                o = oo
+                o = oo;
             }
         }
     }
-    return obj
+    return obj;
 }
 
 export type ErrorFieldProps<
@@ -626,19 +626,19 @@ export type ErrorFieldProps<
     TError,
     TState extends object
 > = {
-    form: FormState<T, TError, TState>
-    name: KeyOf<T>
-    as: (props: { children: React.ReactNode }) => JSX.Element
-}
+    form: FormState<T, TError, TState>;
+    name: KeyOf<T>;
+    as: (props: { children: React.ReactNode }) => JSX.Element;
+};
 
 export function ErrorField<
     T extends ObjectOrArray,
     TError,
     TState extends object
 >(props: ErrorFieldProps<T, TError, TState>) {
-    const { error } = useListener(props.form, props.name)
-    if (!error) return null
-    return props.as({ children: error })
+    const { error } = useListener(props.form, props.name);
+    if (!error) return null;
+    return props.as({ children: error });
 }
 
 export type ArrayFieldProps<
@@ -648,19 +648,19 @@ export type ArrayFieldProps<
     TError,
     TState extends object
 > = {
-    parent: FormState<TParent, TError, TState>
-    name: TKey
+    parent: FormState<TParent, TError, TState>;
+    name: TKey;
     render: (props: {
-        form: FormState<T, TError, TState>
-        values: T
-        setValues: (values: T) => void
-        remove: (index: number) => void
-        clear: () => void
-        move: (index: number, newIndex: number) => void
-        swap: (index: number, newIndex: number) => void
-        append: (value: T[number]) => void
-    }) => React.ReactNode
-}
+        form: FormState<T, TError, TState>;
+        values: T;
+        setValues: (values: T) => void;
+        remove: (index: number) => void;
+        clear: () => void;
+        move: (index: number, newIndex: number) => void;
+        swap: (index: number, newIndex: number) => void;
+        append: (value: T[number]) => void;
+    }) => React.ReactNode;
+};
 
 export function ArrayField<
     TParent extends ObjectOrArray,
@@ -672,46 +672,46 @@ export function ArrayField<
     const form = useChildForm<TParent, TKey, T, TError, TState>(
         props.parent,
         props.name
-    )
+    );
 
     function append(value: T[number]) {
-        form.setValues([...(form.values as any), value] as any)
+        form.setValues([...(form.values as any), value] as any);
     }
 
     function remove(index: number) {
-        let newValues = [...(form.values as any)]
-        newValues.splice(index, 1)
-        let newErrors = { ...form.errorMap }
-        delete (newErrors as any)[index]
-        form.setValues(newValues as any, newErrors)
+        let newValues = [...(form.values as any)];
+        newValues.splice(index, 1);
+        let newErrors = { ...form.errorMap };
+        delete (newErrors as any)[index];
+        form.setValues(newValues as any, newErrors);
     }
 
     function clear() {
-        form.setValues([] as any, {})
+        form.setValues([] as any, {});
     }
 
     function move(from: number, to: number) {
-        if (to === from) return
-        let newArr = [...(form.values as any)] as T
-        let newErr = { ...form.errorMap } as ErrorMap<T, TError>
-        var target = newArr[from]
-        var targetErr = newErr[from]
-        var increment = to < from ? -1 : 1
+        if (to === from) return;
+        let newArr = [...(form.values as any)] as T;
+        let newErr = { ...form.errorMap } as ErrorMap<T, TError>;
+        var target = newArr[from];
+        var targetErr = newErr[from];
+        var increment = to < from ? -1 : 1;
         for (var k = from; k !== to; k += increment) {
-            newArr[k] = newArr[k + increment]
-            newErr[k] = newErr[k + increment]
+            newArr[k] = newArr[k + increment];
+            newErr[k] = newErr[k + increment];
         }
-        newArr[to] = target
-        newErr[to] = targetErr
-        form.setValues(newArr, newErr)
+        newArr[to] = target;
+        newErr[to] = targetErr;
+        form.setValues(newArr, newErr);
     }
 
     function swap(index: number, newIndex: number) {
-        let values = [...(form.values as any)]
-        ;[values[index], values[newIndex]] = [values[newIndex], values[index]]
-        let errors = { ...form.errorMap }
-        ;[errors[index], errors[newIndex]] = [errors[newIndex], errors[index]]
-        form.setValues(values as any, errors)
+        let values = [...(form.values as any)];
+        [values[index], values[newIndex]] = [values[newIndex], values[index]];
+        let errors = { ...form.errorMap };
+        [errors[index], errors[newIndex]] = [errors[newIndex], errors[index]];
+        form.setValues(values as any, errors);
     }
 
     return (
@@ -731,5 +731,5 @@ export function ArrayField<
                 })
             }
         />
-    )
+    );
 }

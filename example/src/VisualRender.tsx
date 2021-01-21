@@ -1,17 +1,17 @@
-import React, { useRef } from 'react'
+import React, { useRef } from "react";
 
 export function VisualRender(props: { children: React.ReactNode }) {
-    let ref = useRef<HTMLDivElement>(null)
-    let timeoutRef = useRef<number | null>(null)
+    let ref = useRef<HTMLDivElement>(null);
+    let timeoutRef = useRef<number | null>(null);
 
     if (ref.current) {
-        ref.current.className = ''
-        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        ref.current.className = "";
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = window.setTimeout(
-            () => (ref.current!.className = 'blink'),
+            () => (ref.current!.className = "blink"),
             100
-        )
+        );
     }
 
-    return <div ref={ref}>{props.children}</div>
+    return <div ref={ref}>{props.children}</div>;
 }

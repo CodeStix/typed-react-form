@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import {
     AnyListener,
     ArrayField,
@@ -6,18 +6,18 @@ import {
     FormState,
     Listener,
     useForm
-} from 'react-state-form'
-import { VisualRender } from './VisualRender'
+} from "react-state-form";
+import { VisualRender } from "./VisualRender";
 
 function FormVisualize<T, TError, TState extends object>(props: {
-    form: FormState<T, TError, TState>
+    form: FormState<T, TError, TState>;
 }) {
     return (
         <AnyListener
             form={props.form}
             render={({ values, errorMap }) => (
                 <VisualRender>
-                    <div style={{ background: '#eee' }}>
+                    <div style={{ background: "#eee" }}>
                         <pre>{JSON.stringify(values, null, 2)}</pre>
                         {props.form.dirty && (
                             <p>
@@ -29,20 +29,20 @@ function FormVisualize<T, TError, TState extends object>(props: {
                 </VisualRender>
             )}
         />
-    )
+    );
 }
 
 export default function App() {
     const [defaultValues, setDefaultValues] = useState({
-        firstName: 'Stijn',
-        lastName: 'Rogiest',
+        firstName: "Stijn",
+        lastName: "Rogiest",
         todo: [
             {
-                title: '',
-                id: 'asdjfklasdfjklasdljkf'
+                title: "",
+                id: "asdjfklasdfjklasdljkf"
             }
         ]
-    })
+    });
 
     const form = useForm(
         defaultValues,
@@ -51,36 +51,36 @@ export default function App() {
             values.todo
                 .filter((e) => e.title.length < 5)
                 .reduce((prev, _val, index) => {
-                    let l = prev['todo']
+                    let l = prev["todo"];
                     if (!l) {
-                        l = {}
-                        prev['todo'] = l
+                        l = {};
+                        prev["todo"] = l;
                     }
-                    l[index] = { title: 'title must be longer' }
-                    return prev
+                    l[index] = { title: "title must be longer" };
+                    return prev;
                 }, {}),
         true,
         true
-    )
+    );
 
     return (
         <VisualRender>
             <form
-                style={{ margin: '3em' }}
+                style={{ margin: "3em" }}
                 onSubmit={async (ev) => {
-                    ev.preventDefault()
-                    form.validate()
-                    if (form.error) return
-                    console.log('submit', form.values)
-                    form.setState({ isSubmitting: true })
-                    await new Promise((res) => setTimeout(res, 1000))
-                    form.setState({ isSubmitting: false })
-                    setDefaultValues(form.values)
+                    ev.preventDefault();
+                    form.validate();
+                    if (form.error) return;
+                    console.log("submit", form.values);
+                    form.setState({ isSubmitting: true });
+                    await new Promise((res) => setTimeout(res, 1000));
+                    form.setState({ isSubmitting: false });
+                    setDefaultValues(form.values);
                 }}
             >
                 <Listener
                     form={form}
-                    name='firstName'
+                    name="firstName"
                     render={({ value, setValue }) => (
                         <input
                             value={value}
@@ -89,7 +89,7 @@ export default function App() {
                     )}
                 />
                 <ArrayField
-                    name='todo'
+                    name="todo"
                     parent={form}
                     render={({ values, append, remove, form, move }) => (
                         <VisualRender>
@@ -102,7 +102,7 @@ export default function App() {
                                         validator={(values) => ({
                                             title:
                                                 values.title.length < 5
-                                                    ? 'pick a longer title'
+                                                    ? "pick a longer title"
                                                     : undefined
                                         })}
                                         render={(form) => (
@@ -110,7 +110,7 @@ export default function App() {
                                                 {/* <FormVisualize form={form} /> */}
                                                 <Listener
                                                     form={form}
-                                                    name='title'
+                                                    name="title"
                                                     render={({
                                                         value,
                                                         setValue,
@@ -144,13 +144,13 @@ export default function App() {
                                                     )}
                                                 />
                                                 <button
-                                                    type='button'
+                                                    type="button"
                                                     onClick={() => remove(i)}
                                                 >
                                                     remove
                                                 </button>
                                                 <button
-                                                    type='button'
+                                                    type="button"
                                                     onClick={() => move(i, 0)}
                                                 >
                                                     to top
@@ -161,12 +161,12 @@ export default function App() {
                                 ))}
                             </ul>
                             <button
-                                type='button'
+                                type="button"
                                 onClick={() => {
                                     append({
-                                        title: '',
-                                        id: '' + new Date().getTime()
-                                    })
+                                        title: "",
+                                        id: "" + new Date().getTime()
+                                    });
                                 }}
                             >
                                 Add todo item
@@ -184,7 +184,7 @@ export default function App() {
                             <button disabled={isSubmitting}>submit</button>
                             <button
                                 disabled={isSubmitting}
-                                type='button'
+                                type="button"
                                 onClick={() => form.reset()}
                             >
                                 reset
@@ -194,5 +194,5 @@ export default function App() {
                 />
             </form>
         </VisualRender>
-    )
+    );
 }
