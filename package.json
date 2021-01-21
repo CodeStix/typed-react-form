@@ -1,10 +1,10 @@
 {
-  "name": "react-state-form",
+  "name": "fast-react-form",
   "version": "1.0.0",
-  "description": "A form state manager for react.",
+  "description": "A form state manager for react, focussed on minimal rerenders and flawless typescript integration.",
   "author": "CodeStix",
   "license": "MIT",
-  "repository": "CodeStix/react-state-form",
+  "repository": "CodeStix/fast-react-form",
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "source": "src/index.tsx",

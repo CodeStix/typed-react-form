@@ -6,7 +6,7 @@ import {
     FormState,
     Listener,
     useForm
-} from "react-state-form";
+} from "fast-react-form";
 import { VisualRender } from "./VisualRender";
 
 function FormVisualize<T, TError, TState extends object>(props: {
