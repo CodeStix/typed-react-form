@@ -4,6 +4,10 @@ export type ObjectOrArray = {
     [TIndex in number | string]: any;
 };
 
+export type KeysOfType<T, TProp> = {
+    [P in keyof T]: T[P] extends TProp ? P : never;
+}[keyof T];
+
 /**
  * The keys of a type T, when T is an array then it returns number (to index the array), otherwise, a key of the object.
  */
@@ -35,6 +39,14 @@ type DirtyMap<T extends ObjectOrArray> = {
 
 export type FormValidator<T, TError> = (values: T) => ErrorMap<T, TError>;
 
+export type FormFieldProps<TProps, TForm, TFormError, TFormState> = Omit<
+    TProps,
+    "form" | "name"
+> & {
+    form: FormState<TForm, TFormError, TFormState>;
+    name: KeyOf<TForm>;
+};
+
 // clones only the lower-most object
 function memberCopy<T>(value: T): T {
     if (Array.isArray(value)) {
@@ -46,11 +58,7 @@ function memberCopy<T>(value: T): T {
     }
 }
 
-export class FormState<
-    T extends ObjectOrArray,
-    TError = string,
-    TState extends {} = {}
-> {
+export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
     public readonly formId: number;
     public validateOnChange: boolean = true;
     public validator: FormValidator<T, TError> = () => ({});
@@ -369,11 +377,10 @@ export class FormState<
     }
 }
 
-export function useAnyListener<
-    T extends ObjectOrArray,
-    TError,
-    TState extends object
->(form: FormState<T, TError, TState>, onlyOnSetValues: boolean = false) {
+export function useAnyListener<T extends ObjectOrArray, TError, TState>(
+    form: FormState<T, TError, TState>,
+    onlyOnSetValues: boolean = false
+) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
@@ -386,21 +393,15 @@ export function useAnyListener<
     return form;
 }
 
-export type AnyListenerProps<
-    T extends ObjectOrArray,
-    TError,
-    TState extends object
-> = {
+export type AnyListenerProps<T extends ObjectOrArray, TError, TState> = {
     form: FormState<T, TError, TState>;
     onlyOnSetValues?: boolean;
     render: (props: FormState<T, TError, TState>) => React.ReactNode;
 };
 
-export function AnyListener<
-    T extends ObjectOrArray,
-    TError,
-    TState extends object
->(props: AnyListenerProps<T, TError, TState>) {
+export function AnyListener<T extends ObjectOrArray, TError, TState>(
+    props: AnyListenerProps<T, TError, TState>
+) {
     const values = useAnyListener(props.form, props.onlyOnSetValues);
     return <>{props.render(values)}</>;
 }
@@ -410,7 +411,7 @@ export type ListenerProps<
     TKey extends KeyOf<T>,
     TValue extends T[TKey],
     TError,
-    TState extends object
+    TState
 > = {
     form: FormState<T, TError, TState>;
     name: TKey;
@@ -428,7 +429,7 @@ export function Listener<
     TKey extends KeyOf<T>,
     TValue extends T[TKey],
     TError,
-    TState extends object
+    TState
 >(props: ListenerProps<T, TKey, TValue, TError, TState>) {
     const values = useListener(props.form, props.name);
     return <>{props.render(values)}</>;
@@ -438,7 +439,7 @@ export function useListener<
     T extends ObjectOrArray,
     TKey extends KeyOf<T>,
     TError,
-    TState extends object
+    TState
 >(form: FormState<T, TError, TState>, name: TKey) {
     const [, setRender] = useState(0);
 
@@ -456,16 +457,12 @@ export function useListener<
     };
 }
 
-export type FormProps<
-    T extends ObjectOrArray,
-    TError,
-    TState extends object
-> = {
+export type FormProps<T extends ObjectOrArray, TError, TState> = {
     values: T;
     render: (form: FormState<T, TError, TState>) => React.ReactNode;
 };
 
-export function Form<T extends ObjectOrArray, TError, TState extends object>(
+export function Form<T extends ObjectOrArray, TError, TState>(
     props: FormProps<T, TError, TState>
 ) {
     const form = useForm<T, TError, TState>(props.values);
@@ -477,7 +474,7 @@ export type ChildFormProps<
     TKey extends KeyOf<TParent>,
     TValue extends TParent[TKey],
     TError,
-    TState extends object
+    TState
 > = {
     parent: FormState<TParent, TError, TState>;
     name: TKey;
@@ -490,13 +487,13 @@ export function ChildForm<
     TKey extends KeyOf<TParent>,
     TValue extends TParent[TKey],
     TError,
-    TState extends object
+    TState
 >(props: ChildFormProps<TParent, TKey, TValue, TError, TState>) {
     const childForm = useChildForm(props.parent, props.name, props.validator);
     return props.render(childForm);
 }
 
-export function useForm<T, TError = string, TState extends object = {}>(
+export function useForm<T, TError = string, TState = {}>(
     values: T,
     defaultState: TState = {} as any,
     validator: FormValidator<T, TError> = () => ({}),
@@ -527,7 +524,7 @@ export function useChildForm<
     TKey extends KeyOf<TParent>,
     TValue extends TParent[TKey],
     TError,
-    TState extends object
+    TState
 >(
     parent: FormState<TParent, TError, TState>,
     name: TKey,
@@ -621,21 +618,15 @@ export function yupErrorsToErrorMap(
     return obj;
 }
 
-export type ErrorFieldProps<
-    T extends ObjectOrArray,
-    TError,
-    TState extends object
-> = {
+export type ErrorFieldProps<T extends ObjectOrArray, TError, TState> = {
     form: FormState<T, TError, TState>;
     name: KeyOf<T>;
     as: (props: { children: React.ReactNode }) => JSX.Element;
 };
 
-export function ErrorField<
-    T extends ObjectOrArray,
-    TError,
-    TState extends object
->(props: ErrorFieldProps<T, TError, TState>) {
+export function ErrorField<T extends ObjectOrArray, TError, TState>(
+    props: ErrorFieldProps<T, TError, TState>
+) {
     const { error } = useListener(props.form, props.name);
     if (!error) return null;
     return props.as({ children: error });
@@ -646,7 +637,7 @@ export type ArrayFieldProps<
     TKey extends KeyOf<TParent>,
     T extends TParent[TKey],
     TError,
-    TState extends object
+    TState
 > = {
     parent: FormState<TParent, TError, TState>;
     name: TKey;
@@ -667,7 +658,7 @@ export function ArrayField<
     TKey extends KeyOf<TParent>,
     T extends TParent[TKey],
     TError,
-    TState extends object
+    TState
 >(props: ArrayFieldProps<TParent, TKey, T, TError, TState>) {
     const form = useChildForm<TParent, TKey, T, TError, TState>(
         props.parent,

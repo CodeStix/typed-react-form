@@ -1,15 +1,46 @@
-import React, { useState } from "react";
+import React, { InputHTMLAttributes, Key, useState } from "react";
 import {
     AnyListener,
     ArrayField,
     ChildForm,
+    FormFieldProps,
     FormState,
+    KeyOf,
+    KeysOfType,
     Listener,
-    useForm
+    ObjectOrArray,
+    useForm,
+    useListener
 } from "fast-react-form";
 import { VisualRender } from "./VisualRender";
 
-function FormVisualize<T, TError, TState extends object>(props: {
+type InputProps<T extends ObjectOrArray, TError, TState> = FormFieldProps<
+    InputHTMLAttributes<HTMLInputElement>,
+    T,
+    TError,
+    TState
+>;
+
+function Input<T extends ObjectOrArray, U, V>({
+    form,
+    name,
+    ...rest
+}: InputProps<T, U, V>) {
+    const { value, setValue, error, dirty } = useListener(form, name);
+    return (
+        <input
+            style={{
+                border: error ? "1px solid red" : "none",
+                background: dirty ? "#eee" : "#fff"
+            }}
+            value={value}
+            onChange={(ev) => setValue(ev.target.value as T[KeyOf<T>])}
+            {...rest}
+        />
+    );
+}
+
+function FormVisualize<T, TError, TState>(props: {
     form: FormState<T, TError, TState>;
 }) {
     return (
