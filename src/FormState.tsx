@@ -68,17 +68,31 @@ function keys<T>(obj: T): KeyOf<T>[] {
     }
 }
 
-function changedKeys<T>(a: T, b: T, skipObjects: boolean = false): KeyOf<T>[] {
+/**
+ * @param a The first objects/array
+ * @param b The second object/array
+ * @param compareObjectsAsBooleans True if you don't want to compare objects by reference but by thruthfulness.
+ */
+function changedKeys<T>(
+    a: T,
+    b: T,
+    compareObjectsAsBooleans: boolean = false
+): KeyOf<T>[] {
     let aKeys = keys(a);
     let bKeys = keys(b);
     let largest = aKeys.length > bKeys.length ? aKeys : bKeys;
     let changed = [];
+    const o = {};
     for (let i = 0; i < largest.length; i++) {
         let k = largest[i];
         let av = a[k as any];
         let bv = b[k as any];
-        if (skipObjects && (typeof av === "object" || typeof bv === "object"))
-            continue;
+        if (av === null && bv === undefined)
+            console.warn("comparing null and undefined!");
+        if (compareObjectsAsBooleans && typeof av === "object")
+            av = av ? o : undefined;
+        if (compareObjectsAsBooleans && typeof bv === "object")
+            bv = bv ? o : undefined;
         if (av !== bv) {
             changed.push(k);
         }
@@ -404,6 +418,13 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
             ...changedKeys(prevDefaultValues, this._defaultValues)
         ];
         toFire = [...toFire, ...changedKeys(prevDirtyMap, this._dirtyMap)];
+        console.trace(
+            this.formId,
+            "comparing errors",
+            JSON.stringify(errors),
+            JSON.stringify(prevErrorMap),
+            JSON.stringify(this._errorMap)
+        );
         toFire = [
             ...toFire,
             ...changedKeys(prevErrorMap, this._errorMap, true)
@@ -637,9 +658,10 @@ export function useChildForm<
 
     useEffect(() => {
         let parentId = parent.listen(name, (isDefault) => {
+            console.log("new parent values", parent.errorMap[name]);
             ref.current!.setValues(
                 parent.values[name],
-                parent.errorMap[name] ?? undefined, // undefined causes validate, {} sets no errors and causes no validation
+                parent.errorMap[name] ?? {}, // undefined causes validate, {} sets no errors and causes no validation
                 isDefault,
                 parent.state
                 // id
