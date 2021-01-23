@@ -1,71 +1,101 @@
-import React, { useState } from "react";
+import React, { InputHTMLAttributes, useState } from "react";
 import {
     AnyListener,
     ArrayField,
-    ChildForm,
+    FormFieldProps,
     FormState,
-    Listener,
-    useForm
+    KeyOf,
+    ObjectOrArray,
+    useChildForm,
+    useForm,
+    useListener
 } from "fast-react-form";
 import { VisualRender } from "./VisualRender";
 
-// type InputProps<T extends ObjectOrArray, TError, TState> = FormFieldProps<
-//     InputHTMLAttributes<HTMLInputElement>,
-//     T,
-//     TError,
-//     TState
-// >;
+// First, wrap your UI components
 
-// function Input<T extends ObjectOrArray, U, V>({
-//     form,
-//     name,
-//     ...rest
-// }: InputProps<T, U, V>) {
-//     const { value, setValue, error, dirty } = useListener(form, name);
-//     return (
-//         <input
-//             style={{
-//                 border: error ? "1px solid red" : "none",
-//                 background: dirty ? "#eee" : "#fff"
-//             }}
-//             value={value}
-//             onChange={(ev) => setValue(ev.target.value as T[KeyOf<T>])}
-//             {...rest}
-//         />
-//     );
-// }
+type InputProps<T extends ObjectOrArray, TError, TState> = FormFieldProps<
+    InputHTMLAttributes<HTMLInputElement>,
+    T,
+    TError,
+    TState
+>;
 
-function FormVisualize<T, TError, TState>(props: {
-    form: FormState<T, TError, TState>;
-}) {
+function TextInput<T extends ObjectOrArray, U, V>({
+    form,
+    name,
+    ...rest
+}: InputProps<T, U, V>) {
+    const { value, setValue, error, dirty } = useListener(form, name);
     return (
-        <AnyListener
-            form={props.form}
-            render={({ values, errorMap }) => (
-                <VisualRender>
-                    <div style={{ background: "#eee" }}>
-                        <pre>{JSON.stringify(values, null, 2)}</pre>
-                        {props.form.dirty && (
-                            <p>
-                                <strong>DIRTY</strong>
-                            </p>
-                        )}
-                        <pre>{JSON.stringify(errorMap, null, 2)}</pre>
-                    </div>
-                </VisualRender>
+        <>
+            <input
+                style={{
+                    padding: "0.3em",
+                    border: error ? "1px solid red" : "1px solid #0003",
+                    background: dirty ? "#eee" : "#fff",
+                    fontSize: "inherit"
+                }}
+                value={value}
+                onChange={(ev) => setValue(ev.target.value as T[KeyOf<T>])}
+                {...rest}
+            />
+            {error && (
+                <span
+                    style={{
+                        color: "red",
+                        display: "inline-block",
+                        padding: "0.3em",
+                        fontWeight: "bold"
+                    }}
+                >
+                    {error}
+                </span>
             )}
-        />
+        </>
     );
 }
 
+// Then, reuse them in your application
+
+type TodoPriority = "normal" | "important";
+
+interface Todo {
+    id: string;
+    message: string;
+    priority: TodoPriority;
+}
+
+interface TodoList {
+    name: string;
+    authorName: string;
+    todos: Todo[];
+}
+
+// Example validator, you should use a validation library instead of this mess.
+function validateTodoList(list: TodoList) {
+    return list.todos
+        .filter((e) => e.message.length < 5)
+        .reduce((prev, _val, index) => {
+            let l = prev["todos"];
+            if (!l) {
+                l = {};
+                prev["todos"] = l;
+            }
+            l[index] = { title: "Todo message must be longer!" };
+            return prev;
+        }, {});
+}
+
 export default function App() {
-    const [defaultValues, setDefaultValues] = useState({
-        firstName: "Stijn",
-        lastName: "Rogiest",
-        todo: [
+    const [defaultValues, setDefaultValues] = useState<TodoList>({
+        authorName: "codestix",
+        name: "My TODO list",
+        todos: [
             {
-                title: "",
-                id: "asdjfklasdfjklasdljkf"
+                id: "0",
+                message: "Do this",
+                priority: "normal"
             }
         ]
     });
@@ -73,18 +103,7 @@ export default function App() {
     const form = useForm(
         defaultValues,
         { isSubmitting: false },
-        (values) =>
-            values.todo
-                .filter((e) => e.title.length < 5)
-                .reduce((prev, _val, index) => {
-                    let l = prev["todo"];
-                    if (!l) {
-                        l = {};
-                        prev["todo"] = l;
-                    }
-                    l[index] = { title: "title must be longer" };
-                    return prev;
-                }, {}),
+        validateTodoList,
         true,
         true
     );
@@ -104,85 +123,26 @@ export default function App() {
                     setDefaultValues(form.values);
                 }}
             >
-                <Listener
+                <TextInput
                     form={form}
-                    name="firstName"
-                    render={({ value, setValue }) => (
-                        <input
-                            value={value}
-                            onChange={(ev) => setValue(ev.target.value)}
-                        />
-                    )}
+                    name="name"
+                    style={{ display: "block", fontSize: "1.3em" }}
                 />
+                <TextInput form={form} name="authorName" />
+
                 <ArrayField
-                    name="todo"
+                    name="todos"
                     parent={form}
                     render={({ values, append, remove, form, move }) => (
                         <VisualRender>
                             <ul>
-                                {values.map((_, i) => (
-                                    <ChildForm
-                                        key={i}
+                                {values.map((e, i) => (
+                                    <TodoItem
+                                        key={e.id}
+                                        index={i}
+                                        moveToTop={() => move(i, 0)}
+                                        remove={() => remove(i)}
                                         parent={form}
-                                        name={i}
-                                        validator={(values) => ({
-                                            title:
-                                                values.title.length < 5
-                                                    ? "pick a longer title"
-                                                    : undefined
-                                        })}
-                                        render={(form) => (
-                                            <li>
-                                                {/* <FormVisualize form={form} /> */}
-                                                <Listener
-                                                    form={form}
-                                                    name="title"
-                                                    render={({
-                                                        value,
-                                                        setValue,
-                                                        error
-                                                    }) => (
-                                                        <VisualRender>
-                                                            {error && (
-                                                                <p>
-                                                                    <i>
-                                                                        {error}
-                                                                    </i>
-                                                                </p>
-                                                            )}
-                                                            <input
-                                                                disabled={
-                                                                    form.state
-                                                                        .isSubmitting
-                                                                }
-                                                                value={value}
-                                                                onChange={(
-                                                                    ev
-                                                                ) =>
-                                                                    setValue(
-                                                                        ev
-                                                                            .target
-                                                                            .value
-                                                                    )
-                                                                }
-                                                            />
-                                                        </VisualRender>
-                                                    )}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => remove(i)}
-                                                >
-                                                    remove
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => move(i, 0)}
-                                                >
-                                                    to top
-                                                </button>
-                                            </li>
-                                        )}
                                     />
                                 ))}
                             </ul>
@@ -190,35 +150,70 @@ export default function App() {
                                 type="button"
                                 onClick={() => {
                                     append({
-                                        title: "",
-                                        id: "" + new Date().getTime()
+                                        id: "" + new Date().getTime(),
+                                        message: "",
+                                        priority: "normal"
                                     });
                                 }}
                             >
-                                Add todo item
+                                New item
                             </button>
                         </VisualRender>
                     )}
                 />
 
-                <FormVisualize form={form} />
-
                 <AnyListener
                     form={form}
-                    render={({ state: { isSubmitting } }) => (
-                        <>
-                            <button disabled={isSubmitting}>submit</button>
+                    render={({
+                        state: { isSubmitting },
+                        values,
+                        dirty,
+                        errorMap
+                    }) => (
+                        <VisualRender>
+                            <div style={{ background: "#eee" }}>
+                                <pre>{JSON.stringify(values, null, 2)}</pre>
+                                {dirty && (
+                                    <p>
+                                        <strong>DIRTY</strong>
+                                    </p>
+                                )}
+                                <pre>{JSON.stringify(errorMap, null, 2)}</pre>
+                            </div>
+
+                            <button disabled={isSubmitting}>Submit</button>
                             <button
                                 disabled={isSubmitting}
                                 type="button"
                                 onClick={() => form.reset()}
                             >
-                                reset
+                                Reset
                             </button>
-                        </>
+                        </VisualRender>
                     )}
                 />
             </form>
         </VisualRender>
+    );
+}
+
+function TodoItem(props: {
+    parent: FormState<Todo[]>;
+    index: number;
+    remove: () => void;
+    moveToTop: () => void;
+}) {
+    const form = useChildForm(props.parent, props.index);
+
+    return (
+        <li>
+            <TextInput form={form} name="message" />
+            <button type="button" onClick={() => props.remove()}>
+                Remove
+            </button>
+            <button type="button" onClick={() => props.moveToTop()}>
+                Move to top
+            </button>
+        </li>
     );
 }
