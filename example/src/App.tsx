@@ -72,21 +72,6 @@ interface TodoList {
     todos: Todo[];
 }
 
-// Example validator, you should use a validation library instead of this mess.
-function validateTodoList(list: TodoList) {
-    return list.todos
-        .filter((e) => e.message.length < 5)
-        .reduce((prev, _val, index) => {
-            let l = prev["todos"];
-            if (!l) {
-                l = {};
-                prev["todos"] = l;
-            }
-            l[index] = { title: "Todo message must be longer!" };
-            return prev;
-        }, {});
-}
-
 export default function App() {
     const [defaultValues, setDefaultValues] = useState<TodoList>({
         authorName: "codestix",
@@ -203,17 +188,34 @@ function TodoItem(props: {
     remove: () => void;
     moveToTop: () => void;
 }) {
-    const form = useChildForm(props.parent, props.index);
+    const form = useChildForm(props.parent, props.index, undefined, false);
 
     return (
         <li>
-            <TextInput form={form} name="message" />
-            <button type="button" onClick={() => props.remove()}>
-                Remove
-            </button>
-            <button type="button" onClick={() => props.moveToTop()}>
-                Move to top
-            </button>
+            <VisualRender>
+                <TextInput form={form} name="message" />
+                <button type="button" onClick={() => props.remove()}>
+                    Remove
+                </button>
+                <button type="button" onClick={() => props.moveToTop()}>
+                    Move to top
+                </button>
+            </VisualRender>
         </li>
     );
+}
+
+// Example validator, you should use a validation library instead of this mess.
+function validateTodoList(list: TodoList) {
+    return list.todos
+        .filter((e) => e.message.length < 5)
+        .reduce((prev, _val, index) => {
+            let l = prev["todos"];
+            if (!l) {
+                l = {};
+                prev["todos"] = l;
+            }
+            l[index] = { message: "Todo message should be longer!" };
+            return prev;
+        }, {});
 }

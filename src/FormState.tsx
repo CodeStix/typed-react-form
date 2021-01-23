@@ -251,10 +251,12 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         this._values[key] = value;
         this._dirtyMap[key] = dirty;
         if (error !== undefined) {
+            console.log("setting error", error);
             if (error === null || Object.keys(error).length === 0)
                 delete this._errorMap[key];
             else this._errorMap[key] = error;
         } else if (this.validateOnChange) {
+            console.log("validating form", this.formId);
             this._errorMap = this.validator(this._values);
         }
 
@@ -558,7 +560,9 @@ export function useChildForm<
                 name,
                 ref.current!.values,
                 ref.current!.dirty,
-                ref.current!.errorMap as ErrorType<TValue, TError>,
+                ref.current!.error
+                    ? (ref.current!.errorMap as ErrorType<TValue, TError>)
+                    : undefined,
                 parentId
             );
         });
