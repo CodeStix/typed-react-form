@@ -68,14 +68,18 @@ function keys<T>(obj: T): KeyOf<T>[] {
     }
 }
 
-function objectOuterJoin<T>(a: T, b: T): KeyOf<T>[] {
+function changedKeys<T>(a: T, b: T, skipObjects: boolean = false): KeyOf<T>[] {
     let aKeys = keys(a);
     let bKeys = keys(b);
     let largest = aKeys.length > bKeys.length ? aKeys : bKeys;
     let changed = [];
     for (let i = 0; i < largest.length; i++) {
         let k = largest[i];
-        if (a[k as any] !== b[k as any]) {
+        let av = a[k as any];
+        let bv = b[k as any];
+        if (skipObjects && (typeof av === "object" || typeof bv === "object"))
+            continue;
+        if (av !== bv) {
             changed.push(k);
         }
     }
@@ -278,16 +282,24 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         let toFire = [];
         toFire.push(key);
 
-        if (error !== undefined) {
-            if (error === null || Object.keys(error).length === 0)
-                delete this._errorMap[key];
-            else this._errorMap[key] = error;
-        } else if (this.validateOnChange && this.validator !== undefined) {
+        error;
+        // if (error !== undefined) {
+        //     if (error === null || Object.keys(error).length === 0)
+        //         delete this._errorMap[key];
+        //     else this._errorMap[key] = error;
+        // }
+        if (this.validateOnChange && this.validator !== undefined) {
             let prevErrors = memberCopy(this._errorMap);
             this._errorMap = this.validator(this._values);
+            console.log(
+                this.formId,
+                "validation errors",
+                prevErrors,
+                this._errorMap
+            );
             toFire = [
                 ...toFire,
-                ...objectOuterJoin(prevErrors, this._errorMap)
+                ...changedKeys(prevErrors, this._errorMap, true)
             ];
         }
 
@@ -316,10 +328,9 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
      * @param skipId The field listener to skip.
      */
     public setErrors(errors: ErrorMap<T, TError>) {
-        if (this._errorMap[name] === errors) return;
         let p = this._errorMap;
         this._errorMap = errors;
-        this.fireListeners(objectOuterJoin(p, this._errorMap), false, true);
+        this.fireListeners(changedKeys(p, this._errorMap), false, true);
     }
 
     /**
@@ -334,7 +345,7 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         if (this._errorMap[name] === error) return;
         let p = this._errorMap;
         this._errorMap[name] = error;
-        this.fireListeners(objectOuterJoin(p, this._errorMap), false, true);
+        this.fireListeners(changedKeys(p, this._errorMap), false, true);
     }
 
     /**
@@ -354,7 +365,7 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
     ) {
         if (errors === null)
             throw new Error(
-                "errors is null, use undefined to not set any errors"
+                "errors is null, use undefined to not set any errors, and {} to clear the errors"
             );
         if (!setValues) {
             //  throw new Error("setValues is undefined")
@@ -387,14 +398,17 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
             this._state = state;
         }
 
-        let toFire = objectOuterJoin(prevValues, this._values);
+        let toFire = changedKeys(prevValues, this._values);
         toFire = [
             ...toFire,
-            ...objectOuterJoin(prevDefaultValues, this._defaultValues)
+            ...changedKeys(prevDefaultValues, this._defaultValues)
         ];
-        toFire = [...toFire, ...objectOuterJoin(prevDirtyMap, this._dirtyMap)];
-        toFire = [...toFire, ...objectOuterJoin(prevErrorMap, this._errorMap)];
-        if (objectOuterJoin(prevState, this._state).length > 0) {
+        toFire = [...toFire, ...changedKeys(prevDirtyMap, this._dirtyMap)];
+        toFire = [
+            ...toFire,
+            ...changedKeys(prevErrorMap, this._errorMap, true)
+        ];
+        if (changedKeys(prevState, this._state).length > 0) {
             toFire = keys(this._values); // fire all because state has changed
         }
         toFire = Array.from(new Set(toFire));
