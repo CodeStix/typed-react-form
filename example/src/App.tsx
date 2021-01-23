@@ -14,22 +14,26 @@ import { VisualRender } from "./VisualRender";
 
 // First, wrap your UI components
 
-type InputProps<T extends ObjectOrArray, TError, TState> = FormFieldProps<
-    InputHTMLAttributes<HTMLInputElement>,
-    T,
-    TError,
-    TState
->;
+interface SubmittingState {
+    isSubmitting: boolean;
+}
 
-function TextInput<T extends ObjectOrArray, U, V>({
+type InputProps<
+    T extends ObjectOrArray,
+    TError,
+    TState extends SubmittingState
+> = FormFieldProps<InputHTMLAttributes<HTMLInputElement>, T, TError, TState>;
+
+function TextInput<T extends ObjectOrArray, U, V extends SubmittingState>({
     form,
     name,
     ...rest
 }: InputProps<T, U, V>) {
-    const { value, setValue, error, dirty } = useListener(form, name);
+    const { value, setValue, error, dirty, state } = useListener(form, name);
     return (
         <>
             <input
+                disabled={state.isSubmitting}
                 style={{
                     padding: "0.3em",
                     border: error ? "1px solid red" : "1px solid #0003",
@@ -183,7 +187,7 @@ export default function App() {
 }
 
 function TodoItem(props: {
-    parent: FormState<Todo[]>;
+    parent: FormState<Todo[], string, { isSubmitting: boolean }>;
     index: number;
     remove: () => void;
     moveToTop: () => void;
