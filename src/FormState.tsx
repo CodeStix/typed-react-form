@@ -60,7 +60,7 @@ function memberCopy<T>(value: T): T {
 
 function keys<T>(obj: T): KeyOf<T>[] {
     if (Array.isArray(obj)) {
-        return [...Array(obj.length).keys()] as any;
+        return Array.from(Array(obj.length).keys()) as any;
     } else if (typeof obj === "object") {
         return Object.keys(obj) as any;
     } else {
@@ -319,16 +319,11 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
      * @param errors The errors to set in this form.
      * @param skipId The field listener to skip.
      */
-    public setErrors(errors: ErrorMap<T, TError>, skipId?: string) {
-        if (
-            Object.keys(this._errorMap).length === 0 &&
-            Object.keys(errors).length === 0
-        )
-            return;
+    public setErrors(errors: ErrorMap<T, TError>) {
+        if (this._errorMap[name] === errors) return;
+        let p = this._errorMap;
         this._errorMap = errors;
-
-        this.fireAllNormalListeners(false, skipId);
-        this.fireAnyListeners(true, skipId);
+        this.fireListeners(objectOuterJoin(p, this._errorMap), false, true);
     }
 
     /**
@@ -341,9 +336,9 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         error: ErrorType<T[U], TError>
     ) {
         if (this._errorMap[name] === error) return;
+        let p = this._errorMap;
         this._errorMap[name] = error;
-        this.fireAllNormalListeners(false);
-        this.fireAnyListeners(true);
+        this.fireListeners(objectOuterJoin(p, this._errorMap), false, true);
     }
 
     /**
@@ -405,9 +400,7 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         toFire = Array.from(new Set(toFire));
 
         console.log(this.formId, "setValues: to fire", toFire);
-        toFire.forEach((e) => this.fireListener(e, isDefault)); //, skipId
-        if (toFire.length > 0) this.fireAnyListeners(true); // , skipId
-
+        this.fireListeners(toFire, isDefault ?? false, true);
         // this.fireAllNormalListeners(isDefault, skipId);
         // this.recalculateDirty();
         // this.fireAnyListeners(true, skipId);
@@ -424,6 +417,15 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
     //         this._dirtyMap[name] = this._defaultValues[name] !== value;
     //     }
     // }
+
+    private fireListeners(
+        keys: KeyOf<T>[],
+        isDefault: boolean,
+        setValuesWasUsed: boolean
+    ) {
+        keys.forEach((e) => this.fireListener(e, isDefault));
+        if (keys.length > 0) this.fireAnyListeners(setValuesWasUsed);
+    }
 
     private fireListener(key: KeyOf<T>, isDefault?: boolean, skipId?: string) {
         let listeners = this.listeners[key];
@@ -520,15 +522,7 @@ export function useListener<
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        let id = form.listen(name, () => {
-            console.log(
-                form.formId,
-                "useListener trigger",
-                name,
-                form.values[name]
-            );
-            setRender((r) => r + 1);
-        });
+        let id = form.listen(name, () => setRender((r) => r + 1));
         return () => form.ignore(name, id);
     }, [form, name]);
 
