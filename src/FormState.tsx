@@ -403,7 +403,7 @@ export function AnyListener<T extends ObjectOrArray, TError, TState>(
     props: AnyListenerProps<T, TError, TState>
 ) {
     const values = useAnyListener(props.form, props.onlyOnSetValues);
-    return <>{props.render(values)}</>;
+    return <React.Fragment>{props.render(values)}</React.Fragment>;
 }
 
 export type ListenerProps<
@@ -432,7 +432,7 @@ export function Listener<
     TState
 >(props: ListenerProps<T, TKey, TValue, TError, TState>) {
     const values = useListener(props.form, props.name);
-    return <>{props.render(values)}</>;
+    return <React.Fragment>{props.render(values)}</React.Fragment>;
 }
 
 export function useListener<
