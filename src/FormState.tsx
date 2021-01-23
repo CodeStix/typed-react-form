@@ -54,14 +54,38 @@ function memberCopy<T>(value: T): T {
     } else if (typeof value === "object") {
         return { ...value };
     } else {
-        throw new Error("Can only member-copy arrays and objects.");
+        throw new Error("Can only memberCopy() arrays and objects.");
     }
+}
+
+function keys<T>(obj: T): KeyOf<T>[] {
+    if (Array.isArray(obj)) {
+        return [...Array(obj.length).keys()] as any;
+    } else if (typeof obj === "object") {
+        return Object.keys(obj) as any;
+    } else {
+        throw new Error("Can only keys() arrays and objects.");
+    }
+}
+
+function objectOuterJoin<T>(a: T, b: T): KeyOf<T>[] {
+    let aKeys = keys(a);
+    let bKeys = keys(b);
+    let largest = aKeys.length > bKeys.length ? aKeys : bKeys;
+    let changed = [];
+    for (let i = 0; i < largest.length; i++) {
+        let k = largest[i];
+        if (a[k as any] !== b[k as any]) {
+            changed.push(k);
+        }
+    }
+    return changed;
 }
 
 export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
     public readonly formId: number;
     public validateOnChange: boolean = true;
-    public validator: FormValidator<T, TError> = () => ({});
+    public validator?: FormValidator<T, TError>;
 
     private anyListeners: AnyListenersMap = {};
     private listeners: ListenersMap<T> = {};
@@ -96,7 +120,7 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         initialValues: T,
         defaultValues: T,
         state: TState,
-        validator: FormValidator<T, TError>,
+        validator: FormValidator<T, TError> | undefined,
         validateOnChange: boolean
     ) {
         if (!defaultValues || !initialValues)
@@ -245,30 +269,49 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         key: U,
         value: V,
         dirty: boolean,
-        error?: ErrorType<V, TError> | null | undefined,
-        skipId?: string
+        error?: ErrorType<V, TError> | null | undefined
+        // skipId?: string
     ) {
-        this._values[key] = value;
-        this._dirtyMap[key] = dirty;
+        let toFire = [];
+        if (this._values[key] !== value) {
+            this._values[key] = value;
+            toFire.push(key);
+        }
+        if (this._dirtyMap[key] !== dirty) {
+            this._dirtyMap[key] = dirty;
+            toFire.push(key);
+        }
+
+        let prevErrors = memberCopy(this._errorMap);
         if (error !== undefined) {
-            console.log("setting error", error);
             if (error === null || Object.keys(error).length === 0)
                 delete this._errorMap[key];
             else this._errorMap[key] = error;
-        } else if (this.validateOnChange) {
-            console.log("validating form", this.formId);
+        } else if (this.validateOnChange && this.validator !== undefined) {
             this._errorMap = this.validator(this._values);
         }
 
-        this.fireListener(key, false, skipId);
-        this.fireAnyListeners(false, skipId);
+        toFire = [...toFire, ...objectOuterJoin(prevErrors, this._errorMap)];
+        toFire = Array.from(new Set(toFire));
+
+        console.log(this.formId, "setValueInternal: to fire", toFire);
+        toFire.forEach((e) => this.fireListener(e, false)); //, skipId
+        if (toFire.length > 0) this.fireAnyListeners(false); // , skipId
+        // this.fireListener(key, false, skipId);
     }
 
     /**
      * Force validation on this form. This is not needed when validateOnChange is enabled.
      */
     public validate() {
-        this.setErrors(this.validator(this._values));
+        if (this.validator === undefined) {
+            console.warn(
+                "validate() was called on a form which does not have a validator set",
+                this._values
+            );
+        } else {
+            this.setErrors(this.validator(this._values));
+        }
     }
 
     /**
@@ -315,8 +358,8 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         setValues: T,
         errors?: ErrorMap<T, TError>,
         isDefault?: boolean,
-        state?: TState,
-        skipId?: string
+        state?: TState
+        // skipId?: string
     ) {
         if (errors === null)
             throw new Error(
@@ -324,7 +367,14 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
             );
         if (!setValues) throw new Error("setValues is undefined");
 
+        let prevDefaultValues = this._defaultValues;
+        let prevValues = this._values;
+        let prevDirtyMap = this._dirtyMap;
+        let prevErrorMap = this._errorMap;
+        let prevState = this._state;
+
         if (isDefault) {
+            console.log(this.formId, "setting defaults");
             this._defaultValues = setValues;
             this._values = memberCopy(setValues);
             this._dirtyMap = {};
@@ -332,35 +382,59 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
             this._values = setValues;
         }
 
-        if (errors !== undefined) this._errorMap = errors;
-        else this._errorMap = this.validator(this._values);
-
-        if (state !== undefined) this._state = state;
-
-        this.fireAllNormalListeners(isDefault, skipId);
-        this.recalculateDirty();
-        this.fireAnyListeners(true, skipId);
-    }
-
-    private recalculateDirty() {
-        // Recalculate dirty values
-        let keys = Object.keys(this._values);
-        for (let i = 0; i < keys.length; i++) {
-            let name = keys[i] as KeyOf<T>;
-            let value = this._values[name];
-            // Do not compare objects and arrays, they are set dirty using setValueInternal
-            if (typeof value === "object" || Array.isArray(value)) continue;
-            this._dirtyMap[name] = this._defaultValues[name] !== value;
+        if (errors !== undefined) {
+            this._errorMap = errors;
+        } else if (this.validator !== undefined) {
+            this._errorMap = this.validator(this._values);
         }
+
+        if (state !== undefined) {
+            this._state = state;
+        }
+
+        let toFire = objectOuterJoin(prevValues, this._values);
+        toFire = [
+            ...toFire,
+            ...objectOuterJoin(prevDefaultValues, this._defaultValues)
+        ];
+        toFire = [...toFire, ...objectOuterJoin(prevDirtyMap, this._dirtyMap)];
+        toFire = [...toFire, ...objectOuterJoin(prevErrorMap, this._errorMap)];
+        if (objectOuterJoin(prevState, this._state).length > 0) {
+            toFire = keys(this._values); // fire all because state has changed
+        }
+        toFire = Array.from(new Set(toFire));
+
+        console.log(this.formId, "setValues: to fire", toFire);
+        toFire.forEach((e) => this.fireListener(e, isDefault)); //, skipId
+        if (toFire.length > 0) this.fireAnyListeners(true); // , skipId
+
+        // this.fireAllNormalListeners(isDefault, skipId);
+        // this.recalculateDirty();
+        // this.fireAnyListeners(true, skipId);
     }
+
+    // private recalculateDirty() {
+    //     // Recalculate dirty values
+    //     let keys = Object.keys(this._values);
+    //     for (let i = 0; i < keys.length; i++) {
+    //         let name = keys[i] as KeyOf<T>;
+    //         let value = this._values[name];
+    //         // Do not compare objects and arrays, they are set dirty using setValueInternal
+    //         if (typeof value === "object" || Array.isArray(value)) continue;
+    //         this._dirtyMap[name] = this._defaultValues[name] !== value;
+    //     }
+    // }
 
     private fireListener(key: KeyOf<T>, isDefault?: boolean, skipId?: string) {
         let listeners = this.listeners[key];
         if (listeners) {
             // Call all listeners for the set field
             Object.keys(listeners!).forEach((id) => {
+                console.log(this.formId, "fire", key);
                 if (id !== skipId) listeners![id](isDefault ?? false);
             });
+        } else {
+            console.log(this.formId, "no listeners for", key);
         }
     }
 
@@ -446,7 +520,15 @@ export function useListener<
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        let id = form.listen(name, () => setRender((r) => r + 1));
+        let id = form.listen(name, () => {
+            console.log(
+                form.formId,
+                "useListener trigger",
+                name,
+                form.values[name]
+            );
+            setRender((r) => r + 1);
+        });
         return () => form.ignore(name, id);
     }, [form, name]);
 
@@ -498,7 +580,7 @@ export function ChildForm<
 export function useForm<T, TError = string, TState = {}>(
     values: T,
     defaultState: TState = {} as any,
-    validator: FormValidator<T, TError> = () => ({}),
+    validator: FormValidator<T, TError> | undefined = undefined,
     validateOnMount = false,
     validateOnChange = true
 ) {
@@ -530,7 +612,7 @@ export function useChildForm<
 >(
     parent: FormState<TParent, TError, TState>,
     name: TKey,
-    validator: FormValidator<TValue, TError> = () => ({}),
+    validator: FormValidator<TValue, TError> | undefined = undefined,
     validateOnChange = true
 ) {
     let ref = useRef<FormState<TValue, TError, TState> | null>(null);
@@ -547,12 +629,13 @@ export function useChildForm<
 
     useEffect(() => {
         let parentId = parent.listen(name, (isDefault) => {
+            console.log("parent errors", parent.errorMap[name]);
             ref.current!.setValues(
                 parent.values[name],
                 parent.errorMap[name] ?? undefined, // undefined causes validate, {} sets no errors and causes no validation
                 isDefault,
-                parent.state,
-                id
+                parent.state
+                // id
             );
         });
         let id = ref.current!.listenAny(() => {
@@ -562,8 +645,8 @@ export function useChildForm<
                 ref.current!.dirty,
                 ref.current!.error
                     ? (ref.current!.errorMap as ErrorType<TValue, TError>)
-                    : undefined,
-                parentId
+                    : undefined
+                // parentId
             );
         });
         ref.current!.setValues(

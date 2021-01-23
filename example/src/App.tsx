@@ -192,6 +192,13 @@ function TodoItem(props: {
 
     return (
         <li>
+            <AnyListener
+                form={form}
+                render={() => (
+                    <pre>{JSON.stringify(form.errorMap, null, 2)}</pre>
+                )}
+            />
+
             <VisualRender>
                 <TextInput form={form} name="message" />
                 <button type="button" onClick={() => props.remove()}>
