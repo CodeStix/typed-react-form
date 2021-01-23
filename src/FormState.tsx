@@ -272,32 +272,28 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         error?: ErrorType<V, TError> | null | undefined
         // skipId?: string
     ) {
-        let toFire = [];
-        if (this._values[key] !== value) {
-            this._values[key] = value;
-            toFire.push(key);
-        }
-        if (this._dirtyMap[key] !== dirty) {
-            this._dirtyMap[key] = dirty;
-            toFire.push(key);
-        }
+        this._values[key] = value;
+        this._dirtyMap[key] = dirty;
 
-        let prevErrors = memberCopy(this._errorMap);
+        let toFire = [];
+        toFire.push(key);
+
         if (error !== undefined) {
             if (error === null || Object.keys(error).length === 0)
                 delete this._errorMap[key];
             else this._errorMap[key] = error;
         } else if (this.validateOnChange && this.validator !== undefined) {
+            let prevErrors = memberCopy(this._errorMap);
             this._errorMap = this.validator(this._values);
+            toFire = [
+                ...toFire,
+                ...objectOuterJoin(prevErrors, this._errorMap)
+            ];
         }
 
-        toFire = [...toFire, ...objectOuterJoin(prevErrors, this._errorMap)];
         toFire = Array.from(new Set(toFire));
-
         console.log(this.formId, "setValueInternal: to fire", toFire);
-        toFire.forEach((e) => this.fireListener(e, false)); //, skipId
-        if (toFire.length > 0) this.fireAnyListeners(false); // , skipId
-        // this.fireListener(key, false, skipId);
+        this.fireListeners(toFire, false, false);
     }
 
     /**
@@ -360,7 +356,11 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
             throw new Error(
                 "errors is null, use undefined to not set any errors"
             );
-        if (!setValues) throw new Error("setValues is undefined");
+        if (!setValues) {
+            //  throw new Error("setValues is undefined")
+            console.warn("setValues was called with undefined values");
+            return;
+        }
 
         let prevDefaultValues = this._defaultValues;
         let prevValues = this._values;
@@ -623,7 +623,6 @@ export function useChildForm<
 
     useEffect(() => {
         let parentId = parent.listen(name, (isDefault) => {
-            console.log("parent errors", parent.errorMap[name]);
             ref.current!.setValues(
                 parent.values[name],
                 parent.errorMap[name] ?? undefined, // undefined causes validate, {} sets no errors and causes no validation
