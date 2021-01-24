@@ -124,6 +124,14 @@ export default function App() {
                     parent={form}
                     render={({ values, append, remove, form, move }) => (
                         <VisualRender>
+                            <AnyListener
+                                form={form}
+                                render={() => (
+                                    <code>
+                                        {JSON.stringify(form.errorMap, null, 2)}
+                                    </code>
+                                )}
+                            />
                             <ul>
                                 {values.map((e, i) => (
                                     <TodoItem
@@ -192,16 +200,30 @@ function TodoItem(props: {
     remove: () => void;
     moveToTop: () => void;
 }) {
-    const form = useChildForm(props.parent, props.index, undefined, false);
+    const form = useChildForm(
+        props.parent,
+        props.index,
+        ({ message }) => ({
+            message: message.length > 10 ? "message is too long!" : undefined
+        }),
+        true
+    );
 
     return (
         <li>
             <AnyListener
                 form={form}
                 render={() => (
-                    <pre>{JSON.stringify(form.errorMap, null, 2)}</pre>
+                    <code>{JSON.stringify(form.errorMap, null, 2)}</code>
                 )}
             />
+
+            <button
+                type="button"
+                onClick={() => form.setError("message", "this is a test")}
+            >
+                Set error
+            </button>
 
             <VisualRender>
                 <TextInput form={form} name="message" />
