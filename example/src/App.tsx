@@ -13,12 +13,20 @@ function Input<T extends ObjectOrArray>(props: {
     form: Form<T>;
     name: KeyOf<T>;
 }) {
-    const { value, dirty, defaultValue } = useListener(props.form, props.name);
-    console.log("render", defaultValue, value, dirty);
+    const { value, dirty, defaultValue, error } = useListener(
+        props.form,
+        props.name
+    );
 
     return (
         <input
-            style={{ background: dirty ? "#eee" : "#fff" }}
+            placeholder={defaultValue}
+            style={{
+                background: dirty ? "#eee" : "#fff",
+                padding: "0.3em",
+                fontSize: "inherit",
+                border: error ? "1px solid red" : "1px solid gray"
+            }}
             value={value as string}
             onChange={(ev) =>
                 props.form.setValue(props.name, ev.target.value as T[KeyOf<T>])
@@ -33,6 +41,7 @@ function FormValues<T>(props: { form: Form<T> }) {
     return (
         <div>
             <pre>{JSON.stringify(val.values, null, 2)}</pre>
+            <pre>{JSON.stringify(val.errorMap, null, 2)}</pre>
             <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre>
             {val.dirty && (
                 <p>
@@ -96,7 +105,7 @@ export default function App() {
             >
                 Set values
             </button>
-            <button type="button" onClick={() => form.reset()}>
+            <button type="button" onClick={() => form.resetAll()}>
                 Reset
             </button>
             <button>Submit</button>
@@ -118,14 +127,14 @@ function FormUserInfo(props: { parent: Form<User> }) {
             <FormValues form={form} />
             <button
                 type="button"
-                onClick={() =>
-                    form.setValues({
-                        favoriteFood: "asdfjkl",
-                        intelligence: 1000
-                    })
-                }
+                onClick={() => {
+                    form.setError(
+                        "favoriteFood",
+                        form.errorMap.favoriteFood ? null : "not ok"
+                    );
+                }}
             >
-                Set values
+                Toggle error
             </button>
         </div>
     );
