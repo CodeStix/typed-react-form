@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Form,
     KeyOf,
@@ -34,6 +34,11 @@ function FormValues<T>(props: { form: Form<T> }) {
         <div>
             <pre>{JSON.stringify(val.values, null, 2)}</pre>
             <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre>
+            {val.dirty && (
+                <p>
+                    <strong>DIRTY</strong>
+                </p>
+            )}
         </div>
     );
 }
@@ -50,14 +55,23 @@ interface UserInfo {
 }
 
 export default function App() {
-    const form = useForm<User>({
+    const [values, setValues] = useState<User>({
         firstName: "stijn",
         lastName: "rogiest",
         info: { favoriteFood: "pasta", intelligence: 128 }
     });
 
+    const form = useForm<User>(values);
+
     return (
-        <div
+        <form
+            onSubmit={async (ev) => {
+                ev.preventDefault();
+                console.log("submitting");
+                await new Promise((res) => setTimeout(res, 500));
+                console.log("submitted");
+                setValues({ ...form.values });
+            }}
             style={{ padding: "1em", margin: "1em", border: "1px solid #0003" }}
         >
             <p>Firstname</p>
@@ -68,6 +82,7 @@ export default function App() {
             <FormUserInfo parent={form} />
             <FormValues form={form} />
             <button
+                type="button"
                 onClick={() =>
                     form.setValues({
                         firstName: "code",
@@ -81,8 +96,11 @@ export default function App() {
             >
                 Set values
             </button>
-            <button onClick={() => form.reset()}>Reset</button>
-        </div>
+            <button type="button" onClick={() => form.reset()}>
+                Reset
+            </button>
+            <button>Submit</button>
+        </form>
     );
 }
 
@@ -99,6 +117,7 @@ function FormUserInfo(props: { parent: Form<User> }) {
             <Input form={form} name="intelligence" />
             <FormValues form={form} />
             <button
+                type="button"
                 onClick={() =>
                     form.setValues({
                         favoriteFood: "asdfjkl",

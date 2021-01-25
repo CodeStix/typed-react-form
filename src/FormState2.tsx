@@ -245,9 +245,12 @@ export function useForm<T>(defaultValues: T): Form<T> {
     let c = useRef<Form<T> | null>(null);
 
     if (c.current === null) {
-        console.log("new form");
         c.current = new Form<T>(defaultValues, defaultValues);
     }
+
+    useEffect(() => {
+        c.current!.setDefaultValues(defaultValues);
+    }, [defaultValues]);
 
     return c.current;
 }
@@ -283,6 +286,12 @@ export function useAnyListener<T extends ObjectOrArray>(form: Form<T>) {
 
     useEffect(() => {
         form.valuesListener.listenAny(() => {
+            setRender((e) => e + 1);
+        });
+        form.defaultValuesListener.listenAny(() => {
+            setRender((e) => e + 1);
+        });
+        form.dirtyListener.listenAny(() => {
             setRender((e) => e + 1);
         });
     }, [form]);
