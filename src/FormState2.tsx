@@ -56,8 +56,6 @@ function changedKeys<T>(
         let k = largest[i];
         let av = a[k as any];
         let bv = b[k as any];
-        if (av === null && bv === undefined)
-            console.warn("comparing null and undefined!");
         if (typeof av === "object" || typeof bv === "object") {
             if (objectCompareMode === "truthy") {
                 if (typeof av === "object") av = av ? o : undefined;
@@ -161,6 +159,7 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
             this._values[key] === value
         )
             return;
+        console.log("update", key, value);
         if (value === undefined) delete this._values[key];
         else this._values[key] = value;
         super.fire(key);
@@ -168,6 +167,7 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
 
     public updateAll(values: T) {
         if (this._values === values) return;
+        console.log("update all", values);
         let changed = changedKeys(this._values, values, "compare");
         this._values = values;
         super.fireMultiple(changed);
@@ -256,8 +256,19 @@ export class Form<T extends ObjectOrArray, Error = string> {
             return;
         }
         let allErrors = this.validator(this.values);
-        console.log("validateAll", allErrors);
         this.errorListener.updateAll(allErrors as any);
+    }
+
+    public validate(key: KeyOf<T>) {
+        if (!this.validator) {
+            console.warn(
+                "validate() was called on a form which does not have a validator set"
+            );
+            return;
+        }
+        // TODO: validation per field
+        let allErrors = this.validator(this.values);
+        this.errorListener.update(key as any, allErrors[key] as any);
     }
 
     public recalculateDirty() {
@@ -273,19 +284,6 @@ export class Form<T extends ObjectOrArray, Error = string> {
             d[e] = a !== b;
         }
         this.dirtyListener.updateAll(d);
-    }
-
-    public validate(key: KeyOf<T>) {
-        if (!this.validator) {
-            console.warn(
-                "validate() was called on a form which does not have a validator set"
-            );
-            return;
-        }
-        // TODO: validation per field
-        let allErrors = this.validator(this.values);
-        console.log("validate", allErrors);
-        this.errorListener.update(key as any, allErrors[key] as any);
     }
 
     public setValues(values: T, validate: boolean = true) {

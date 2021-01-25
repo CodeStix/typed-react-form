@@ -8,6 +8,7 @@ import {
     useForm,
     useListener
 } from "fast-react-form";
+import { VisualRender } from "./VisualRender";
 
 function Input<T extends ObjectOrArray>(props: {
     form: Form<T>;
@@ -19,7 +20,7 @@ function Input<T extends ObjectOrArray>(props: {
     );
 
     return (
-        <>
+        <VisualRender>
             <input
                 placeholder={defaultValue}
                 style={{
@@ -47,7 +48,7 @@ function Input<T extends ObjectOrArray>(props: {
                     {error}
                 </span>
             )}
-        </>
+        </VisualRender>
     );
 }
 
@@ -55,7 +56,7 @@ function FormValues<T>(props: { form: Form<T> }) {
     const val = useAnyListener(props.form);
 
     return (
-        <div>
+        <VisualRender>
             <pre>{JSON.stringify(val.values, null, 2)}</pre>
             <pre>{JSON.stringify(val.errorMap, null, 2)}</pre>
             <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre>
@@ -64,7 +65,7 @@ function FormValues<T>(props: { form: Form<T> }) {
                     <strong>DIRTY</strong>
                 </p>
             )}
-        </div>
+        </VisualRender>
     );
 }
 
@@ -113,20 +114,22 @@ export default function App() {
             }}
             style={{ padding: "1em", margin: "1em", border: "1px solid #0003" }}
         >
-            <p>Firstname</p>
-            <Input form={form} name="firstName" />
-            <p>Lastname</p>
-            <Input form={form} name="lastName" />
-            <p>Info</p>
-            {show && <FormUserInfo parent={form} />}
-            <FormValues form={form} />
-            <button type="button" onClick={() => setShow(!show)}>
-                Toggle child form
-            </button>
-            <button type="button" onClick={() => form.resetAll()}>
-                Reset
-            </button>
-            <button>Submit</button>
+            <VisualRender>
+                <p>Firstname</p>
+                <Input form={form} name="firstName" />
+                <p>Lastname</p>
+                <Input form={form} name="lastName" />
+                <p>Info</p>
+                {show && <FormUserInfo parent={form} />}
+                <FormValues form={form} />
+                <button type="button" onClick={() => setShow(!show)}>
+                    Toggle child form
+                </button>
+                <button type="button" onClick={() => form.resetAll()}>
+                    Reset
+                </button>
+                <button>Submit</button>
+            </VisualRender>
         </form>
     );
 }
@@ -135,25 +138,31 @@ function FormUserInfo(props: { parent: Form<User> }) {
     const form = useChildForm(props.parent, "info");
 
     return (
-        <div
-            style={{ padding: "1em", margin: "1em", border: "1px solid #0003" }}
-        >
-            <p>Favorite food</p>
-            <Input form={form} name="favoriteFood" />
-            <p>Intelligence</p>
-            <Input form={form} name="intelligence" />
-            <FormValues form={form} />
-            <button
-                type="button"
-                onClick={() => {
-                    form.setError(
-                        "favoriteFood",
-                        form.errorMap.favoriteFood ? null : "not ok"
-                    );
+        <VisualRender>
+            <div
+                style={{
+                    padding: "1em",
+                    margin: "1em",
+                    border: "1px solid #0003"
                 }}
             >
-                Toggle error
-            </button>
-        </div>
+                <p>Favorite food</p>
+                <Input form={form} name="favoriteFood" />
+                <p>Intelligence</p>
+                <Input form={form} name="intelligence" />
+                <FormValues form={form} />
+                <button
+                    type="button"
+                    onClick={() => {
+                        form.setError(
+                            "favoriteFood",
+                            form.errorMap.favoriteFood ? null : "not ok"
+                        );
+                    }}
+                >
+                    Toggle error
+                </button>
+            </div>
+        </VisualRender>
     );
 }
