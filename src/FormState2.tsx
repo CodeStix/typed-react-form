@@ -269,13 +269,27 @@ export class Form<T extends ObjectOrArray, Error = string> {
         this.errorListener.update(key as any, allErrors[key] as any);
     }
 
-    public setValues(values: T) {
-        this.valuesListener.updateAll(memberCopy(values));
-        this.dirtyListener.updateAll({}); // TODO recalculate dirty values here
-        this.errorListener.updateAll({}); // TODO validate
+    public refresh() {
+        this.valuesListener;
     }
 
-    public setValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
+    public setValues(values: T, validate: boolean = true) {
+        this.valuesListener.updateAll(memberCopy(values));
+        this.dirtyListener.updateAll({}); // TODO recalculate dirty values here
+        if (validate) this.validateAll();
+    }
+
+    public setDefaultValues(defaultValues: T, validate: boolean = true) {
+        this.defaultValuesListener.updateAll(memberCopy(defaultValues));
+        this.dirtyListener.updateAll({}); // TODO recalculate dirty values here
+        if (validate) this.validateAll();
+    }
+
+    public setValue<Key extends KeyOf<T>>(
+        key: Key,
+        value: T[Key],
+        isDefault: boolean = false
+    ) {
         if (typeof value === "object" || Array.isArray(value)) {
             console.warn(
                 "Not setting value, value is object, use setValueInternal"
@@ -285,29 +299,22 @@ export class Form<T extends ObjectOrArray, Error = string> {
         this.setValueInternal(
             key,
             value,
-            (this.defaultValuesListener.values[key] !== value) as any
+            (this.defaultValuesListener.values[key] !== value) as any,
+            isDefault
         );
     }
 
     public setValueInternal<Key extends KeyOf<T>>(
         key: Key,
         value: T[Key],
-        dirty?: DirtyType<T[Key]>
+        dirty?: DirtyType<T[Key]>,
+        isDefault: boolean = false
     ) {
-        this.valuesListener.update(key, value);
+        if (isDefault) this.defaultValuesListener.update(key, value);
+        else this.valuesListener.update(key, value);
         if (dirty !== undefined)
             this.dirtyListener.update(key as any, dirty as any);
-        if (this.validator && this.validateOnChange) this.validateAll();
-    }
-
-    public setDefaultValues(defaultValues: T) {
-        this.defaultValuesListener.updateAll(memberCopy(defaultValues));
-        this.dirtyListener.updateAll({}); // TODO recalculate dirty values here
-        this.errorListener.updateAll({}); // TODO validate
-    }
-
-    public setDefaultValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
-        this.defaultValuesListener.update(key, value); // TODO recalculate dirty value & validate
+        if (this.validator && this.validateOnChange) this.validateAll(); // use this.validate instead?
     }
 }
 
@@ -368,18 +375,25 @@ export function useAnyListener<T extends ObjectOrArray>(form: Form<T>) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        form.valuesListener.listenAny(() => {
+        let a1 = form.valuesListener.listenAny(() => {
             setRender((e) => e + 1);
         });
-        form.defaultValuesListener.listenAny(() => {
+        let a2 = form.defaultValuesListener.listenAny(() => {
             setRender((e) => e + 1);
         });
-        form.dirtyListener.listenAny(() => {
+        let a3 = form.dirtyListener.listenAny(() => {
             setRender((e) => e + 1);
         });
-        form.errorListener.listenAny(() => {
+        let a4 = form.errorListener.listenAny(() => {
             setRender((e) => e + 1);
         });
+
+        return () => {
+            form.valuesListener.ignoreAny(a1);
+            form.defaultValuesListener.ignoreAny(a2);
+            form.dirtyListener.ignoreAny(a3);
+            form.errorListener.ignoreAny(a4);
+        };
     }, [form]);
 
     return form;
@@ -393,45 +407,52 @@ export function useChildForm<
 
     if (c.current === null) {
         c.current = new Form<Parent[Key]>(
-            parentForm.values[key],
+            parentForm.values[key] ?? parentForm.defaultValues[key],
             parentForm.defaultValues[key]
         );
     }
 
     useEffect(() => {
         // Listen for parent value changes on this child form
-        parentForm.valuesListener.listen(key, () => {
+        let p1 = parentForm.valuesListener.listen(key, () => {
             c.current!.valuesListener.updateAll(
                 memberCopy(parentForm.values[key])
             );
         });
-        parentForm.defaultValuesListener.listen(key, () => {
+        let p2 = parentForm.defaultValuesListener.listen(key, () => {
             c.current!.defaultValuesListener.updateAll(
                 memberCopy(parentForm.defaultValuesListener.values[key])
             );
         });
-        parentForm.dirtyListener.listen(key as any, () => {
+        let p3 = parentForm.dirtyListener.listen(key as any, () => {
             c.current!.dirtyListener.updateAll(
                 parentForm.dirtyListener.values[key] || ({} as any)
             );
         });
-        parentForm.errorListener.listen(key as any, () => {
+        let p4 = parentForm.errorListener.listen(key as any, () => {
             c.current!.errorListener.updateAll(
                 parentForm.errorListener.values[key] || ({} as any)
             );
         });
 
         // Listen for any change on this form and notify parent on change
-        c.current!.valuesListener.listenAny(() => {
-            parentForm.setValueInternal(key, c.current!.valuesListener.values);
-        });
-        c.current!.defaultValuesListener.listenAny(() => {
-            parentForm.setDefaultValue(
+        let a1 = c.current!.valuesListener.listenAny(() => {
+            parentForm.setValueInternal(
                 key,
-                c.current!.defaultValuesListener.values
+                c.current!.valuesListener.values,
+                undefined,
+                false
             );
         });
-        c.current!.dirtyListener.listenAny(() => {
+        let a2 = c.current!.defaultValuesListener.listenAny(() => {
+            parentForm.setValueInternal(
+                key,
+                c.current!.defaultValuesListener.values,
+                undefined,
+                true
+            );
+        });
+        let a3 = c.current!.dirtyListener.listenAny(() => {
             parentForm.dirtyListener.update(
                 key as any,
                 c.current!.dirty
@@ -439,7 +460,7 @@ export function useChildForm<
                     : false
             );
         });
-        c.current!.errorListener.listenAny(() => {
+        let a4 = c.current!.errorListener.listenAny(() => {
             parentForm.errorListener.update(
                 key as any,
                 c.current!.error
@@ -447,7 +468,31 @@ export function useChildForm<
                     : undefined
             );
         });
+
+        c.current!.refresh();
+
+        return () => {
+            parentForm.valuesListener.ignore(key, p1);
+            parentForm.defaultValuesListener.ignore(key, p2);
+            parentForm.dirtyListener.ignore(key as any, p3);
+            parentForm.errorListener.ignore(key as any, p4);
+            c.current!.valuesListener.ignoreAny(a1);
+            c.current!.defaultValuesListener.ignoreAny(a2);
+            c.current!.dirtyListener.ignoreAny(a3);
+            c.current!.errorListener.ignoreAny(a4);
+
+            parentForm.valuesListener.update(key, null as any);
+            parentForm.dirtyListener.update(
+                key as any,
+                !!parentForm.defaultValues[key] as any
+            );
+            parentForm.errorListener.update(key as any, undefined);
+        };
     }, [parentForm, key]);
+
+    useEffect(() => {
+        // TODO update dirty and validate
+    });
 
     return c.current;
 }

@@ -94,12 +94,13 @@ export default function App() {
                     ? "Your firstName is too short"
                     : undefined,
             info:
-                values.info.favoriteFood !== "pasta"
+                values.info && values.info.favoriteFood !== "pasta"
                     ? { favoriteFood: "Favorite food must be pasta" }
                     : undefined
         }),
         true
     );
+    const [show, setShow] = useState(true);
 
     return (
         <form
@@ -117,22 +118,10 @@ export default function App() {
             <p>Lastname</p>
             <Input form={form} name="lastName" />
             <p>Info</p>
-            <FormUserInfo parent={form} />
+            {show && <FormUserInfo parent={form} />}
             <FormValues form={form} />
-            <button
-                type="button"
-                onClick={() =>
-                    form.setValues({
-                        firstName: "code",
-                        lastName: "stix",
-                        info: {
-                            favoriteFood: "asdfjkl",
-                            intelligence: 1000
-                        }
-                    })
-                }
-            >
-                Set values
+            <button type="button" onClick={() => setShow(!show)}>
+                Toggle child form
             </button>
             <button type="button" onClick={() => form.resetAll()}>
                 Reset
