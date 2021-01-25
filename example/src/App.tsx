@@ -81,6 +81,7 @@ export default function App() {
             >
                 Set values
             </button>
+            <button onClick={() => form.reset()}>Reset</button>
         </div>
     );
 }

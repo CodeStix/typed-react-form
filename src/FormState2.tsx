@@ -16,7 +16,7 @@ export type ListenerCallback = () => void;
 
 type ListenerMap = { [T in string]?: ListenerCallback };
 
-type DirtyType<T> = T extends ObjectOrArray ? DirtyMap<T> : boolean;
+type DirtyType<T> = T extends ObjectOrArray ? DirtyMap<T> | false : boolean;
 type DirtyMap<T extends ObjectOrArray> = {
     [Key in KeyOf<T>]?: DirtyType<T[Key]>;
 };
@@ -199,12 +199,18 @@ export class Form<T extends ObjectOrArray> {
         this.dirtyListener = new ObjectListener({});
     }
 
+    public reset() {
+        this.setValues(this.defaultValues);
+    }
+
     public setValues(values: T) {
-        this.valuesListener.updateAll(values);
+        this.valuesListener.updateAll(memberCopy(values));
+        this.dirtyListener.updateAll({}); // TODO see useChildForm
     }
 
     public setDefaultValues(defaultValues: T) {
-        this.defaultValuesListener.updateAll(defaultValues);
+        this.defaultValuesListener.updateAll(memberCopy(defaultValues));
+        this.dirtyListener.updateAll({}); // TODO see useChildForm
     }
 
     public setValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
@@ -301,11 +307,13 @@ export function useChildForm<
         // Listen for parent value changes on this child form
         parentForm.valuesListener.listen(key, () => {
             c.current!.valuesListener.updateAll(parentForm.values[key]);
+            // TODO <- recalculate dirty values here
         });
         parentForm.defaultValuesListener.listen(key, () => {
             c.current!.defaultValuesListener.updateAll(
                 parentForm.defaultValuesListener.values[key]
             );
+            // TODO <- recalculate dirty values here
         });
         parentForm.dirtyListener.listen(key as any, () => {
             c.current!.dirtyListener.updateAll(
