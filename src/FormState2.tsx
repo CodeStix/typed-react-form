@@ -4,11 +4,18 @@ export type ObjectOrArray = {
     [Key in number | string]: any;
 };
 
-export type KeyOf<T> = T extends any[] ? number : keyof T;
+export type KeyOf<T extends ObjectOrArray> = T extends any[] ? number : keyof T;
+export type ObjectKeyOf<T extends ObjectOrArray> = {
+    [Key in KeyOf<T>]: T[Key] extends ObjectOrArray ? Key : never;
+}[KeyOf<T>];
 
 export type ListenerCallback = () => void;
 
 type ListenerMap = { [T in string]?: ListenerCallback };
+
+type DirtyMap<T extends ObjectOrArray> = {
+    [Key in KeyOf<T>]?: boolean;
+};
 
 function keys<T>(obj: T): KeyOf<T>[] {
     if (Array.isArray(obj)) {
@@ -17,6 +24,16 @@ function keys<T>(obj: T): KeyOf<T>[] {
         return Object.keys(obj) as any;
     } else {
         throw new Error("Can only keys() arrays and objects.");
+    }
+}
+
+function memberCopy<T>(value: T): T {
+    if (Array.isArray(value)) {
+        return [...value] as any;
+    } else if (typeof value === "object") {
+        return { ...value };
+    } else {
+        throw new Error("Can only memberCopy() arrays and objects.");
     }
 }
 
@@ -154,6 +171,7 @@ export class Form<T extends ObjectOrArray> {
 
     public valuesListener: ObjectListener<T>;
     public defaultValuesListener: ObjectListener<T>;
+    public dirtyListener: ObjectListener<DirtyMap<T>>;
 
     public get values() {
         return this.valuesListener.values;
@@ -163,9 +181,18 @@ export class Form<T extends ObjectOrArray> {
         return this.defaultValuesListener.values;
     }
 
+    public get dirty() {
+        return Object.keys(this.dirtyListener.values).some(
+            (e) => this.dirtyListener.values[e]
+        );
+    }
+
     constructor(values: T, defaultValues: T) {
-        this.valuesListener = new ObjectListener(values);
-        this.defaultValuesListener = new ObjectListener(defaultValues);
+        this.valuesListener = new ObjectListener(memberCopy(values));
+        this.defaultValuesListener = new ObjectListener(
+            memberCopy(defaultValues)
+        );
+        this.dirtyListener = new ObjectListener({});
     }
 
     public setValues(values: T) {
@@ -178,6 +205,10 @@ export class Form<T extends ObjectOrArray> {
 
     public setValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
         this.valuesListener.update(key, value);
+        this.dirtyListener.update(
+            key as any,
+            this.defaultValuesListener.values[key] !== value
+        );
     }
 
     public setDefaultValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
@@ -189,25 +220,37 @@ export function useForm<T>(defaultValues: T): Form<T> {
     let c = useRef<Form<T> | null>(null);
 
     if (c.current === null) {
+        console.log("new form");
         c.current = new Form<T>(defaultValues, defaultValues);
     }
 
     return c.current;
 }
 
-export function useListener<T extends ObjectOrArray>(
+export function useListener<T extends ObjectOrArray, Key extends KeyOf<T>>(
     form: Form<T>,
-    key: KeyOf<T>
+    key: Key
 ) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
+        form.dirtyListener.listen(key as any, () => {
+            setRender((e) => e + 1);
+        });
         form.valuesListener.listen(key, () => {
+            setRender((e) => e + 1);
+        });
+        form.defaultValuesListener.listen(key, () => {
             setRender((e) => e + 1);
         });
     }, [form, key]);
 
-    return form.values[key];
+    return {
+        value: form.values[key],
+        dirty: form.dirtyListener.values[key],
+        defaultValue: form.defaultValues[key],
+        setValue: (value: T[Key]) => form.setValue(key, value)
+    };
 }
 
 export function useAnyListener<T extends ObjectOrArray>(form: Form<T>) {
@@ -224,7 +267,7 @@ export function useAnyListener<T extends ObjectOrArray>(form: Form<T>) {
 
 export function useChildForm<
     Parent extends ObjectOrArray,
-    Key extends KeyOf<Parent>
+    Key extends ObjectKeyOf<Parent>
 >(parentForm: Form<Parent>, key: Key) {
     let c = useRef<Form<Parent[Key]> | null>(null);
 
@@ -236,31 +279,59 @@ export function useChildForm<
     }
 
     useEffect(() => {
+        // Listen for parent value changes on this child form
         parentForm.valuesListener.listen(key, () => {
-            c.current!.setValues(parentForm.values[key]);
+            c.current!.valuesListener.updateAll(parentForm.values[key]);
         });
         parentForm.defaultValuesListener.listen(key, () => {
-            c.current!.setDefaultValues(parentForm.defaultValues[key]);
+            c.current!.defaultValuesListener.updateAll(
+                parentForm.defaultValuesListener.values[key]
+            );
         });
+        // parentForm.dirtyListener.listen(key as any, () => {
+        //     c.current!.dirtyListener.updateAll(
+        //         parentForm.dirtyListener.values[key] ?? {}
+        //     );
+        // });
+
+        // Listen for any change on this form and notify parent on change
         c.current!.valuesListener.listenAny(() => {
             parentForm.valuesListener.update(
                 key,
                 c.current!.valuesListener.values
             );
         });
+        c.current!.defaultValuesListener.listenAny(() => {
+            parentForm.defaultValuesListener.update(
+                key,
+                c.current!.defaultValuesListener.values
+            );
+        });
+        c.current!.dirtyListener.listenAny(() => {
+            parentForm.dirtyListener.update(key as any, c.current!.dirty);
+        });
     }, [parentForm, key]);
 
-    useEffect(() => {
-        parentForm.defaultValuesListener.listen(key, () => {
-            c.current!.setDefaultValues(parentForm.defaultValues[key]);
-        });
-    }, [parentForm.defaultValues[key]]);
+    // useEffect(() => {
+    //     parentForm.defaultValuesListener.listen(key, () => {
+    //         console.trace("new default value from parent");
+    //         c.current!.defaultValuesListener.updateAll(
+    //             parentForm.defaultValuesListener.values[key]
+    //         );
+    //     });
+    // }, [parentForm.defaultValuesListener.values[key]]);
 
-    useEffect(() => {
-        parentForm.valuesListener.listen(key, () => {
-            c.current!.setValues(parentForm.values[key]);
-        });
-    }, [parentForm.values[key]]);
+    // useEffect(() => {
+    //     parentForm.valuesListener.listen(key, () => {
+    //         c.current!.valuesListener.updateAll(parentForm.values[key]);
+    //     });
+    // }, [parentForm.valuesListener.values[key]]);
+
+    // useEffect(() => {
+    //     parentForm.dirtyListener.listen(key as any, () => {
+    //         c.current!.dirtyListener.updateAll(parentForm.values[key]);
+    //     });
+    // }, [parentForm.dirtyListener.values[key]]);
 
     return c.current;
 }

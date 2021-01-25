@@ -13,11 +13,13 @@ function Input<T extends ObjectOrArray>(props: {
     form: Form<T>;
     name: KeyOf<T>;
 }) {
-    const val = useListener(props.form, props.name);
+    const { value, dirty, defaultValue } = useListener(props.form, props.name);
+    console.log("render", defaultValue, value, dirty);
 
     return (
         <input
-            value={val as string}
+            style={{ background: dirty ? "#eee" : "#fff" }}
+            value={value as string}
             onChange={(ev) =>
                 props.form.setValue(props.name, ev.target.value as T[KeyOf<T>])
             }
@@ -28,7 +30,12 @@ function Input<T extends ObjectOrArray>(props: {
 function FormValues<T>(props: { form: Form<T> }) {
     const val = useAnyListener(props.form);
 
-    return <code>{JSON.stringify(val.values, null, 2)}</code>;
+    return (
+        <div>
+            <pre>{JSON.stringify(val.values, null, 2)}</pre>
+            <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre>
+        </div>
+    );
 }
 
 interface User {
