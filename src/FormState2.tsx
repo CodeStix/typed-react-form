@@ -8,13 +8,17 @@ export type KeyOf<T extends ObjectOrArray> = T extends any[] ? number : keyof T;
 export type ObjectKeyOf<T extends ObjectOrArray> = {
     [Key in KeyOf<T>]: T[Key] extends ObjectOrArray ? Key : never;
 }[KeyOf<T>];
+export type ValueKeyOf<T extends ObjectOrArray> = {
+    [Key in KeyOf<T>]: T[Key] extends ObjectOrArray ? never : Key;
+}[KeyOf<T>];
 
 export type ListenerCallback = () => void;
 
 type ListenerMap = { [T in string]?: ListenerCallback };
 
+type DirtyType<T> = T extends ObjectOrArray ? DirtyMap<T> : boolean;
 type DirtyMap<T extends ObjectOrArray> = {
-    [Key in KeyOf<T>]?: boolean;
+    [Key in KeyOf<T>]?: DirtyType<T[Key]>;
 };
 
 function keys<T>(obj: T): KeyOf<T>[] {
@@ -204,11 +208,26 @@ export class Form<T extends ObjectOrArray> {
     }
 
     public setValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
-        this.valuesListener.update(key, value);
-        this.dirtyListener.update(
-            key as any,
-            this.defaultValuesListener.values[key] !== value
+        if (typeof value === "object" || Array.isArray(value)) {
+            console.warn(
+                "Not setting value, value is object, use setValueInternal"
+            );
+            return;
+        }
+        this.setValueInternal(
+            key,
+            value,
+            (this.defaultValuesListener.values[key] !== value) as any
         );
+    }
+
+    public setValueInternal<Key extends KeyOf<T>>(
+        key: Key,
+        value: T[Key],
+        dirty: DirtyType<T[Key]>
+    ) {
+        this.valuesListener.update(key, value);
+        this.dirtyListener.update(key as any, dirty as any);
     }
 
     public setDefaultValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
@@ -267,7 +286,7 @@ export function useAnyListener<T extends ObjectOrArray>(form: Form<T>) {
 
 export function useChildForm<
     Parent extends ObjectOrArray,
-    Key extends ObjectKeyOf<Parent>
+    Key extends KeyOf<Parent>
 >(parentForm: Form<Parent>, key: Key) {
     let c = useRef<Form<Parent[Key]> | null>(null);
 
@@ -288,11 +307,11 @@ export function useChildForm<
                 parentForm.defaultValuesListener.values[key]
             );
         });
-        // parentForm.dirtyListener.listen(key as any, () => {
-        //     c.current!.dirtyListener.updateAll(
-        //         parentForm.dirtyListener.values[key] ?? {}
-        //     );
-        // });
+        parentForm.dirtyListener.listen(key as any, () => {
+            c.current!.dirtyListener.updateAll(
+                parentForm.dirtyListener.values[key] || ({} as any)
+            );
+        });
 
         // Listen for any change on this form and notify parent on change
         c.current!.valuesListener.listenAny(() => {
@@ -308,7 +327,12 @@ export function useChildForm<
             );
         });
         c.current!.dirtyListener.listenAny(() => {
-            parentForm.dirtyListener.update(key as any, c.current!.dirty);
+            parentForm.dirtyListener.update(
+                key as any,
+                c.current!.dirty
+                    ? (c.current!.dirtyListener.values as any)
+                    : false
+            );
         });
     }, [parentForm, key]);
 
