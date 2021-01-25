@@ -240,15 +240,23 @@ function TodoItem(props: {
 
 // Example validator, you should use a validation library instead of this mess.
 function validateTodoList(list: TodoList) {
-    return list.todos
-        .filter((e) => e.message.length < 5)
-        .reduce((prev, _val, index) => {
-            let l = prev["todos"];
-            if (!l) {
-                l = {};
-                prev["todos"] = l;
-            }
-            l[index] = { message: "Todo message should be longer!" };
-            return prev;
-        }, {});
+    return {
+        name: list.name.length <= 2 ? "Please choose a longer name" : undefined,
+        authorName:
+            list.authorName.length <= 2
+                ? "Please choose a longer author name"
+                : undefined
+    };
 }
+//     return list.todos
+//         .filter((e) => e.message.length < 5)
+//         .reduce((prev, _val, index) => {
+//             let l = prev["todos"];
+//             if (!l) {
+//                 l = {};
+//                 prev["todos"] = l;
+//             }
+//             l[index] = { message: "Todo message should be longer!" };
+//             return prev;
+//         }, {});
+// }

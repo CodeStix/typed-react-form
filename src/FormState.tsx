@@ -295,20 +295,20 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         error?: ErrorType<V, TError> | null | undefined,
         skipId?: string
     ) {
+        console.log(this.formId, "setValueInternal: set", key, value, error);
+
         this._values[key] = value;
         this._dirtyMap[key] = dirty;
-
-        let toFire = [];
-        toFire.push(key);
-
-        console.log(this.formId, "setValueInternal: set error", error);
-
         if (error !== undefined) {
             if (error === null || Object.keys(error).length === 0)
                 delete this._errorMap[key];
             else this._errorMap[key] = error;
         }
 
+        let toFire = [];
+        toFire.push(key);
+
+        // Validate if no error is yet set or if the passed error is undefined (value could have changed)
         if (
             this.validator !== undefined &&
             this.validateOnChange &&
@@ -370,7 +370,7 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         error: ErrorType<T[U], TError>
     ) {
         if (this._errorMap[name] === error) return;
-        let p = this._errorMap;
+        let p = memberCopy(this._errorMap);
         this._errorMap[name] = error;
         this.fireListeners(changedKeys(p, this._errorMap), false, true);
     }
@@ -409,11 +409,9 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
             return;
         }
 
-        let prevDefaultValues = this._defaultValues;
-        let prevValues = this._values;
-        let prevDirtyMap = this._dirtyMap;
-        let prevErrorMap = this._errorMap;
-        let prevState = this._state;
+        let prevValues = memberCopy(this._values);
+        let prevErrorMap = memberCopy(this._errorMap);
+        let prevState = memberCopy(this._state);
 
         if (isDefault) {
             this._defaultValues = setValues;
@@ -427,13 +425,13 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
             this._errorMap = errors;
         } else if (this.validator !== undefined) {
             this._errorMap = this.validator(this._values);
+            deleteUndefinedFields(this._errorMap);
             console.log(
                 this.formId,
                 "setValues: validate",
                 prevErrorMap,
                 this._errorMap
             );
-            deleteUndefinedFields(this._errorMap);
         } else {
             this._errorMap = {};
         }
@@ -445,14 +443,9 @@ export class FormState<T extends ObjectOrArray, TError = string, TState = {}> {
         let toFire = changedKeys(prevValues, this._values);
         toFire = [
             ...toFire,
-            ...changedKeys(prevDefaultValues, this._defaultValues)
-        ];
-        toFire = [...toFire, ...changedKeys(prevDirtyMap, this._dirtyMap)];
-        toFire = [
-            ...toFire,
             ...changedKeys(prevErrorMap, this._errorMap, true)
         ];
-        if (changedKeys(prevState, this._state).length > 0) {
+        if (isDefault || changedKeys(prevState, this._state).length > 0) {
             toFire = keys(this._values); // fire all because state has changed
         }
         toFire = Array.from(new Set(toFire));
