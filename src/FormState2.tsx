@@ -44,7 +44,7 @@ function memberCopy<T>(value: T): T {
 function changedKeys<T>(
     a: T,
     b: T,
-    compareObjectsAsBooleans: boolean = false
+    objectCompareMode: "skip" | "truthy" | "compare" = "truthy"
 ): KeyOf<T>[] {
     if (a === b) return [];
     let aKeys = keys(a);
@@ -58,10 +58,14 @@ function changedKeys<T>(
         let bv = b[k as any];
         if (av === null && bv === undefined)
             console.warn("comparing null and undefined!");
-        if (compareObjectsAsBooleans && typeof av === "object")
-            av = av ? o : undefined;
-        if (compareObjectsAsBooleans && typeof bv === "object")
-            bv = bv ? o : undefined;
+        if (typeof av === "object" || typeof bv === "object") {
+            if (objectCompareMode === "truthy") {
+                if (typeof av === "object") av = av ? o : undefined;
+                if (typeof bv === "object") bv = bv ? o : undefined;
+            } else if (objectCompareMode === "skip") {
+                continue;
+            }
+        }
         if (av !== bv) {
             changed.push(k);
         }
@@ -164,7 +168,7 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
 
     public updateAll(values: T) {
         if (this._values === values) return;
-        let changed = changedKeys(this._values, values, false);
+        let changed = changedKeys(this._values, values, "compare");
         this._values = values;
         super.fireMultiple(changed);
     }
@@ -256,6 +260,21 @@ export class Form<T extends ObjectOrArray, Error = string> {
         this.errorListener.updateAll(allErrors as any);
     }
 
+    public recalculateDirty() {
+        let ak = Object.keys(this.values);
+        let bk = Object.keys(this.defaultValues);
+        let lk = ak.length > bk.length ? ak : bk;
+        let d = { ...this.dirtyListener.values };
+        for (let i = 0; i < lk.length; i++) {
+            let e = lk[i];
+            let a = this.values[e];
+            let b = this.defaultValues[e];
+            if (typeof a === "object" || typeof b === "object") continue; // Do not compare objects
+            d[e] = a !== b;
+        }
+        this.dirtyListener.updateAll(d);
+    }
+
     public validate(key: KeyOf<T>) {
         if (!this.validator) {
             console.warn(
@@ -269,20 +288,16 @@ export class Form<T extends ObjectOrArray, Error = string> {
         this.errorListener.update(key as any, allErrors[key] as any);
     }
 
-    public refresh() {
-        this.valuesListener;
-    }
-
     public setValues(values: T, validate: boolean = true) {
         this.valuesListener.updateAll(memberCopy(values));
-        this.dirtyListener.updateAll({}); // TODO recalculate dirty values here
-        if (validate) this.validateAll();
+        this.recalculateDirty();
+        if (validate && this.validator) this.validateAll();
     }
 
     public setDefaultValues(defaultValues: T, validate: boolean = true) {
         this.defaultValuesListener.updateAll(memberCopy(defaultValues));
-        this.dirtyListener.updateAll({}); // TODO recalculate dirty values here
-        if (validate) this.validateAll();
+        this.recalculateDirty();
+        if (validate && this.validator) this.validateAll();
     }
 
     public setValue<Key extends KeyOf<T>>(
@@ -415,13 +430,11 @@ export function useChildForm<
     useEffect(() => {
         // Listen for parent value changes on this child form
         let p1 = parentForm.valuesListener.listen(key, () => {
-            c.current!.valuesListener.updateAll(
-                memberCopy(parentForm.values[key])
-            );
+            c.current!.setValues(parentForm.values[key]);
         });
         let p2 = parentForm.defaultValuesListener.listen(key, () => {
-            c.current!.defaultValuesListener.updateAll(
-                memberCopy(parentForm.defaultValuesListener.values[key])
+            c.current!.setDefaultValues(
+                parentForm.defaultValuesListener.values[key]
             );
         });
         let p3 = parentForm.dirtyListener.listen(key as any, () => {
@@ -469,7 +482,10 @@ export function useChildForm<
             );
         });
 
-        c.current!.refresh();
+        c.current!.setValues(
+            parentForm.values[key] ?? parentForm.defaultValues[key],
+            true
+        );
 
         return () => {
             parentForm.valuesListener.ignore(key, p1);
@@ -482,10 +498,7 @@ export function useChildForm<
             c.current!.errorListener.ignoreAny(a4);
 
             parentForm.valuesListener.update(key, null as any);
-            parentForm.dirtyListener.update(
-                key as any,
-                !!parentForm.defaultValues[key] as any
-            );
+            parentForm.dirtyListener.update(key as any, undefined); // !!parentForm.defaultValues[key]
             parentForm.errorListener.update(key as any, undefined);
         };
     }, [parentForm, key]);
