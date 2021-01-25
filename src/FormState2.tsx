@@ -142,7 +142,7 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
 
     public updateAll(values: T) {
         if (this._values === values) return;
-        let changed = changedKeys(this._values, values, true);
+        let changed = changedKeys(this._values, values, false);
         this._values = values;
         super.fireMultiple(changed);
     }
@@ -241,6 +241,12 @@ export function useChildForm<
         });
         parentForm.defaultValuesListener.listen(key, () => {
             c.current!.setDefaultValues(parentForm.defaultValues[key]);
+        });
+        c.current!.valuesListener.listenAny(() => {
+            parentForm.valuesListener.update(
+                key,
+                c.current!.valuesListener.values
+            );
         });
     }, [parentForm, key]);
 
