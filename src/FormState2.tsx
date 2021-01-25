@@ -292,10 +292,11 @@ export class Form<T extends ObjectOrArray, Error = string> {
     public setValueInternal<Key extends KeyOf<T>>(
         key: Key,
         value: T[Key],
-        dirty: DirtyType<T[Key]>
+        dirty?: DirtyType<T[Key]>
     ) {
         this.valuesListener.update(key, value);
-        this.dirtyListener.update(key as any, dirty as any);
+        if (dirty !== undefined)
+            this.dirtyListener.update(key as any, dirty as any);
         if (this.validator && this.validateOnChange) this.validateAll();
     }
 
@@ -306,7 +307,7 @@ export class Form<T extends ObjectOrArray, Error = string> {
     }
 
     public setDefaultValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
-        this.defaultValuesListener.update(key, value);
+        this.defaultValuesListener.update(key, value); // TODO recalculate dirty value & validate
     }
 }
 
@@ -400,11 +401,13 @@ export function useChildForm<
     useEffect(() => {
         // Listen for parent value changes on this child form
         parentForm.valuesListener.listen(key, () => {
-            c.current!.setValues(parentForm.values[key]);
+            c.current!.valuesListener.updateAll(
+                memberCopy(parentForm.values[key])
+            );
         });
         parentForm.defaultValuesListener.listen(key, () => {
-            c.current!.setDefaultValues(
-                parentForm.defaultValuesListener.values[key]
+            c.current!.defaultValuesListener.updateAll(
+                memberCopy(parentForm.defaultValuesListener.values[key])
             );
         });
         parentForm.dirtyListener.listen(key as any, () => {
@@ -420,14 +423,10 @@ export function useChildForm<
 
         // Listen for any change on this form and notify parent on change
         c.current!.valuesListener.listenAny(() => {
-            // parentForm.setValue(key, c.current!.valuesListener.values);
-            parentForm.valuesListener.update(
-                key,
-                c.current!.valuesListener.values
-            );
+            parentForm.setValueInternal(key, c.current!.valuesListener.values);
         });
         c.current!.defaultValuesListener.listenAny(() => {
-            parentForm.defaultValuesListener.update(
+            parentForm.setDefaultValue(
                 key,
                 c.current!.defaultValuesListener.values
             );
