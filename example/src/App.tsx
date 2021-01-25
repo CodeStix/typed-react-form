@@ -19,19 +19,35 @@ function Input<T extends ObjectOrArray>(props: {
     );
 
     return (
-        <input
-            placeholder={defaultValue}
-            style={{
-                background: dirty ? "#eee" : "#fff",
-                padding: "0.3em",
-                fontSize: "inherit",
-                border: error ? "1px solid red" : "1px solid gray"
-            }}
-            value={value as string}
-            onChange={(ev) =>
-                props.form.setValue(props.name, ev.target.value as T[KeyOf<T>])
-            }
-        />
+        <>
+            <input
+                placeholder={defaultValue}
+                style={{
+                    background: dirty ? "#eee" : "#fff",
+                    padding: "0.3em",
+                    fontSize: "inherit",
+                    outline: error ? "4px solid #f306" : "none"
+                }}
+                value={value as string}
+                onChange={(ev) =>
+                    props.form.setValue(
+                        props.name,
+                        ev.target.value as T[KeyOf<T>]
+                    )
+                }
+            />
+            {error && (
+                <span
+                    style={{
+                        padding: "0.3em",
+                        fontWeight: "bold",
+                        color: "red"
+                    }}
+                >
+                    {error}
+                </span>
+            )}
+        </>
     );
 }
 
@@ -70,7 +86,20 @@ export default function App() {
         info: { favoriteFood: "pasta", intelligence: 128 }
     });
 
-    const form = useForm<User>(values);
+    const form = useForm<User>(
+        values,
+        (values) => ({
+            firstName:
+                values.firstName.length < 3
+                    ? "Your firstName is too short"
+                    : undefined,
+            info:
+                values.info.favoriteFood !== "pasta"
+                    ? { favoriteFood: "Favorite food must be pasta" }
+                    : undefined
+        }),
+        true
+    );
 
     return (
         <form

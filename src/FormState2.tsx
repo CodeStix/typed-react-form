@@ -7,8 +7,7 @@ export type ObjectOrArray = {
 export type KeyOf<T extends ObjectOrArray> = T extends any[] ? number : keyof T;
 
 export type ListenerCallback = () => void;
-
-type ListenerMap = { [T in string]?: ListenerCallback };
+export type ListenerMap = { [T in string]?: ListenerCallback };
 
 type DirtyType<T> = T extends ObjectOrArray ? DirtyMap<T> | false : boolean;
 type DirtyMap<T extends ObjectOrArray> = {
@@ -19,6 +18,8 @@ type ErrorType<T, Error> = T extends ObjectOrArray ? ErrorMap<T, Error> : Error;
 type ErrorMap<T extends ObjectOrArray, Error> = {
     [Key in KeyOf<T>]?: ErrorType<T[Key], Error>;
 };
+
+export type Validator<T, Error> = (values: T) => ErrorMap<T, Error>;
 
 function keys<T>(obj: T): KeyOf<T>[] {
     if (Array.isArray(obj)) {
@@ -177,6 +178,8 @@ export class Form<T extends ObjectOrArray, Error = string> {
     public defaultValuesListener: ObjectListener<T>;
     public dirtyListener: ObjectListener<DirtyMap<T>>;
     public errorListener: ObjectListener<ErrorMap<T, Error>>;
+    public validator?: Validator<T, Error>;
+    public validateOnChange: boolean;
 
     public get values() {
         return this.valuesListener.values;
@@ -206,7 +209,14 @@ export class Form<T extends ObjectOrArray, Error = string> {
         );
     }
 
-    constructor(values: T, defaultValues: T) {
+    constructor(
+        values: T,
+        defaultValues: T,
+        validator?: Validator<T, Error>,
+        validateOnChange: boolean = true
+    ) {
+        this.validator = validator;
+        this.validateOnChange = validateOnChange;
         this.valuesListener = new ObjectListener(memberCopy(values));
         this.defaultValuesListener = new ObjectListener(
             memberCopy(defaultValues)
@@ -223,6 +233,10 @@ export class Form<T extends ObjectOrArray, Error = string> {
         this.setValueInternal(key, this.defaultValues[key], false as any);
     }
 
+    public setErrors(errors: ErrorMap<T, Error>) {
+        this.errorListener.updateAll(errors);
+    }
+
     public setError<Key extends KeyOf<T>>(
         key: Key,
         error: ErrorType<T[Key], Error> | null | undefined
@@ -230,18 +244,35 @@ export class Form<T extends ObjectOrArray, Error = string> {
         this.errorListener.update(key as any, (error as any) ?? undefined);
     }
 
+    public validateAll() {
+        if (!this.validator) {
+            console.warn(
+                "validateAll() was called on a form which does not have a validator set"
+            );
+            return;
+        }
+        let allErrors = this.validator(this.values);
+        console.log("validateAll", allErrors);
+        this.errorListener.updateAll(allErrors as any);
+    }
+
+    public validate(key: KeyOf<T>) {
+        if (!this.validator) {
+            console.warn(
+                "validate() was called on a form which does not have a validator set"
+            );
+            return;
+        }
+        // TODO: validation per field
+        let allErrors = this.validator(this.values);
+        console.log("validate", allErrors);
+        this.errorListener.update(key as any, allErrors[key] as any);
+    }
+
     public setValues(values: T) {
         this.valuesListener.updateAll(memberCopy(values));
-        this.dirtyListener.updateAll({}); // TODO  recalculate dirty values here
-    }
-
-    public setDefaultValues(defaultValues: T) {
-        this.defaultValuesListener.updateAll(memberCopy(defaultValues));
-        this.dirtyListener.updateAll({}); // TODO  recalculate dirty values here
-    }
-
-    public setErrors(errors: ErrorMap<T, Error>) {
-        this.errorListener.updateAll(errors);
+        this.dirtyListener.updateAll({}); // TODO recalculate dirty values here
+        this.errorListener.updateAll({}); // TODO validate
     }
 
     public setValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
@@ -265,6 +296,13 @@ export class Form<T extends ObjectOrArray, Error = string> {
     ) {
         this.valuesListener.update(key, value);
         this.dirtyListener.update(key as any, dirty as any);
+        if (this.validator && this.validateOnChange) this.validateAll();
+    }
+
+    public setDefaultValues(defaultValues: T) {
+        this.defaultValuesListener.updateAll(memberCopy(defaultValues));
+        this.dirtyListener.updateAll({}); // TODO recalculate dirty values here
+        this.errorListener.updateAll({}); // TODO validate
     }
 
     public setDefaultValue<Key extends KeyOf<T>>(key: Key, value: T[Key]) {
@@ -272,11 +310,20 @@ export class Form<T extends ObjectOrArray, Error = string> {
     }
 }
 
-export function useForm<T>(defaultValues: T): Form<T> {
-    let c = useRef<Form<T> | null>(null);
+export function useForm<T extends ObjectOrArray, Error = string>(
+    defaultValues: T,
+    validator?: Validator<T, Error>,
+    validateOnChange: boolean = true
+) {
+    let c = useRef<Form<T, Error> | null>(null);
 
     if (c.current === null) {
-        c.current = new Form<T>(defaultValues, defaultValues);
+        c.current = new Form<T, Error>(
+            defaultValues,
+            defaultValues,
+            validator,
+            validateOnChange
+        );
     }
 
     useEffect(() => {
@@ -373,6 +420,7 @@ export function useChildForm<
 
         // Listen for any change on this form and notify parent on change
         c.current!.valuesListener.listenAny(() => {
+            // parentForm.setValue(key, c.current!.valuesListener.values);
             parentForm.valuesListener.update(
                 key,
                 c.current!.valuesListener.values
