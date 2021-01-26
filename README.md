@@ -1,8 +1,14 @@
+
+
 # Typed React form
 
 A React form state manager, focussed on flawless typescript integration and minimal rerenders.
 
 [![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form)
+
+
+![vscode typescript](https://github.com/CodeStix/typed-react-form/raw/master/example/public/thumb.png)
+
 
 ## Install
 
@@ -15,7 +21,7 @@ yarn add typed-react-form
 
 This libary contains components and hooks to wrap your UI components with, which you can then reuse all over your application. After you did this correctly, all your form elements will be type checked!
 
-You should check the example for more information!
+You should check the example for more information.
 
 ```tsx
 const form = useForm(
@@ -47,7 +53,7 @@ return (
 
 ### Wrapping your inputs
 
-Example of an simple stateful input.
+Example of a simple stateful input.
 
 ```tsx
 function SimpleInput<T extends ObjectOrArray>(props: {
@@ -115,34 +121,34 @@ function Input<T extends ObjectOrArray>({
 
 ## Documentation
 
-### `useForm`
+#### `useForm`
 
 Hook which creates a new form state manager, and returns it, which can then be used with any of the components and hooks below.
 
-### `<Listener form={} name="" />`
+#### `<Listener form={} name="" />`
 
 Component (wrapper around useListener) to listen for changes on a form's field without rerendering the whole form.
 
-### `<AnyListener form={} />`
+#### `<AnyListener form={} />`
 
 Component (wrapper around useAnyListener) to listen any changes in a form without rerendering.
 
-### `<ChildForm parent={} name="" />`
+#### `<ChildForm parent={} name="" />`
 
 Component (wrapper around useChildForm) to create a form out of one of its parent's object fields.
 Name should be the name of a field in the parent form which is an object.
 When the parent form is an array form, you should pass the index to the name field.
 
-### `<ArrayForm parent={} name="">`
+#### `<ArrayForm parent={} name="">`
 
 Component (wrapper around useArrayForm) to create a form out of one of its parent's array fields.
 Name should be the name of a field in the parent form which is an array.
 
-### `useListener(form, name)`
+#### `useListener(form, name)`
 
 Hook to listen for changes on a form's field, you should not use this in large components as it will cause a rerender. Use multiple Listener components instead.
 
-### `useAnyListener(form)`
+#### `useAnyListener(form)`
 
 Hook to listen for any change on a form without rerendering the whole form. Do not use this in large components, because this will cause a rerender each time a form changes. Use multiple AnyListener's instead.
 
