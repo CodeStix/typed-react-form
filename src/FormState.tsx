@@ -575,28 +575,15 @@ export function useChildForm<
     return c.current;
 }
 
-export function ArrayListener<
+export function useArrayForm<
     Parent extends ObjectOrArray,
     ParentState extends ObjectOrArray,
     ParentError,
     Key extends KeyOf<Parent>
->(props: {
-    parent: Form<Parent, ParentState, ParentError>;
-    name: Key;
-    children: (props: {
-        form: Form<Parent[Key], ParentState, ParentError>;
-        values: Parent[Key];
-        setValues: (newValues: Parent[Key], validate?: boolean) => void;
-        remove: (index: number) => void;
-        clear: () => void;
-        move: (index: number, newIndex: number) => void;
-        swap: (index: number, newIndex: number) => void;
-        append: (value: Parent[Key][number]) => void;
-    }) => React.ReactNode;
-}) {
+>(parent: Form<Parent, ParentState, ParentError>, name: Key) {
     const form = useChildForm<Parent, ParentState, ParentError, Key>(
-        props.parent,
-        props.name
+        parent,
+        name
     );
     const [, setRender] = useState(0);
 
@@ -606,15 +593,10 @@ export function ArrayListener<
                 setRender((e) => e + 1);
             }
         });
-
         return () => {
             form.valuesListener.ignoreAny(p1);
         };
-    }, [props.parent, props.name]);
-
-    // const { values, setValues } = useAnyListener(form, true);
-
-    console.log("rerender list");
+    }, [parent, name]);
 
     function append(value: Parent[Key][number]) {
         form.setValues([...(form.values as any), value] as any);
@@ -651,18 +633,33 @@ export function ArrayListener<
         form.setValues(values as any);
     }
 
-    return (
-        <React.Fragment>
-            {props.children({
-                form,
-                values: form.values,
-                setValues: form.setValues,
-                remove,
-                move,
-                swap,
-                clear,
-                append
-            })}
-        </React.Fragment>
-    );
+    return {
+        remove,
+        move,
+        swap,
+        clear,
+        append,
+        form
+    };
+}
+
+export function ArrayForm<
+    Parent extends ObjectOrArray,
+    ParentState extends ObjectOrArray,
+    ParentError,
+    Key extends KeyOf<Parent>
+>(props: {
+    parent: Form<Parent, ParentState, ParentError>;
+    name: Key;
+    children: (props: {
+        form: Form<Parent[Key], ParentState, ParentError>;
+        remove: (index: number) => void;
+        clear: () => void;
+        move: (index: number, newIndex: number) => void;
+        swap: (index: number, newIndex: number) => void;
+        append: (value: Parent[Key][number]) => void;
+    }) => React.ReactNode;
+}) {
+    const arr = useArrayForm(props.parent, props.name);
+    return <React.Fragment>{props.children(arr)}</React.Fragment>;
 }

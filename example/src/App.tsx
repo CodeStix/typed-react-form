@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-    ArrayListener,
+    ArrayForm,
     Form,
     KeyOf,
     ObjectOrArray,
@@ -164,11 +164,11 @@ function TodoItemList(props: {
     // const { values } = useAnyListener(form, true);
 
     return (
-        <ArrayListener parent={props.parent} name="todos">
-            {({ values, form, swap, remove }) => (
+        <ArrayForm parent={props.parent} name="todos">
+            {({ form, swap, remove }) => (
                 <>
                     <ul style={{ padding: "0" }}>
-                        {values.map((e, i) => (
+                        {form.values.map((e, i) => (
                             <TodoItem
                                 onTop={() => swap(i, 0)}
                                 onRemove={() => {
@@ -198,7 +198,7 @@ function TodoItemList(props: {
                     <FormValues form={form} />
                 </>
             )}
-        </ArrayListener>
+        </ArrayForm>
     );
 }
 
