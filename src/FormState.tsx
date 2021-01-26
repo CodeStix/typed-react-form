@@ -71,7 +71,7 @@ function changedKeys<T>(
     return changed;
 }
 
-export class Listener<Key extends string | number | symbol> {
+export class ListenEmitter<Key extends string | number | symbol> {
     private listeners?: { [T in Key]?: ListenerMap };
     private anyListeners?: ListenerMap;
     private counter = 0;
@@ -139,7 +139,7 @@ export class Listener<Key extends string | number | symbol> {
     }
 }
 
-export class ObjectListener<T extends ObjectOrArray> extends Listener<
+export class ObjectListener<T extends ObjectOrArray> extends ListenEmitter<
     KeyOf<T>
 > {
     private _values: T;
@@ -529,11 +529,12 @@ export function useChildForm<
             }
         });
         let a3 = c.current!.dirtyListener.listenAny(() => {
-            let d = c.current!.dirty
-                ? (c.current!.dirtyListener.values as any)
-                : undefined;
-            console.log("updating parent dirty", key, d);
-            parentForm.dirtyListener.update(key as any, d);
+            parentForm.dirtyListener.update(
+                key as any,
+                c.current!.dirty
+                    ? (c.current!.dirtyListener.values as any)
+                    : undefined
+            );
         });
         let a4 = c.current!.errorListener.listenAny(() => {
             parentForm.errorListener.update(
@@ -661,5 +662,57 @@ export function ArrayForm<
     }) => React.ReactNode;
 }) {
     const arr = useArrayForm(props.parent, props.name);
+    return <React.Fragment>{props.children(arr)}</React.Fragment>;
+}
+
+export function Listener<
+    T extends ObjectOrArray,
+    State extends ObjectOrArray,
+    Error,
+    Key extends KeyOf<T>
+>(props: {
+    form: Form<T, State, Error>;
+    name: Key;
+    children: (props: {
+        value: T[Key];
+        defaultValue: T[Key];
+        dirty: DirtyMap<T>[Key];
+        error: ErrorMap<T, Error>[Key];
+        state: State;
+        form: Form<T, State, Error>;
+        setValue: (value: T[Key]) => void;
+    }) => React.ReactNode;
+}) {
+    const l = useListener(props.form, props.name);
+    return <React.Fragment>{props.children(l)}</React.Fragment>;
+}
+
+export function AnyListener<
+    T extends ObjectOrArray,
+    State extends ObjectOrArray,
+    Error,
+    Key extends KeyOf<T>
+>(props: {
+    form: Form<T, State, Error>;
+    name: Key;
+    children: (props: Form<T, State, Error>) => React.ReactNode;
+}) {
+    const l = useAnyListener(props.form);
+    return <React.Fragment>{props.children(l)}</React.Fragment>;
+}
+
+export function ChildForm<
+    Parent extends ObjectOrArray,
+    ParentState extends ObjectOrArray,
+    ParentError,
+    Key extends KeyOf<Parent>
+>(props: {
+    parent: Form<Parent, ParentState, ParentError>;
+    name: Key;
+    children: (
+        props: Form<Parent[Key], ParentState, ParentError>
+    ) => React.ReactNode;
+}) {
+    const arr = useChildForm(props.parent, props.name);
     return <React.Fragment>{props.children(arr)}</React.Fragment>;
 }
