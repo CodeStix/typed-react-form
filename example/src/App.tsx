@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+    ArrayListener,
     Form,
     KeyOf,
     ObjectOrArray,
@@ -18,8 +19,6 @@ function Input<T extends ObjectOrArray>(props: {
         props.form,
         props.name
     );
-
-    console.log("render input", value);
 
     return (
         <VisualRender>
@@ -138,32 +137,36 @@ export default function App() {
 function TodoItemList(props: {
     parent: Form<TodoList, { isSubmitting: boolean }>;
 }) {
-    const form = useChildForm(props.parent, "todos");
-    const { values } = useAnyListener(form, true);
+    // const form = useChildForm(props.parent, "todos");
+    // const { values } = useAnyListener(form, true);
 
     return (
-        <div>
-            <ul style={{ padding: "0" }}>
-                {values.map((e, i) => (
-                    <TodoItem key={e.id} parent={form} index={i} />
-                ))}
-            </ul>
-            <button
-                type="button"
-                onClick={() =>
-                    form.setValues([
-                        ...form.values,
-                        {
-                            message: "",
-                            priority: "normal",
-                            id: new Date().getTime()
+        <ArrayListener parent={props.parent} name="todos">
+            {({ values, form }) => (
+                <>
+                    <ul style={{ padding: "0" }}>
+                        {values.map((e, i) => (
+                            <TodoItem key={e.id} parent={form} index={i} />
+                        ))}
+                    </ul>
+                    <button
+                        type="button"
+                        onClick={() =>
+                            form.setValues([
+                                ...form.values,
+                                {
+                                    message: "",
+                                    priority: "normal",
+                                    id: new Date().getTime()
+                                }
+                            ])
                         }
-                    ])
-                }
-            >
-                Add item
-            </button>
-        </div>
+                    >
+                        Add item
+                    </button>
+                </>
+            )}
+        </ArrayListener>
     );
 }
 

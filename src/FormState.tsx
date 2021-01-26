@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export type ObjectOrArray = {
     [Key in number | string]: any;
@@ -566,4 +566,82 @@ export function useChildForm<
     }, [parentForm, key]);
 
     return c.current;
+}
+
+// export function Listener<T extends ObjectOrArray, State extends ObjectOrArray, Error>(props: {form: Form<T, State, Error>, name: KeyOf<T>})  {
+
+// }
+
+export function ArrayListener<
+    Parent extends ObjectOrArray,
+    ParentState extends ObjectOrArray,
+    ParentError,
+    Key extends KeyOf<Parent>
+>(props: {
+    parent: Form<Parent, ParentState, ParentError>;
+    name: Key;
+    children: (props: {
+        form: Form<Parent[Key], ParentState, ParentError>;
+        values: Parent[Key];
+        setValues: (newValues: Parent[Key], validate?: boolean) => void;
+        remove: (index: number) => void;
+        clear: () => void;
+        move: (index: number, newIndex: number) => void;
+        swap: (index: number, newIndex: number) => void;
+        append: (value: Parent[Key][number]) => void;
+    }) => React.ReactNode;
+}) {
+    const form = useChildForm<Parent, ParentState, ParentError, Key>(
+        props.parent,
+        props.name
+    );
+    const { values, setValues } = useAnyListener(form, true);
+
+    function append(value: Parent[Key][number]) {
+        form.setValues([...(form.values as any), value] as any);
+    }
+
+    function remove(index: number) {
+        let newValues = [...(form.values as any)];
+        newValues.splice(index, 1);
+        form.setValues(newValues as any);
+    }
+
+    function clear() {
+        form.setValues([] as any);
+    }
+
+    function move(from: number, to: number) {
+        if (to === from) return;
+        let newArr = [...(form.values as any)];
+        var target = newArr[from];
+        var increment = to < from ? -1 : 1;
+        for (var k = from; k !== to; k += increment) {
+            newArr[k] = newArr[k + increment];
+        }
+        newArr[to] = target;
+        form.setValues(newArr as any);
+    }
+
+    function swap(index: number, newIndex: number) {
+        if (index === newIndex) return;
+        let values = [...(form.values as any)];
+        [values[index], values[newIndex]] = [values[newIndex], values[index]];
+        form.setValues(values as any);
+    }
+
+    return (
+        <React.Fragment>
+            {props.children({
+                form,
+                values,
+                setValues,
+                remove,
+                move,
+                swap,
+                clear,
+                append
+            })}
+        </React.Fragment>
+    );
 }
