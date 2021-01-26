@@ -214,8 +214,12 @@ export class Form<
     }
 
     public get dirty() {
-        return Object.keys(this.dirtyListener.values).some(
-            (e) => this.dirtyListener.values[e]
+        return (
+            Object.keys(this.dirtyListener.values).some(
+                (e) => this.dirtyListener.values[e]
+            ) ||
+            Object.keys(this.values).length !==
+                Object.keys(this.defaultValues).length
         );
     }
 
@@ -320,6 +324,10 @@ export class Form<
             console.warn("setValues was called with undefined");
             return;
         }
+        if (JSON.stringify(values) === "{}") {
+            console.trace("set to {}");
+        }
+
         if (this.valuesListener.updateAll(values)) {
             this.recalculateDirty();
             if (validate && this.validator) this.validateAll();
@@ -327,6 +335,9 @@ export class Form<
     }
 
     public setDefaultValues(defaultValues: T, validate: boolean = true) {
+        if (JSON.stringify(defaultValues) === "{}") {
+            console.trace("set to {}");
+        }
         if (this.defaultValuesListener.updateAll(defaultValues)) {
             this.recalculateDirty();
             if (validate && this.validator) this.validateAll();
@@ -473,7 +484,7 @@ export function useChildForm<
 
     if (c.current === null) {
         c.current = new Form<Parent[Key], ParentState, ParentError>(
-            parentForm.values[key] ?? ({} as any),
+            parentForm.values[key], //?? ({} as any),
             parentForm.defaultValues[key] ?? ({} as any),
             parentForm.state
         );
@@ -505,9 +516,6 @@ export function useChildForm<
 
         // Listen for any change on this form and notify parent on change
         let a1 = c.current!.valuesListener.listenAny(() => {
-            if (Array.isArray(c.current!.valuesListener.values)) {
-                console.log("setting child array");
-            }
             parentForm.setValueInternal(
                 key,
                 c.current!.valuesListener.values,
@@ -516,20 +524,24 @@ export function useChildForm<
             );
         });
         let a2 = c.current!.defaultValuesListener.listenAny(() => {
-            parentForm.setValueInternal(
-                key,
-                c.current!.defaultValuesListener.values,
-                undefined,
-                true
-            );
+            // Only update parent defaults for this field when a non default {} is set (can happen when a new array item is added)
+            if (
+                Object.keys(c.current!.defaultValuesListener.values).length > 0
+            ) {
+                parentForm.setValueInternal(
+                    key,
+                    c.current!.defaultValuesListener.values,
+                    undefined,
+                    true
+                );
+            }
         });
         let a3 = c.current!.dirtyListener.listenAny(() => {
-            parentForm.dirtyListener.update(
-                key as any,
-                c.current!.dirty
-                    ? (c.current!.dirtyListener.values as any)
-                    : undefined
-            );
+            let d = c.current!.dirty
+                ? (c.current!.dirtyListener.values as any)
+                : undefined;
+            console.log("updating parent dirty", key, d);
+            parentForm.dirtyListener.update(key as any, d);
         });
         let a4 = c.current!.errorListener.listenAny(() => {
             parentForm.errorListener.update(
@@ -540,9 +552,7 @@ export function useChildForm<
             );
         });
 
-        c.current!.valuesListener.updateAll(
-            parentForm.values[key] ?? ({} as any)
-        );
+        c.current!.valuesListener.updateAll(parentForm.values[key]);
         c.current!.defaultValuesListener.updateAll(
             parentForm.defaultValues[key] ?? ({} as any)
         );
