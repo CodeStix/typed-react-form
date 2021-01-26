@@ -13,9 +13,37 @@ yarn add typed-react-form
 
 ## Usage
 
-This libary contains components and hooks to wrap your UI components with, which you can then reuse all over your application.
+This libary contains components and hooks to wrap your UI components with, which you can then reuse all over your application. After you did this correctly, all your form elements will be type checked!
 
 You should check the example for more information!
+
+```tsx
+const form = useForm(
+    {
+        firstName: "John",
+        lastName: "Tester",
+        info: { email: "johntester@example.com" }
+    },
+    { isSubmitting: false }
+);
+return (
+    <form>
+        <Input form={form} name="firstName" />
+        <Input form={form} name="lastName" />
+        <form>
+            <Input form={form} name="firstName" />
+            <Input form={form} name="lastName" />
+            <ChildForm parent={form} name="info">
+                {(form) => (
+                    <>
+                        <Input form={form} name="email" />
+                    </>
+                )}
+            </ChildForm>
+        </form>
+    </form>
+);
+```
 
 ### Wrapping your inputs
 
@@ -84,6 +112,39 @@ function Input<T extends ObjectOrArray>({
     );
 }
 ```
+
+## Documentation
+
+### `useForm`
+
+Hook which creates a new form state manager, and returns it, which can then be used with any of the components and hooks below.
+
+### `<Listener form={} name="" />`
+
+Component (wrapper around useListener) to listen for changes on a form's field without rerendering the whole form.
+
+### `<AnyListener form={} />`
+
+Component (wrapper around useAnyListener) to listen any changes in a form without rerendering.
+
+### `<ChildForm parent={} name="" />`
+
+Component (wrapper around useChildForm) to create a form out of one of its parent's object fields.
+Name should be the name of a field in the parent form which is an object.
+When the parent form is an array form, you should pass the index to the name field.
+
+### `<ArrayForm parent={} name="">`
+
+Component (wrapper around useArrayForm) to create a form out of one of its parent's array fields.
+Name should be the name of a field in the parent form which is an array.
+
+### `useListener(form, name)`
+
+Hook to listen for changes on a form's field, you should not use this in large components as it will cause a rerender. Use multiple Listener components instead.
+
+### `useAnyListener(form)`
+
+Hook to listen for any change on a form without rerendering the whole form. Do not use this in large components, because this will cause a rerender each time a form changes. Use multiple AnyListener's instead.
 
 ## License
 
