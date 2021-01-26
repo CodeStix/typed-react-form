@@ -71,6 +71,8 @@ function changedKeys<T>(
     return changed;
 }
 
+export const DIRTY_KEY_COUNT_SYMBOL = "_keyCount";
+
 export class ListenEmitter<Key extends string | number | symbol> {
     private listeners?: { [T in Key]?: ListenerMap };
     private anyListeners?: ListenerMap;
@@ -169,7 +171,6 @@ export class ObjectListener<T extends ObjectOrArray> extends ListenEmitter<
         } else {
             this._values[key] = value;
         }
-        console.log("update", key);
         super.fire(key, false);
         return true;
     }
@@ -179,7 +180,6 @@ export class ObjectListener<T extends ObjectOrArray> extends ListenEmitter<
         let changed = changedKeys(this._values, values, "compare");
         this._values = memberCopy(values);
         super.fireMultiple(changed, true);
-        if (changed.length > 0) console.log("updateAll", changed);
         return changed.length > 0;
     }
 }
@@ -217,12 +217,8 @@ export class Form<
     }
 
     public get dirty() {
-        return (
-            Object.keys(this.dirtyListener.values).some(
-                (e) => this.dirtyListener.values[e]
-            ) ||
-            Object.keys(this.values).length !==
-                Object.keys(this.defaultValues).length
+        return Object.keys(this.dirtyListener.values).some(
+            (e) => this.dirtyListener.values[e]
         );
     }
 
@@ -318,14 +314,13 @@ export class Form<
             if (a !== b) d[e] = true;
             else delete d[e];
         }
+        if (ak.length !== bk.length) d[DIRTY_KEY_COUNT_SYMBOL] = true;
+        else delete d[DIRTY_KEY_COUNT_SYMBOL];
         this.dirtyListener.updateAll(d);
     }
 
     public setValues(values: T, validate: boolean = true) {
-        if (!values) {
-            console.warn("setValues was called with undefined");
-            return;
-        }
+        if (!values) return;
         if (this.valuesListener.updateAll(values)) {
             this.recalculateDirty();
             if (validate && this.validator) this.validateAll();
@@ -693,11 +688,9 @@ export function Listener<
 export function AnyListener<
     T extends ObjectOrArray,
     State extends ObjectOrArray,
-    Error,
-    Key extends KeyOf<T>
+    Error
 >(props: {
     form: Form<T, State, Error>;
-    name: Key;
     children: (props: Form<T, State, Error>) => React.ReactNode;
 }) {
     const l = useAnyListener(props.form);

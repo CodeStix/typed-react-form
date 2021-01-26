@@ -15,7 +15,7 @@ code {
 
 @keyframes blink {
     0% {
-        background-color: red;
+        background-color: #f008;
         outline: 2px solid black;
     }
     50% {

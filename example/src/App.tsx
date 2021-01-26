@@ -1,7 +1,7 @@
 import React, { InputHTMLAttributes, useState } from "react";
 import {
+    AnyListener,
     ArrayForm,
-    ChildForm,
     Form,
     KeyOf,
     ObjectOrArray,
@@ -85,11 +85,11 @@ export default function App() {
             }))
     });
 
-    const form = useForm<TodoList, { isSubmitting: boolean }>(
-        values, // <- default values, can change
-        { isSubmitting: false }, // <- global form state
-        validateTodoList, // <- validator
-        true // <- validate on change
+    const form = useForm(
+        values, // <- Default values, can change
+        { isSubmitting: false }, // <- Global form state, which can contain custom fields (e.g. loading)
+        validateTodoList, // <- Validator
+        true // <- Validate on change
     );
 
     return (
@@ -108,9 +108,20 @@ export default function App() {
 
                 setValues({ ...form.values }); // Set new default values, (form.setDefaultValues is also possible instead of useState/useForm combo!)
             }}
-            style={{ padding: "1em", margin: "1em", border: "1px solid #0003" }}
+            style={{ padding: "1em", margin: "1em" }}
         >
             <VisualRender>
+                <h1>
+                    Form created using{" "}
+                    <a href="https://github.com/CodeStix/typed-react-form">
+                        typed-react-form
+                    </a>
+                </h1>
+                <p>
+                    The red flash indicated which parts of the form are being
+                    rerendered.
+                </p>
+                <hr />
                 <h2>Todo list</h2>
                 <p>Name</p>
                 {/* The name field is type checked, try to name it something else that does not exist on interface TodoList */}
@@ -136,6 +147,7 @@ export default function App() {
                                 ))}
                             </ul>
                             <button
+                                style={{ margin: "0 0 1em 0" }}
                                 type="button"
                                 onClick={() =>
                                     append({
@@ -150,10 +162,28 @@ export default function App() {
                         </VisualRender>
                     )}
                 </ArrayForm>
-                <button type="button" onClick={() => form.resetAll()}>
-                    Reset
-                </button>
-                <button>Submit</button>
+                <AnyListener form={form}>
+                    {({ state, dirty }) => (
+                        <>
+                            {/* Disable buttons when form is submitting or when nothing has changed, the AnyListener wrapper is required */}
+                            <button
+                                style={{ fontSize: "1.3em" }}
+                                disabled={state.isSubmitting || !dirty}
+                            >
+                                Save
+                            </button>
+                            <button
+                                style={{ fontSize: "1.3em" }}
+                                disabled={state.isSubmitting || !dirty}
+                                type="button"
+                                onClick={() => form.resetAll()}
+                            >
+                                Reset
+                            </button>
+                        </>
+                    )}
+                </AnyListener>
+
                 <h3>Output</h3>
                 <FormValues form={form} />
             </VisualRender>
@@ -201,13 +231,17 @@ function FormValues<T>(props: { form: Form<T> }) {
             <div style={{ background: "#0001" }}>
                 <p>
                     {/* <em>{val.formId}</em> */}
-                    {form.dirty && <strong>DIRTY</strong>}
-                    {form.error && <strong>ERROR</strong>}
+                    {form.dirty && (
+                        <strong style={{ color: "blue" }}>DIRTY</strong>
+                    )}
+                    {form.error && (
+                        <strong style={{ color: "red" }}>ERROR</strong>
+                    )}
                 </p>
                 <pre>{JSON.stringify(form.values, null, 2)}</pre>
                 {/* <pre>{JSON.stringify(val.defaultValues)}</pre> */}
                 {/* <pre>{JSON.stringify(val.errorMap, null, 2)}</pre> */}
-                {/* <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre> */}
+                <pre>{JSON.stringify(form.dirtyListener.values, null, 2)}</pre>
                 {/* <pre>{JSON.stringify(val.state, null, 2)}</pre> */}
             </div>
         </VisualRender>
