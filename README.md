@@ -17,7 +17,7 @@ yarn add typed-react-form
 
 This libary contains components and hooks to wrap your UI components with, which you can then reuse all over your application. After you did this correctly, all your form elements will be type checked!
 
-You should check the [example code](https://github.com/CodeStix/typed-react-form/tree/master/example) for more information, which is hosted [here](https://typed-react-form-example.codestix.github.com/).
+You should check the [example code](https://github.com/CodeStix/typed-react-form/tree/master/example) for more information, which is hosted [here](https://codestix.github.io/typed-react-form/).
 
 ```tsx
 const form = useForm(
