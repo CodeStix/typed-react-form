@@ -130,14 +130,12 @@ export default function App() {
 
 function TodoItemList(props: { parent: Form<TodoList> }) {
     const form = useChildForm(props.parent, "todos");
-    const { value: todos } = useListener(props.parent, "todos");
-
-    console.log("render list");
+    const { values } = useAnyListener(form, true);
 
     return (
         <div>
             <ul style={{ padding: "0" }}>
-                {todos.map((e, i) => (
+                {values.map((e, i) => (
                     <TodoItem key={e.id} parent={form} index={i} />
                 ))}
             </ul>

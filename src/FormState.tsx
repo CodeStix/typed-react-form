@@ -6,7 +6,7 @@ export type ObjectOrArray = {
 
 export type KeyOf<T extends ObjectOrArray> = T extends any[] ? number : keyof T;
 
-export type ListenerCallback = () => void;
+export type ListenerCallback = (updateAllWasUsed: boolean) => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
 
 type DirtyType<T> = T extends ObjectOrArray ? DirtyMap<T> | false : boolean;
@@ -120,20 +120,20 @@ export class Listener<Key extends string | number | symbol> {
         delete setters[id];
     }
 
-    public fireMultiple(key: Key[]) {
-        key.forEach((e) => this.fire(e));
+    public fireMultiple(key: Key[], updateAllWasUsed: boolean = false) {
+        key.forEach((e) => this.fire(e, updateAllWasUsed));
     }
 
-    public fire(key: Key) {
+    public fire(key: Key, updateAllWasUsed: boolean = false) {
         if (this.listeners) {
             let l = this.listeners[key];
             if (l) {
-                Object.keys(l!).forEach((e) => l![e]!());
+                Object.keys(l!).forEach((e) => l![e]!(updateAllWasUsed));
             }
         }
         if (this.anyListeners) {
             Object.keys(this.anyListeners).forEach((e) =>
-                this.anyListeners![e]!()
+                this.anyListeners![e]!(updateAllWasUsed)
             );
         }
     }
@@ -155,23 +155,24 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
 
     public update(key: KeyOf<T>, value: T[KeyOf<T>] | undefined) {
         if (
-            (typeof this._values[key] !== "object" ||
-                Array.isArray(this._values[key])) &&
+            typeof this._values[key] !== "object" &&
             this._values[key] === value
         )
-            return;
+            return false;
         // console.log("update", key, value);
         if (value === undefined) delete this._values[key];
         else this._values[key] = value;
-        super.fire(key);
+        super.fire(key, false);
+        return true;
     }
 
     public updateAll(values: T) {
-        if (this._values === values) return;
+        // if (this._values === values) return;
         // console.log("update all", values);
         let changed = changedKeys(this._values, values, "compare");
         this._values = values;
-        super.fireMultiple(changed);
+        super.fireMultiple(changed, true);
+        return changed.length > 0;
     }
 }
 
@@ -282,26 +283,30 @@ export class Form<T extends ObjectOrArray, Error = string> {
             let a = this.values[e];
             let b = this.defaultValues[e];
             if (typeof a === "object" || typeof b === "object") continue; // Do not compare objects
-            d[e] = a !== b;
+            if (a !== b) d[e] = true;
+            else delete d[e];
         }
         this.dirtyListener.updateAll(d);
     }
 
     public setValues(values: T, validate: boolean = true) {
-        if (this.values === values) return;
+        // if (this.values === values) return;
         if (!values) {
             console.warn("setValues was called with undefined");
             return;
         }
-        this.valuesListener.updateAll(memberCopy(values));
-        this.recalculateDirty();
-        if (validate && this.validator) this.validateAll();
+        if (this.valuesListener.updateAll(memberCopy(values))) {
+            console.log("setValues", values);
+            this.recalculateDirty();
+            if (validate && this.validator) this.validateAll();
+        }
     }
 
     public setDefaultValues(defaultValues: T, validate: boolean = true) {
-        this.defaultValuesListener.updateAll(memberCopy(defaultValues));
-        this.recalculateDirty();
-        if (validate && this.validator) this.validateAll();
+        if (this.defaultValuesListener.updateAll(memberCopy(defaultValues))) {
+            this.recalculateDirty();
+            if (validate && this.validator) this.validateAll();
+        }
     }
 
     public setValue<Key extends KeyOf<T>>(
@@ -329,19 +334,15 @@ export class Form<T extends ObjectOrArray, Error = string> {
         dirty?: DirtyType<T[Key]>,
         isDefault: boolean = false
     ) {
-        console.log(
-            "setValueInternal",
-            this.valuesListener.values[key] === value,
-            key,
-            value,
-            dirty,
-            isDefault
-        );
-        if (isDefault) this.defaultValuesListener.update(key, value);
-        else this.valuesListener.update(key, value);
-        if (dirty !== undefined)
-            this.dirtyListener.update(key as any, dirty as any);
-        if (this.validator && this.validateOnChange) this.validateAll(); // use this.validate instead?
+        let changed = isDefault
+            ? this.defaultValuesListener.update(key, value)
+            : this.valuesListener.update(key, value);
+        if (changed) {
+            console.log("setValueInternal", key, value);
+            if (dirty !== undefined)
+                this.dirtyListener.update(key as any, dirty as any);
+            if (this.validator && this.validateOnChange) this.validateAll(); // use this.validate instead?
+        }
     }
 }
 
@@ -381,25 +382,19 @@ export function useForm<T extends ObjectOrArray, Error = string>(
 
 export function useListener<T extends ObjectOrArray, Key extends KeyOf<T>>(
     form: Form<T>,
-    key: Key
+    key: Key,
+    onlyOnUpdateAll: boolean = false
 ) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        form.valuesListener.listen(key, () => {
-            if (key === "todos")
-                console.trace("array changed", form.values[key]);
-            setRender((e) => e + 1);
-        });
-        form.defaultValuesListener.listen(key, () => {
-            setRender((e) => e + 1);
-        });
-        form.dirtyListener.listen(key as any, () => {
-            setRender((e) => e + 1);
-        });
-        form.errorListener.listen(key as any, () => {
-            setRender((e) => e + 1);
-        });
+        function causeRerender(updateAllWasUsed: boolean) {
+            if (!onlyOnUpdateAll || updateAllWasUsed) setRender((e) => e + 1);
+        }
+        form.valuesListener.listen(key, causeRerender);
+        form.defaultValuesListener.listen(key, causeRerender);
+        form.dirtyListener.listen(key as any, causeRerender);
+        form.errorListener.listen(key as any, causeRerender);
     }, [form, key]);
 
     return {
@@ -411,22 +406,20 @@ export function useListener<T extends ObjectOrArray, Key extends KeyOf<T>>(
     };
 }
 
-export function useAnyListener<T extends ObjectOrArray>(form: Form<T>) {
+export function useAnyListener<T extends ObjectOrArray>(
+    form: Form<T>,
+    onlyOnUpdateAll: boolean = false
+) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        let a1 = form.valuesListener.listenAny(() => {
-            setRender((e) => e + 1);
-        });
-        let a2 = form.defaultValuesListener.listenAny(() => {
-            setRender((e) => e + 1);
-        });
-        let a3 = form.dirtyListener.listenAny(() => {
-            setRender((e) => e + 1);
-        });
-        let a4 = form.errorListener.listenAny(() => {
-            setRender((e) => e + 1);
-        });
+        function causeRerender(updateAllWasUsed: boolean) {
+            if (!onlyOnUpdateAll || updateAllWasUsed) setRender((e) => e + 1);
+        }
+        let a1 = form.valuesListener.listenAny(causeRerender);
+        let a2 = form.defaultValuesListener.listenAny(causeRerender);
+        let a3 = form.dirtyListener.listenAny(causeRerender);
+        let a4 = form.errorListener.listenAny(causeRerender);
 
         return () => {
             form.valuesListener.ignoreAny(a1);
@@ -497,7 +490,7 @@ export function useChildForm<
                 key as any,
                 c.current!.dirty
                     ? (c.current!.dirtyListener.values as any)
-                    : false
+                    : undefined
             );
         });
         let a4 = c.current!.errorListener.listenAny(() => {
