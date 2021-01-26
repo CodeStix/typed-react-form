@@ -1,14 +1,14 @@
-# Fast React form
+# Typed React form
 
 A React form state manager, focussed on flawless typescript integration and minimal rerenders.
 
-[![NPM](https://img.shields.io/npm/v/fast-react-form.svg)](https://www.npmjs.com/package/fast-react-form)
+[![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form)
 
 ## Install
 
 ```bash
-npm install --save fast-react-form
-yarn add fast-react-form
+npm install --save typed-react-form
+yarn add typed-react-form
 ```
 
 ## Usage

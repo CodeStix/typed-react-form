@@ -1,10 +1,10 @@
 {
-  "name": "fast-react-form",
+  "name": "typed-react-form",
   "version": "1.0.0",
-  "description": "A form state manager for react, focussed on minimal rerenders and flawless typescript integration.",
+  "description": "A React form state manager, focussed on flawless typescript integration and minimal rerenders.",
   "author": "CodeStix",
   "license": "MIT",
-  "repository": "CodeStix/fast-react-form",
+  "repository": "CodeStix/typed-react-form",
   "main": "dist/index.js",
   "source": "src/index.tsx",
   "engines": {

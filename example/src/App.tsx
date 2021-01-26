@@ -8,7 +8,7 @@ import {
     useChildForm,
     useForm,
     useListener
-} from "fast-react-form";
+} from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 
 interface TodoList {
