@@ -1,6 +1,6 @@
 {
   "name": "typed-react-form",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A React form state manager, focussed on flawless typescript integration and minimal rerenders.",
   "author": "CodeStix",
   "license": "MIT",
@@ -23,9 +23,9 @@
     "@types/node": "^12.12.38",
     "@types/react": "^16.9.27",
     "@types/react-dom": "^16.9.7",
-    "microbundle-crl": "^0.13.10",
     "cross-env": "^7.0.2",
     "gh-pages": "^2.2.0",
+    "microbundle-crl": "^0.13.10",
     "prettier": "^2.0.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
