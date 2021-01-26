@@ -10,6 +10,7 @@ dist
 .rpt2_cache
 
 # misc
+.vscode
 .DS_Store
 .env
 .env.local

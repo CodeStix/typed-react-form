@@ -59,10 +59,14 @@ function FormValues<T>(props: { form: Form<T> }) {
 
     return (
         <VisualRender>
+            <p>
+                <em>{val.formId}</em>
+            </p>
             <pre>{JSON.stringify(val.values, null, 2)}</pre>
-            <pre>{JSON.stringify(val.errorMap, null, 2)}</pre>
+            <pre>{JSON.stringify(val.defaultValues, null, 2)}</pre>
+            {/* <pre>{JSON.stringify(val.errorMap, null, 2)}</pre> */}
             <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre>
-            <pre>{JSON.stringify(val.state, null, 2)}</pre>
+            {/* <pre>{JSON.stringify(val.state, null, 2)}</pre> */}
             {val.dirty && (
                 <p>
                     <strong>DIRTY</strong>
@@ -142,11 +146,19 @@ function TodoItemList(props: {
 
     return (
         <ArrayListener parent={props.parent} name="todos">
-            {({ values, form }) => (
+            {({ values, form, swap, remove }) => (
                 <>
                     <ul style={{ padding: "0" }}>
                         {values.map((e, i) => (
-                            <TodoItem key={e.id} parent={form} index={i} />
+                            <TodoItem
+                                onTop={() => swap(i, 0)}
+                                onRemove={() => {
+                                    remove(i);
+                                }}
+                                key={e.id}
+                                parent={form}
+                                index={i}
+                            />
                         ))}
                     </ul>
                     <button
@@ -173,10 +185,10 @@ function TodoItemList(props: {
 function TodoItem(props: {
     parent: Form<Todo[], { isSubmitting: boolean }>;
     index: number;
+    onTop: () => void;
+    onRemove: () => void;
 }) {
     const form = useChildForm(props.parent, props.index);
-
-    console.log("render item", props.index);
 
     return (
         <li
@@ -191,6 +203,12 @@ function TodoItem(props: {
                 <Input form={form} name="message" />
                 <p>Intelligence</p>
                 <Input form={form} name="priority" />
+                <button type="button" onClick={props.onTop}>
+                    Go to top
+                </button>
+                <button type="button" onClick={props.onRemove}>
+                    Remove
+                </button>
                 <FormValues form={form} />
             </VisualRender>
         </li>

@@ -159,13 +159,21 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
             this._values[key] === value
         )
             return false;
-        if (value === undefined) delete this._values[key];
-        else this._values[key] = value;
+        if (value === undefined) {
+            if (Array.isArray(this._values)) {
+                this._values.splice(key as number, 1);
+            } else {
+                delete this._values[key];
+            }
+        } else {
+            this._values[key] = value;
+        }
         super.fire(key, false);
         return true;
     }
 
     public updateAll(values: T) {
+        if (this._values === values) return false;
         let changed = changedKeys(this._values, values, "compare");
         this._values = memberCopy(values);
         super.fireMultiple(changed, true);
@@ -178,9 +186,6 @@ export class Form<
     State extends ObjectOrArray = {},
     Error = string
 > {
-    // private _values: T;
-    // private _defaultValues: T;
-
     public valuesListener: ObjectListener<T>;
     public defaultValuesListener: ObjectListener<T>;
     public dirtyListener: ObjectListener<DirtyMap<T>>;
@@ -188,6 +193,9 @@ export class Form<
     public stateListener: ObjectListener<State>;
     public validator?: Validator<T, Error>;
     public validateOnChange: boolean;
+    public formId: number = Form.counter++;
+
+    private static counter = 0;
 
     public get values() {
         return this.valuesListener.values;
@@ -313,7 +321,6 @@ export class Form<
             return;
         }
         if (this.valuesListener.updateAll(values)) {
-            console.log("setValues", values);
             this.recalculateDirty();
             if (validate && this.validator) this.validateAll();
         }
@@ -355,7 +362,6 @@ export class Form<
             ? this.defaultValuesListener.update(key, value)
             : this.valuesListener.update(key, value);
         if (changed) {
-            console.log("setValueInternal", key, value);
             if (dirty !== undefined)
                 this.dirtyListener.update(key as any, dirty as any);
             if (this.validator && this.validateOnChange) this.validateAll(); // use this.validate instead?
@@ -391,17 +397,6 @@ export function useForm<
 
     return c.current;
 }
-
-// export function useArrayListener<T extends ObjectOrArray, Key extends KeyOf<T>>(form: Form<T>, key: Key) {
-//     const [state, setState] = useState(form.values[key]);
-
-//     useEffect(() => {
-//         form.valuesListener.listen(key, () => {
-
-//         });
-//     }, [key]);
-
-// }
 
 export function useListener<
     T extends ObjectOrArray,
@@ -478,9 +473,7 @@ export function useChildForm<
 
     if (c.current === null) {
         c.current = new Form<Parent[Key], ParentState, ParentError>(
-            parentForm.values[key] ??
-                parentForm.defaultValues[key] ??
-                ({} as any),
+            parentForm.values[key] ?? ({} as any),
             parentForm.defaultValues[key] ?? ({} as any),
             parentForm.state
         );
@@ -512,6 +505,9 @@ export function useChildForm<
 
         // Listen for any change on this form and notify parent on change
         let a1 = c.current!.valuesListener.listenAny(() => {
+            if (Array.isArray(c.current!.valuesListener.values)) {
+                console.log("setting child array");
+            }
             parentForm.setValueInternal(
                 key,
                 c.current!.valuesListener.values,
@@ -544,9 +540,14 @@ export function useChildForm<
             );
         });
 
-        c.current!.setValues(
-            parentForm.values[key] ?? parentForm.defaultValues[key]
+        c.current!.valuesListener.updateAll(
+            parentForm.values[key] ?? ({} as any)
         );
+        c.current!.defaultValuesListener.updateAll(
+            parentForm.defaultValues[key] ?? ({} as any)
+        );
+        c.current!.recalculateDirty();
+        if (c.current!.validator) c.current!.validateAll();
 
         return () => {
             parentForm.valuesListener.ignore(key, p1);
@@ -558,19 +559,19 @@ export function useChildForm<
             c.current!.defaultValuesListener.ignoreAny(a2);
             c.current!.dirtyListener.ignoreAny(a3);
             c.current!.errorListener.ignoreAny(a4);
-
-            parentForm.valuesListener.update(key, undefined as any); // null
-            parentForm.dirtyListener.update(key as any, undefined); // !!parentForm.defaultValues[key]
-            parentForm.errorListener.update(key as any, undefined);
         };
     }, [parentForm, key]);
 
+    useEffect(() => {
+        return () => {
+            // Do not set value to null on parentForm, because this child (and should be) unmounted because the parent value was set to null
+            parentForm.dirtyListener.update(key as any, undefined);
+            parentForm.errorListener.update(key as any, undefined);
+        };
+    }, []);
+
     return c.current;
 }
-
-// export function Listener<T extends ObjectOrArray, State extends ObjectOrArray, Error>(props: {form: Form<T, State, Error>, name: KeyOf<T>})  {
-
-// }
 
 export function ArrayListener<
     Parent extends ObjectOrArray,
@@ -604,6 +605,7 @@ export function ArrayListener<
     function remove(index: number) {
         let newValues = [...(form.values as any)];
         newValues.splice(index, 1);
+        console.log("remove values", newValues);
         form.setValues(newValues as any);
     }
 
@@ -624,9 +626,17 @@ export function ArrayListener<
     }
 
     function swap(index: number, newIndex: number) {
-        if (index === newIndex) return;
+        console.log("swapping", index, newIndex);
+        if (index === newIndex) {
+            return;
+        }
         let values = [...(form.values as any)];
         [values[index], values[newIndex]] = [values[newIndex], values[index]];
+        console.log(
+            "setting values",
+            JSON.stringify(form.values),
+            JSON.stringify(values)
+        );
         form.setValues(values as any);
     }
 
