@@ -1,14 +1,10 @@
-
-
 # Typed React form
 
 A React form state manager, focussed on flawless typescript integration and minimal rerenders.
 
 [![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form)
 
-
 ![vscode typescript](https://github.com/CodeStix/typed-react-form/raw/master/example/public/thumb.png)
-
 
 ## Install
 
@@ -21,7 +17,7 @@ yarn add typed-react-form
 
 This libary contains components and hooks to wrap your UI components with, which you can then reuse all over your application. After you did this correctly, all your form elements will be type checked!
 
-You should check the example for more information.
+You should check the [example code](https://github.com/CodeStix/typed-react-form/tree/master/example) for more information, which is hosted [here](https://typed-react-form-example.codestix.github.com/).
 
 ```tsx
 const form = useForm(
