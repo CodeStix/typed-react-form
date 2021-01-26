@@ -64,13 +64,18 @@ function FormValues<T>(props: { form: Form<T> }) {
                     <em>{val.formId}</em>
                 </p>
                 <pre>{JSON.stringify(val.values, null, 2)}</pre>
-                <pre>{JSON.stringify(val.defaultValues)}</pre>
-                {/* <pre>{JSON.stringify(val.errorMap, null, 2)}</pre> */}
-                <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre>
+                {/* <pre>{JSON.stringify(val.defaultValues)}</pre> */}
+                <pre>{JSON.stringify(val.errorMap, null, 2)}</pre>
+                {/* <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre> */}
                 {/* <pre>{JSON.stringify(val.state, null, 2)}</pre> */}
                 {val.dirty && (
                     <p>
                         <strong>DIRTY</strong>
+                    </p>
+                )}
+                {val.error && (
+                    <p>
+                        <strong>ERROR</strong>
                     </p>
                 )}
             </div>
@@ -94,7 +99,13 @@ export default function App() {
     const [values, setValues] = useState<TodoList>({
         author: "codestix",
         name: "My todo list",
-        todos: [{ message: "Fix this", priority: "normal", id: 4 }]
+        todos: Array(2)
+            .fill(0)
+            .map(() => ({
+                message: "Fix this",
+                priority: "normal",
+                id: Math.random()
+            }))
     });
 
     const form = useForm<TodoList, { isSubmitting: boolean }>(
@@ -105,7 +116,13 @@ export default function App() {
                 values.author.length < 3
                     ? "Author name is too short."
                     : undefined,
-            name: values.name.length < 3 ? "Title is too short." : undefined
+            name: values.name.length < 3 ? "Title is too short." : undefined,
+            todos: values.todos.reduce((prev, val, index) => {
+                if (val.message.length < 5) {
+                    prev[index] = { message: "Todo message should be longer!" };
+                }
+                return prev;
+            }, {})
         }),
         true
     );
@@ -203,14 +220,12 @@ function TodoItem(props: {
         >
             <VisualRender>
                 <Input form={form} name="message" />
-                {/* <Input form={form} name="priority" /> */}
                 <button type="button" onClick={props.onTop}>
                     Go to top
                 </button>
                 <button type="button" onClick={props.onRemove}>
                     Remove
                 </button>
-                {/* <FormValues form={form} /> */}
             </VisualRender>
         </li>
     );

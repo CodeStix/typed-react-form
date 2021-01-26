@@ -319,15 +319,10 @@ export class Form<
     }
 
     public setValues(values: T, validate: boolean = true) {
-        // if (this.values === values) return;
         if (!values) {
             console.warn("setValues was called with undefined");
             return;
         }
-        if (JSON.stringify(values) === "{}") {
-            console.trace("set to {}");
-        }
-
         if (this.valuesListener.updateAll(values)) {
             this.recalculateDirty();
             if (validate && this.validator) this.validateAll();
@@ -335,9 +330,6 @@ export class Form<
     }
 
     public setDefaultValues(defaultValues: T, validate: boolean = true) {
-        if (JSON.stringify(defaultValues) === "{}") {
-            console.trace("set to {}");
-        }
         if (this.defaultValuesListener.updateAll(defaultValues)) {
             this.recalculateDirty();
             if (validate && this.validator) this.validateAll();
@@ -606,7 +598,23 @@ export function ArrayListener<
         props.parent,
         props.name
     );
-    const { values, setValues } = useAnyListener(form, true);
+    const [, setRender] = useState(0);
+
+    useEffect(() => {
+        let p1 = form.valuesListener.listenAny((all) => {
+            if (all) {
+                setRender((e) => e + 1);
+            }
+        });
+
+        return () => {
+            form.valuesListener.ignoreAny(p1);
+        };
+    }, [props.parent, props.name]);
+
+    // const { values, setValues } = useAnyListener(form, true);
+
+    console.log("rerender list");
 
     function append(value: Parent[Key][number]) {
         form.setValues([...(form.values as any), value] as any);
@@ -615,7 +623,6 @@ export function ArrayListener<
     function remove(index: number) {
         let newValues = [...(form.values as any)];
         newValues.splice(index, 1);
-        console.log("remove values", newValues);
         form.setValues(newValues as any);
     }
 
@@ -636,17 +643,11 @@ export function ArrayListener<
     }
 
     function swap(index: number, newIndex: number) {
-        console.log("swapping", index, newIndex);
         if (index === newIndex) {
             return;
         }
         let values = [...(form.values as any)];
         [values[index], values[newIndex]] = [values[newIndex], values[index]];
-        console.log(
-            "setting values",
-            JSON.stringify(form.values),
-            JSON.stringify(values)
-        );
         form.setValues(values as any);
     }
 
@@ -654,8 +655,8 @@ export function ArrayListener<
         <React.Fragment>
             {props.children({
                 form,
-                values,
-                setValues,
+                values: form.values,
+                setValues: form.setValues,
                 remove,
                 move,
                 swap,
