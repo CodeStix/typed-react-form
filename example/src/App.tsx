@@ -69,39 +69,36 @@ function FormValues<T>(props: { form: Form<T> }) {
     );
 }
 
-interface User {
-    firstName: string;
-    lastName: string;
-    info: UserInfo;
+interface TodoList {
+    name: string;
+    author: string;
+    todos: Todo[];
 }
 
-interface UserInfo {
-    favoriteFood: string;
-    intelligence: number;
+interface Todo {
+    id: number;
+    message: string;
+    priority: "low" | "normal" | "high";
 }
 
 export default function App() {
-    const [values, setValues] = useState<User>({
-        firstName: "stijn",
-        lastName: "rogiest",
-        info: { favoriteFood: "pasta", intelligence: 128 }
+    const [values, setValues] = useState<TodoList>({
+        author: "codestix",
+        name: "My todo list",
+        todos: [{ message: "Fix this", priority: "normal", id: 4 }]
     });
 
-    const form = useForm<User>(
+    const form = useForm<TodoList>(
         values,
         (values) => ({
-            firstName:
-                values.firstName.length < 3
-                    ? "Your firstName is too short"
+            author:
+                values.author.length < 3
+                    ? "Author name is too short."
                     : undefined,
-            info:
-                values.info && values.info.favoriteFood !== "pasta"
-                    ? { favoriteFood: "Favorite food must be pasta" }
-                    : undefined
+            name: values.name.length < 3 ? "Title is too short." : undefined
         }),
         true
     );
-    const [show, setShow] = useState(true);
 
     return (
         <form
@@ -115,16 +112,13 @@ export default function App() {
             style={{ padding: "1em", margin: "1em", border: "1px solid #0003" }}
         >
             <VisualRender>
-                <p>Firstname</p>
-                <Input form={form} name="firstName" />
-                <p>Lastname</p>
-                <Input form={form} name="lastName" />
+                <p>Name</p>
+                <Input form={form} name="name" />
+                <p>Author</p>
+                <Input form={form} name="author" />
                 <p>Info</p>
-                {show && <FormUserInfo parent={form} />}
+                <TodoItemList parent={form} />
                 <FormValues form={form} />
-                <button type="button" onClick={() => setShow(!show)}>
-                    Toggle child form
-                </button>
                 <button type="button" onClick={() => form.resetAll()}>
                     Reset
                 </button>
@@ -134,35 +128,58 @@ export default function App() {
     );
 }
 
-function FormUserInfo(props: { parent: Form<User> }) {
-    const form = useChildForm(props.parent, "info");
+function TodoItemList(props: { parent: Form<TodoList> }) {
+    const form = useChildForm(props.parent, "todos");
+    const { value: todos } = useListener(props.parent, "todos");
+
+    console.log("render list");
 
     return (
-        <VisualRender>
-            <div
-                style={{
-                    padding: "1em",
-                    margin: "1em",
-                    border: "1px solid #0003"
-                }}
+        <div>
+            <ul style={{ padding: "0" }}>
+                {todos.map((e, i) => (
+                    <TodoItem key={e.id} parent={form} index={i} />
+                ))}
+            </ul>
+            <button
+                type="button"
+                onClick={() =>
+                    form.setValues([
+                        ...form.values,
+                        {
+                            message: "",
+                            priority: "normal",
+                            id: new Date().getTime()
+                        }
+                    ])
+                }
             >
+                Add item
+            </button>
+        </div>
+    );
+}
+
+function TodoItem(props: { parent: Form<Todo[]>; index: number }) {
+    const form = useChildForm(props.parent, props.index);
+
+    console.log("render item", props.index);
+
+    return (
+        <li
+            style={{
+                padding: "1em",
+                margin: "1em",
+                border: "1px solid #0003"
+            }}
+        >
+            <VisualRender>
                 <p>Favorite food</p>
-                <Input form={form} name="favoriteFood" />
+                <Input form={form} name="message" />
                 <p>Intelligence</p>
-                <Input form={form} name="intelligence" />
+                <Input form={form} name="priority" />
                 <FormValues form={form} />
-                <button
-                    type="button"
-                    onClick={() => {
-                        form.setError(
-                            "favoriteFood",
-                            form.errorMap.favoriteFood ? null : "not ok"
-                        );
-                    }}
-                >
-                    Toggle error
-                </button>
-            </div>
-        </VisualRender>
+            </VisualRender>
+        </li>
     );
 }

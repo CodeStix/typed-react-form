@@ -7,10 +7,9 @@ export function VisualRender(props: { children: React.ReactNode }) {
     if (ref.current) {
         ref.current.className = "";
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        timeoutRef.current = window.setTimeout(
-            () => (ref.current!.className = "blink"),
-            100
-        );
+        timeoutRef.current = window.setTimeout(() => {
+            ref.current && (ref.current.className = "blink");
+        }, 100);
     }
 
     return <div ref={ref}>{props.children}</div>;

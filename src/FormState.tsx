@@ -155,11 +155,12 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
 
     public update(key: KeyOf<T>, value: T[KeyOf<T>] | undefined) {
         if (
-            typeof this._values[key] !== "object" &&
+            (typeof this._values[key] !== "object" ||
+                Array.isArray(this._values[key])) &&
             this._values[key] === value
         )
             return;
-        console.log("update", key, value);
+        // console.log("update", key, value);
         if (value === undefined) delete this._values[key];
         else this._values[key] = value;
         super.fire(key);
@@ -167,7 +168,7 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
 
     public updateAll(values: T) {
         if (this._values === values) return;
-        console.log("update all", values);
+        // console.log("update all", values);
         let changed = changedKeys(this._values, values, "compare");
         this._values = values;
         super.fireMultiple(changed);
@@ -287,6 +288,11 @@ export class Form<T extends ObjectOrArray, Error = string> {
     }
 
     public setValues(values: T, validate: boolean = true) {
+        if (this.values === values) return;
+        if (!values) {
+            console.warn("setValues was called with undefined");
+            return;
+        }
         this.valuesListener.updateAll(memberCopy(values));
         this.recalculateDirty();
         if (validate && this.validator) this.validateAll();
@@ -323,6 +329,14 @@ export class Form<T extends ObjectOrArray, Error = string> {
         dirty?: DirtyType<T[Key]>,
         isDefault: boolean = false
     ) {
+        console.log(
+            "setValueInternal",
+            this.valuesListener.values[key] === value,
+            key,
+            value,
+            dirty,
+            isDefault
+        );
         if (isDefault) this.defaultValuesListener.update(key, value);
         else this.valuesListener.update(key, value);
         if (dirty !== undefined)
@@ -354,6 +368,17 @@ export function useForm<T extends ObjectOrArray, Error = string>(
     return c.current;
 }
 
+// export function useArrayListener<T extends ObjectOrArray, Key extends KeyOf<T>>(form: Form<T>, key: Key) {
+//     const [state, setState] = useState(form.values[key]);
+
+//     useEffect(() => {
+//         form.valuesListener.listen(key, () => {
+
+//         });
+//     }, [key]);
+
+// }
+
 export function useListener<T extends ObjectOrArray, Key extends KeyOf<T>>(
     form: Form<T>,
     key: Key
@@ -362,6 +387,8 @@ export function useListener<T extends ObjectOrArray, Key extends KeyOf<T>>(
 
     useEffect(() => {
         form.valuesListener.listen(key, () => {
+            if (key === "todos")
+                console.trace("array changed", form.values[key]);
             setRender((e) => e + 1);
         });
         form.defaultValuesListener.listen(key, () => {
@@ -420,8 +447,10 @@ export function useChildForm<
 
     if (c.current === null) {
         c.current = new Form<Parent[Key]>(
-            parentForm.values[key] ?? parentForm.defaultValues[key],
-            parentForm.defaultValues[key]
+            parentForm.values[key] ??
+                parentForm.defaultValues[key] ??
+                ({} as any),
+            parentForm.defaultValues[key] ?? ({} as any)
         );
     }
 
@@ -481,8 +510,7 @@ export function useChildForm<
         });
 
         c.current!.setValues(
-            parentForm.values[key] ?? parentForm.defaultValues[key],
-            true
+            parentForm.values[key] ?? parentForm.defaultValues[key]
         );
 
         return () => {
@@ -495,7 +523,7 @@ export function useChildForm<
             c.current!.dirtyListener.ignoreAny(a3);
             c.current!.errorListener.ignoreAny(a4);
 
-            parentForm.valuesListener.update(key, null as any);
+            parentForm.valuesListener.update(key, undefined as any); // null
             parentForm.dirtyListener.update(key as any, undefined); // !!parentForm.defaultValues[key]
             parentForm.errorListener.update(key as any, undefined);
         };
