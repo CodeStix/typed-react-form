@@ -120,8 +120,9 @@ export class ListenEmitter<Key extends string | number | symbol> {
         delete setters[id];
     }
 
-    public fireMultiple(key: Key[], updateAllWasUsed: boolean = false) {
-        key.forEach((e) => this.fire(e, updateAllWasUsed));
+    public fireMultiple(keys: Key[], updateAllWasUsed: boolean = false) {
+        for (let i = 0; i < keys.length; i++)
+            this.fire(keys[i], updateAllWasUsed);
     }
 
     public fire(key: Key, updateAllWasUsed: boolean = false) {
@@ -168,6 +169,7 @@ export class ObjectListener<T extends ObjectOrArray> extends ListenEmitter<
         } else {
             this._values[key] = value;
         }
+        console.log("update", key);
         super.fire(key, false);
         return true;
     }
@@ -177,6 +179,7 @@ export class ObjectListener<T extends ObjectOrArray> extends ListenEmitter<
         let changed = changedKeys(this._values, values, "compare");
         this._values = memberCopy(values);
         super.fireMultiple(changed, true);
+        if (changed.length > 0) console.log("updateAll", changed);
         return changed.length > 0;
     }
 }

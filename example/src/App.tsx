@@ -55,29 +55,20 @@ function Input<T extends ObjectOrArray>(props: {
 }
 
 function FormValues<T>(props: { form: Form<T> }) {
-    const val = useAnyListener(props.form);
-
+    const form = useAnyListener(props.form);
     return (
         <VisualRender>
             <div style={{ background: "#0001" }}>
                 <p>
-                    <em>{val.formId}</em>
+                    {/* <em>{val.formId}</em> */}
+                    {form.dirty && <strong>DIRTY</strong>}
+                    {form.error && <strong>ERROR</strong>}
                 </p>
-                <pre>{JSON.stringify(val.values, null, 2)}</pre>
+                <pre>{JSON.stringify(form.values, null, 2)}</pre>
                 {/* <pre>{JSON.stringify(val.defaultValues)}</pre> */}
-                <pre>{JSON.stringify(val.errorMap, null, 2)}</pre>
+                {/* <pre>{JSON.stringify(val.errorMap, null, 2)}</pre> */}
                 {/* <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre> */}
                 {/* <pre>{JSON.stringify(val.state, null, 2)}</pre> */}
-                {val.dirty && (
-                    <p>
-                        <strong>DIRTY</strong>
-                    </p>
-                )}
-                {val.error && (
-                    <p>
-                        <strong>ERROR</strong>
-                    </p>
-                )}
             </div>
         </VisualRender>
     );
@@ -95,36 +86,40 @@ interface Todo {
     priority: "low" | "normal" | "high";
 }
 
+// You should use a validation library (yup, class-validator) instead of this mess...
+function validateTodoList(values: TodoList) {
+    let todoErrors = values.todos.reduce((prev, val, index) => {
+        if (val.message.length < 5) {
+            prev[index] = { message: "Todo message should be longer!" };
+        }
+        return prev;
+    }, {});
+    return {
+        author:
+            values.author.length < 3 ? "Author name is too short." : undefined,
+        name: values.name.length < 3 ? "Title is too short." : undefined,
+        todos: Object.keys(todoErrors).length > 0 ? todoErrors : undefined
+    };
+}
+
 export default function App() {
     const [values, setValues] = useState<TodoList>({
         author: "codestix",
         name: "My todo list",
-        todos: Array(2)
+        todos: Array(3)
             .fill(0)
-            .map(() => ({
-                message: "Fix this",
+            .map((_, i) => ({
+                message: "Fix this " + i,
                 priority: "normal",
-                id: Math.random()
+                id: i
             }))
     });
 
     const form = useForm<TodoList, { isSubmitting: boolean }>(
-        values,
-        { isSubmitting: false },
-        (values) => ({
-            author:
-                values.author.length < 3
-                    ? "Author name is too short."
-                    : undefined,
-            name: values.name.length < 3 ? "Title is too short." : undefined,
-            todos: values.todos.reduce((prev, val, index) => {
-                if (val.message.length < 5) {
-                    prev[index] = { message: "Todo message should be longer!" };
-                }
-                return prev;
-            }, {})
-        }),
-        true
+        values, // <- default values, can change
+        { isSubmitting: false }, // <- global form state
+        validateTodoList, // <- validator
+        true // <- validate on change
     );
 
     return (
@@ -132,6 +127,8 @@ export default function App() {
             onSubmit={async (ev) => {
                 ev.preventDefault();
                 console.log("submitting");
+                form.validateAll();
+                if (form.error) return;
                 form.setStateField("isSubmitting", true);
                 await new Promise((res) => setTimeout(res, 500));
                 form.setStateField("isSubmitting", false);
@@ -141,64 +138,54 @@ export default function App() {
             style={{ padding: "1em", margin: "1em", border: "1px solid #0003" }}
         >
             <VisualRender>
+                <h2>Todo list</h2>
                 <p>Name</p>
                 <Input form={form} name="name" />
                 <p>Author</p>
                 <Input form={form} name="author" />
-                <p>Info</p>
-                <TodoItemList parent={form} />
-                <FormValues form={form} />
+                <p>Todo's</p>
+                <ArrayForm parent={form} name="todos">
+                    {({ form, swap, remove }) => (
+                        <VisualRender>
+                            <ul style={{ padding: "0" }}>
+                                {form.values.map((e, i) => (
+                                    <TodoItem
+                                        onTop={() => swap(i, 0)}
+                                        onRemove={() => {
+                                            remove(i);
+                                        }}
+                                        key={e.id}
+                                        parent={form}
+                                        index={i}
+                                    />
+                                ))}
+                            </ul>
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    form.setValues([
+                                        ...form.values,
+                                        {
+                                            message: "",
+                                            priority: "normal",
+                                            id: new Date().getTime()
+                                        }
+                                    ])
+                                }
+                            >
+                                Add item
+                            </button>
+                        </VisualRender>
+                    )}
+                </ArrayForm>
                 <button type="button" onClick={() => form.resetAll()}>
                     Reset
                 </button>
                 <button>Submit</button>
+                <h3>Output</h3>
+                <FormValues form={form} />
             </VisualRender>
         </form>
-    );
-}
-
-function TodoItemList(props: {
-    parent: Form<TodoList, { isSubmitting: boolean }>;
-}) {
-    // const form = useChildForm(props.parent, "todos");
-    // const { values } = useAnyListener(form, true);
-
-    return (
-        <ArrayForm parent={props.parent} name="todos">
-            {({ form, swap, remove }) => (
-                <>
-                    <ul style={{ padding: "0" }}>
-                        {form.values.map((e, i) => (
-                            <TodoItem
-                                onTop={() => swap(i, 0)}
-                                onRemove={() => {
-                                    remove(i);
-                                }}
-                                key={e.id}
-                                parent={form}
-                                index={i}
-                            />
-                        ))}
-                    </ul>
-                    <button
-                        type="button"
-                        onClick={() =>
-                            form.setValues([
-                                ...form.values,
-                                {
-                                    message: "",
-                                    priority: "normal",
-                                    id: new Date().getTime()
-                                }
-                            ])
-                        }
-                    >
-                        Add item
-                    </button>
-                    <FormValues form={form} />
-                </>
-            )}
-        </ArrayForm>
     );
 }
 
