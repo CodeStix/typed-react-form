@@ -11,17 +11,20 @@ import {
 import { VisualRender } from "./VisualRender";
 
 function Input<T extends ObjectOrArray>(props: {
-    form: Form<T>;
+    form: Form<T, { isSubmitting: boolean }>;
     name: KeyOf<T>;
 }) {
-    const { value, dirty, defaultValue, error } = useListener(
+    const { value, dirty, defaultValue, error, state } = useListener(
         props.form,
         props.name
     );
 
+    console.log("render input", value);
+
     return (
         <VisualRender>
             <input
+                disabled={state.isSubmitting}
                 placeholder={defaultValue}
                 style={{
                     background: dirty ? "#eee" : "#fff",
@@ -60,6 +63,7 @@ function FormValues<T>(props: { form: Form<T> }) {
             <pre>{JSON.stringify(val.values, null, 2)}</pre>
             <pre>{JSON.stringify(val.errorMap, null, 2)}</pre>
             <pre>{JSON.stringify(val.dirtyListener.values, null, 2)}</pre>
+            <pre>{JSON.stringify(val.state, null, 2)}</pre>
             {val.dirty && (
                 <p>
                     <strong>DIRTY</strong>
@@ -88,8 +92,9 @@ export default function App() {
         todos: [{ message: "Fix this", priority: "normal", id: 4 }]
     });
 
-    const form = useForm<TodoList>(
+    const form = useForm<TodoList, { isSubmitting: boolean }>(
         values,
+        { isSubmitting: false },
         (values) => ({
             author:
                 values.author.length < 3
@@ -105,7 +110,9 @@ export default function App() {
             onSubmit={async (ev) => {
                 ev.preventDefault();
                 console.log("submitting");
+                form.setStateField("isSubmitting", true);
                 await new Promise((res) => setTimeout(res, 500));
+                form.setStateField("isSubmitting", false);
                 console.log("submitted");
                 setValues({ ...form.values });
             }}
@@ -128,7 +135,9 @@ export default function App() {
     );
 }
 
-function TodoItemList(props: { parent: Form<TodoList> }) {
+function TodoItemList(props: {
+    parent: Form<TodoList, { isSubmitting: boolean }>;
+}) {
     const form = useChildForm(props.parent, "todos");
     const { values } = useAnyListener(form, true);
 
@@ -158,7 +167,10 @@ function TodoItemList(props: { parent: Form<TodoList> }) {
     );
 }
 
-function TodoItem(props: { parent: Form<Todo[]>; index: number }) {
+function TodoItem(props: {
+    parent: Form<Todo[], { isSubmitting: boolean }>;
+    index: number;
+}) {
     const form = useChildForm(props.parent, props.index);
 
     console.log("render item", props.index);

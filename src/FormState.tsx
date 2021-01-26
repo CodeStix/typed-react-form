@@ -150,7 +150,7 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
 
     public constructor(initialValues: T) {
         super();
-        this._values = initialValues;
+        this._values = memberCopy(initialValues);
     }
 
     public update(key: KeyOf<T>, value: T[KeyOf<T>] | undefined) {
@@ -159,7 +159,6 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
             this._values[key] === value
         )
             return false;
-        // console.log("update", key, value);
         if (value === undefined) delete this._values[key];
         else this._values[key] = value;
         super.fire(key, false);
@@ -167,16 +166,18 @@ export class ObjectListener<T extends ObjectOrArray> extends Listener<
     }
 
     public updateAll(values: T) {
-        // if (this._values === values) return;
-        // console.log("update all", values);
         let changed = changedKeys(this._values, values, "compare");
-        this._values = values;
+        this._values = memberCopy(values);
         super.fireMultiple(changed, true);
         return changed.length > 0;
     }
 }
 
-export class Form<T extends ObjectOrArray, Error = string> {
+export class Form<
+    T extends ObjectOrArray,
+    State extends ObjectOrArray = {},
+    Error = string
+> {
     // private _values: T;
     // private _defaultValues: T;
 
@@ -184,6 +185,7 @@ export class Form<T extends ObjectOrArray, Error = string> {
     public defaultValuesListener: ObjectListener<T>;
     public dirtyListener: ObjectListener<DirtyMap<T>>;
     public errorListener: ObjectListener<ErrorMap<T, Error>>;
+    public stateListener: ObjectListener<State>;
     public validator?: Validator<T, Error>;
     public validateOnChange: boolean;
 
@@ -215,20 +217,35 @@ export class Form<T extends ObjectOrArray, Error = string> {
         );
     }
 
+    public get state() {
+        return this.stateListener.values;
+    }
+
     constructor(
         values: T,
         defaultValues: T,
+        state: State,
         validator?: Validator<T, Error>,
         validateOnChange: boolean = true
     ) {
         this.validator = validator;
         this.validateOnChange = validateOnChange;
-        this.valuesListener = new ObjectListener(memberCopy(values));
-        this.defaultValuesListener = new ObjectListener(
-            memberCopy(defaultValues)
-        );
+        this.valuesListener = new ObjectListener(values);
+        this.defaultValuesListener = new ObjectListener(defaultValues);
+        this.stateListener = new ObjectListener(state);
         this.dirtyListener = new ObjectListener({});
         this.errorListener = new ObjectListener({});
+    }
+
+    public setState(newState: State) {
+        this.stateListener.updateAll(newState);
+    }
+
+    public setStateField<Key extends KeyOf<State>>(
+        key: Key,
+        value: State[Key]
+    ) {
+        this.stateListener.update(key, value);
     }
 
     public resetAll() {
@@ -295,7 +312,7 @@ export class Form<T extends ObjectOrArray, Error = string> {
             console.warn("setValues was called with undefined");
             return;
         }
-        if (this.valuesListener.updateAll(memberCopy(values))) {
+        if (this.valuesListener.updateAll(values)) {
             console.log("setValues", values);
             this.recalculateDirty();
             if (validate && this.validator) this.validateAll();
@@ -303,7 +320,7 @@ export class Form<T extends ObjectOrArray, Error = string> {
     }
 
     public setDefaultValues(defaultValues: T, validate: boolean = true) {
-        if (this.defaultValuesListener.updateAll(memberCopy(defaultValues))) {
+        if (this.defaultValuesListener.updateAll(defaultValues)) {
             this.recalculateDirty();
             if (validate && this.validator) this.validateAll();
         }
@@ -346,17 +363,23 @@ export class Form<T extends ObjectOrArray, Error = string> {
     }
 }
 
-export function useForm<T extends ObjectOrArray, Error = string>(
+export function useForm<
+    T extends ObjectOrArray,
+    State extends ObjectOrArray = {},
+    Error = string
+>(
     defaultValues: T,
+    state: State,
     validator?: Validator<T, Error>,
     validateOnChange: boolean = true
 ) {
-    let c = useRef<Form<T, Error> | null>(null);
+    let c = useRef<Form<T, State, Error> | null>(null);
 
     if (c.current === null) {
-        c.current = new Form<T, Error>(
+        c.current = new Form<T, State, Error>(
             defaultValues,
             defaultValues,
+            state,
             validator,
             validateOnChange
         );
@@ -380,21 +403,30 @@ export function useForm<T extends ObjectOrArray, Error = string>(
 
 // }
 
-export function useListener<T extends ObjectOrArray, Key extends KeyOf<T>>(
-    form: Form<T>,
-    key: Key,
-    onlyOnUpdateAll: boolean = false
-) {
+export function useListener<
+    T extends ObjectOrArray,
+    State extends ObjectOrArray,
+    Error,
+    Key extends KeyOf<T>
+>(form: Form<T, State, Error>, key: Key, onlyOnUpdateAll: boolean = false) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
         function causeRerender(updateAllWasUsed: boolean) {
             if (!onlyOnUpdateAll || updateAllWasUsed) setRender((e) => e + 1);
         }
-        form.valuesListener.listen(key, causeRerender);
-        form.defaultValuesListener.listen(key, causeRerender);
-        form.dirtyListener.listen(key as any, causeRerender);
-        form.errorListener.listen(key as any, causeRerender);
+        let a1 = form.valuesListener.listen(key, causeRerender);
+        let a2 = form.defaultValuesListener.listen(key, causeRerender);
+        let a3 = form.dirtyListener.listen(key as any, causeRerender);
+        let a4 = form.errorListener.listen(key as any, causeRerender);
+        let a5 = form.stateListener.listenAny(causeRerender);
+        return () => {
+            form.valuesListener.ignore(key, a1);
+            form.defaultValuesListener.ignore(key, a2);
+            form.dirtyListener.ignore(key as any, a3);
+            form.errorListener.ignore(key as any, a4);
+            form.stateListener.ignoreAny(a5);
+        };
     }, [form, key]);
 
     return {
@@ -402,14 +434,17 @@ export function useListener<T extends ObjectOrArray, Key extends KeyOf<T>>(
         defaultValue: form.defaultValues[key],
         dirty: form.dirtyMap[key],
         error: form.errorMap[key],
+        state: form.state,
+        form: form,
         setValue: (value: T[Key]) => form.setValue(key, value)
     };
 }
 
-export function useAnyListener<T extends ObjectOrArray>(
-    form: Form<T>,
-    onlyOnUpdateAll: boolean = false
-) {
+export function useAnyListener<
+    T extends ObjectOrArray,
+    State extends ObjectOrArray,
+    Error
+>(form: Form<T, State, Error>, onlyOnUpdateAll: boolean = false) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
@@ -420,12 +455,13 @@ export function useAnyListener<T extends ObjectOrArray>(
         let a2 = form.defaultValuesListener.listenAny(causeRerender);
         let a3 = form.dirtyListener.listenAny(causeRerender);
         let a4 = form.errorListener.listenAny(causeRerender);
-
+        let a5 = form.stateListener.listenAny(causeRerender);
         return () => {
             form.valuesListener.ignoreAny(a1);
             form.defaultValuesListener.ignoreAny(a2);
             form.dirtyListener.ignoreAny(a3);
             form.errorListener.ignoreAny(a4);
+            form.stateListener.ignoreAny(a5);
         };
     }, [form]);
 
@@ -434,16 +470,19 @@ export function useAnyListener<T extends ObjectOrArray>(
 
 export function useChildForm<
     Parent extends ObjectOrArray,
+    ParentState extends ObjectOrArray,
+    ParentError,
     Key extends KeyOf<Parent>
->(parentForm: Form<Parent>, key: Key) {
-    let c = useRef<Form<Parent[Key]> | null>(null);
+>(parentForm: Form<Parent, ParentState, ParentError>, key: Key) {
+    let c = useRef<Form<Parent[Key], ParentState, ParentError> | null>(null);
 
     if (c.current === null) {
-        c.current = new Form<Parent[Key]>(
+        c.current = new Form<Parent[Key], ParentState, ParentError>(
             parentForm.values[key] ??
                 parentForm.defaultValues[key] ??
                 ({} as any),
-            parentForm.defaultValues[key] ?? ({} as any)
+            parentForm.defaultValues[key] ?? ({} as any),
+            parentForm.state
         );
     }
 
@@ -466,6 +505,9 @@ export function useChildForm<
             c.current!.errorListener.updateAll(
                 parentForm.errorListener.values[key] || ({} as any)
             );
+        });
+        let p5 = parentForm.stateListener.listenAny(() => {
+            c.current!.stateListener.updateAll(parentForm.stateListener.values);
         });
 
         // Listen for any change on this form and notify parent on change
@@ -511,6 +553,7 @@ export function useChildForm<
             parentForm.defaultValuesListener.ignore(key, p2);
             parentForm.dirtyListener.ignore(key as any, p3);
             parentForm.errorListener.ignore(key as any, p4);
+            parentForm.stateListener.ignoreAny(p5);
             c.current!.valuesListener.ignoreAny(a1);
             c.current!.defaultValuesListener.ignoreAny(a2);
             c.current!.dirtyListener.ignoreAny(a3);
@@ -521,10 +564,6 @@ export function useChildForm<
             parentForm.errorListener.update(key as any, undefined);
         };
     }, [parentForm, key]);
-
-    useEffect(() => {
-        // TODO update dirty and validate
-    });
 
     return c.current;
 }
