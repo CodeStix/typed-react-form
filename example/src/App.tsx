@@ -118,7 +118,7 @@ export default function App() {
                     </a>
                 </h1>
                 <p>
-                    The red flash indicated which parts of the form are being
+                    The red flash indicates which parts of the form are being
                     rerendered.
                 </p>
                 <hr />
