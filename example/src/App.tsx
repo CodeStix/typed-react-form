@@ -15,31 +15,44 @@ function Input<T extends { [key: string]: any }>({
     form: Form<T>;
     name: keyof T;
 }) {
-    const { value, setValue } = useListener(form, name);
+    const { value, setValue, error, dirty } = useListener(form, name);
 
     return (
         <VisualRender>
             <input
+                style={{
+                    border: error ? "1px solid red" : undefined,
+                    background: dirty ? "#eee" : undefined
+                }}
                 value={value as string}
                 onChange={(e) => {
                     setValue(e.target.value as any);
                 }}
             />
+            {error && (
+                <p>
+                    <strong>{error}</strong>
+                </p>
+            )}
         </VisualRender>
     );
 }
 
 function Debug(props: { form: Form<any> }) {
-    const { values, dirty, dirtyMap } = useAnyListener(props.form);
+    const { values, dirty, dirtyMap, errorMap, error } = useAnyListener(
+        props.form
+    );
 
     return (
         <VisualRender>
             <div style={{ padding: "1em", background: "#eee" }}>
                 <p>
-                    <strong>{dirty ? "MODIFIED" : "UNMODIFIED"}</strong>
+                    <strong>{dirty ? "MODIFIED" : "UNMODIFIED"}</strong>{" "}
+                    <strong>{error ? "ERROR" : "OK"}</strong>
                 </p>
                 <pre>{JSON.stringify(values, null, 2)}</pre>
                 <pre>{JSON.stringify(dirtyMap, null, 2)}</pre>
+                <pre>{JSON.stringify(errorMap, null, 2)}</pre>
             </div>
         </VisualRender>
     );
@@ -101,6 +114,12 @@ export default function App() {
                 <button type="button" onClick={() => form.reset()}>
                     Reset
                 </button>
+                <button
+                    type="button"
+                    onClick={() => form.setError("name", "Name not epic")}
+                >
+                    Set error
+                </button>
             </form>
         </VisualRender>
     );
@@ -121,6 +140,14 @@ function TodoInfo(props: { parent: Form<TodoList> }) {
                 <p>Author name</p>
                 <Input form={form} name="authorName" />
                 <TodoInfoMore parent={form} />
+                <button
+                    type="button"
+                    onClick={() =>
+                        form.setError("authorName", "Author name not epic")
+                    }
+                >
+                    Set error
+                </button>
             </div>
         </VisualRender>
     );

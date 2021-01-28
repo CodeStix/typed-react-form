@@ -51,11 +51,23 @@ type DirtyMap<T> = {
     [Key in keyof T]?: boolean;
 };
 
-export class Form<T> {
+type ObjectOrArray = {
+    [key: string]: any;
+    [key: number]: any;
+};
+
+type ErrorType<T, Error> = T extends ObjectOrArray ? ErrorMap<T, Error> : Error;
+
+type ErrorMap<T, Error> = {
+    [Key in keyof T]?: ErrorType<T[Key], Error>;
+};
+
+export class Form<T, Error = string> {
     public values: T;
     public defaultValues: T;
     public childMap: ChildFormMap<T> = {};
     public dirtyMap: DirtyMap<T> = {};
+    public errorMap: ErrorMap<T, Error> = {};
     public listeners: { [Key in keyof T]?: ListenerMap } = {};
     public anyListeners: ListenerMap = {};
     public formId = ++Form.formCounter;
@@ -70,6 +82,10 @@ export class Form<T> {
 
     public get dirty() {
         return Object.keys(this.dirtyMap).some((e) => this.dirtyMap[e]);
+    }
+
+    public get error() {
+        return Object.keys(this.errorMap).some((e) => this.errorMap[e]);
     }
 
     public setValueInternal<Key extends keyof T>(
@@ -99,9 +115,20 @@ export class Form<T> {
                 this.dirtyMap[key] = child.dirty;
             }
         }
-        if (notifyParent) void 0; // Not implemented for topmost form
         this.fireListeners(key);
-        if (fireAny) this.fireAnyListeners(); // Will be false when using setValues, he will call fireAnyListeners itself
+        if (fireAny) {
+            // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
+            if (notifyParent) this.updateParentValues(isDefault);
+            this.fireAnyListeners();
+        }
+    }
+
+    protected updateParentValues(_isDefault: boolean) {
+        // Not implemented for root form, as it does not have a parent
+    }
+
+    protected updateParentErrors() {
+        // Not implemented for root form, as it does not have a parent
     }
 
     public setValue<Key extends keyof T>(
@@ -109,7 +136,8 @@ export class Form<T> {
         value: T[Key],
         isDefault: boolean = false,
         notifyChild: boolean = true,
-        notifyParent: boolean = true
+        notifyParent: boolean = true,
+        fireAny: boolean = true
     ) {
         if (typeof value === "object") {
             this.setValueInternal(
@@ -119,7 +147,7 @@ export class Form<T> {
                 isDefault,
                 notifyChild,
                 notifyParent,
-                true
+                fireAny
             );
         } else {
             if (
@@ -130,8 +158,7 @@ export class Form<T> {
                     this.formId,
                     "already set",
                     value,
-                    this.values[key],
-                    this.defaultValues[key]
+                    isDefault ? this.defaultValues[key] : this.values[key]
                 );
                 return false;
             }
@@ -144,7 +171,7 @@ export class Form<T> {
                 isDefault,
                 notifyChild,
                 notifyParent,
-                true
+                fireAny
             );
         }
         return true;
@@ -157,6 +184,7 @@ export class Form<T> {
         notifyParent: boolean = true
     ) {
         console.log(this.formId, "setValues", values, isDefault);
+        // Copy the values to the local form object
         let k = Object.keys(values);
         for (let i = 0; i < k.length; i++) {
             let key = k[i] as keyof T;
@@ -165,9 +193,47 @@ export class Form<T> {
                 values[key],
                 isDefault,
                 notifyChild,
-                notifyParent
+                notifyParent,
+                false // Will call fireAnyListener by itself, see 3 lines down
             );
         }
+        if (notifyParent) this.updateParentValues(isDefault);
+        this.fireAnyListeners();
+    }
+
+    public setError<Key extends keyof T>(
+        key: Key,
+        error: ErrorType<T[Key], Error>,
+        notifyChild: boolean = true,
+        notifyParent: boolean = true,
+        fireAny: boolean = true
+    ) {
+        this.errorMap[key] = error;
+        if (notifyChild) this.childMap[key]?.setErrors(error as any);
+        this.fireListeners(key);
+        if (fireAny) {
+            if (notifyParent) this.updateParentErrors();
+            this.fireAnyListeners();
+        }
+    }
+
+    public setErrors(
+        errors: ErrorMap<T, Error>,
+        notifyChild: boolean = true,
+        notifyParent: boolean = true
+    ) {
+        let k = Object.keys(errors);
+        for (let i = 0; i < k.length; i++) {
+            let key = k[i] as keyof T;
+            this.setError(
+                key,
+                errors[key] as any,
+                notifyChild,
+                notifyParent,
+                false // Will call fireAnyListener by itself, see 3 lines down
+            );
+        }
+        if (notifyParent) this.updateParentErrors();
         this.fireAnyListeners();
     }
 
@@ -236,45 +302,25 @@ export class ChildForm<Parent, Key extends keyof Parent> extends Form<
         parent.childMap[name] = this;
     }
 
-    public setValueInternal<ParentKey extends keyof Parent[Key]>(
-        key: ParentKey,
-        value: Parent[Key][ParentKey],
-        dirty: boolean | undefined,
-        isDefault: boolean,
-        notifyChild: boolean,
-        notifyParent: boolean,
-        fireAny: boolean
-    ) {
-        console.log(
-            this.formId,
-            "setValueInternal(child)",
-            key,
-            value,
-            dirty,
-            isDefault
+    protected updateParentValues(isDefault: boolean) {
+        this.parent.setValueInternal(
+            this.name,
+            isDefault ? { ...this.defaultValues } : { ...this.values },
+            this.dirty,
+            isDefault,
+            false,
+            true,
+            true
         );
-        if (isDefault) this.defaultValues[key] = value;
-        else this.values[key] = value;
-        if (dirty !== undefined) this.dirtyMap[key] = dirty;
-        if (notifyChild) {
-            let child = this.childMap[key];
-            if (child) {
-                child.setValues(value, isDefault, true, false);
-                this.dirtyMap[key] = child.dirty;
-            }
-        }
-        if (notifyParent)
-            this.parent.setValueInternal(
-                this.name,
-                isDefault ? { ...this.defaultValues } : { ...this.values },
-                this.dirty,
-                isDefault,
-                false,
-                true,
-                true
-            );
-        this.fireListeners(key);
-        if (fireAny) this.fireAnyListeners(); // Will be false when using setValues, he will call fireAnyListeners itself
+    }
+
+    protected updateParentErrors() {
+        this.parent.setError(
+            this.name,
+            { ...this.errorMap } as any,
+            false,
+            true
+        );
     }
 }
 
@@ -320,6 +366,8 @@ export function useListener<T, Key extends keyof T>(form: Form<T>, name: Key) {
     return {
         value: form.values[name],
         setValue: (value: T[Key]) => form.setValue(name, value),
+        dirty: form.dirtyMap[name],
+        error: form.errorMap[name],
         form
     };
 }
