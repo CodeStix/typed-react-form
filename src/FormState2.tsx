@@ -76,12 +76,14 @@ export class Form<T> {
         dirty: boolean | undefined,
         isDefault: boolean,
         notifyChild: boolean,
+        notifyParent: boolean,
         fireAny: boolean
     ) {
         if (isDefault) this.defaultValues[key] = value;
         else this.values[key] = value;
         if (dirty !== undefined) this.dirtyMap[key] = dirty;
         if (notifyChild) this.childMap[key]?.setValues(value, isDefault);
+        if (notifyParent) void 0; // Not implemented for topmost form
         this.fireListeners(key);
         if (fireAny) this.fireAnyListeners(); // Will be false when using setValues, he will call fireAnyListeners itself
     }
@@ -92,7 +94,15 @@ export class Form<T> {
         isDefault: boolean = false
     ) {
         if (typeof value === "object") {
-            this.setValueInternal(key, value, undefined, isDefault, true, true);
+            this.setValueInternal(
+                key,
+                value,
+                undefined,
+                isDefault,
+                true,
+                true,
+                true
+            );
         } else {
             if (this.values[key] === value) return false;
             this.setValueInternal(
@@ -102,6 +112,7 @@ export class Form<T> {
                     ? value !== this.values[key]
                     : value !== this.defaultValues[key],
                 isDefault,
+                true,
                 true,
                 true
             );
@@ -189,19 +200,21 @@ export class ChildForm<Parent, Key extends keyof Parent> extends Form<
         dirty: boolean | undefined,
         isDefault: boolean,
         notifyChild: boolean,
+        notifyParent: boolean,
         fireAny: boolean
     ) {
         if (isDefault) this.defaultValues[key] = value;
         else this.values[key] = value;
         if (dirty !== undefined) this.dirtyMap[key] = dirty;
         if (notifyChild) this.childMap[key]?.setValues(value, isDefault);
-        else
+        if (notifyParent)
             this.parent.setValueInternal(
                 this.name,
                 this.values,
                 this.dirty,
                 isDefault,
                 false,
+                true,
                 true
             );
         this.fireListeners(key);
