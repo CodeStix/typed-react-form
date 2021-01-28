@@ -449,6 +449,7 @@ export function useListener<T, State, Error, Key extends keyof T>(
 
     return {
         value: form.values[name],
+        defaultValue: form.defaultValues[name],
         setValue: (value: T[Key]) => form.setValue(name, value),
         dirty: form.dirtyMap[name],
         error: form.errorMap[name],
@@ -566,6 +567,7 @@ export function Listener<
     name: Key;
     children: (props: {
         value: T[Key];
+        defaultValue: T[Key];
         setValue: (value: T[Key]) => boolean;
         dirty: DirtyMap<T>[Key];
         error: ErrorMap<T, Error>[Key];

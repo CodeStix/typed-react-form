@@ -1,70 +1,18 @@
-import React, { useState } from "react";
+import React, { InputHTMLAttributes, useState } from "react";
 import {
+    AnyListener,
+    ArrayForm,
     FormState,
-    useForm,
-    useListener,
     useAnyListener,
-    useChildForm
+    useChildForm,
+    useForm,
+    useListener
 } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 
-function Input<T extends { [key: string]: any }>({
-    form,
-    name
-}: {
-    form: FormState<T>;
-    name: keyof T;
-}) {
-    const { value, setValue, error, dirty } = useListener(form, name);
-
-    return (
-        <VisualRender>
-            <input
-                disabled={form.state.isSubmitting}
-                style={{
-                    border: error ? "1px solid red" : undefined,
-                    background: dirty ? "#eee" : undefined
-                }}
-                value={value as string}
-                onChange={(e) => {
-                    setValue(e.target.value as any);
-                }}
-            />
-            {error && (
-                <p>
-                    <strong>{error}</strong>
-                </p>
-            )}
-        </VisualRender>
-    );
-}
-
-function Debug(props: { form: FormState<any> }) {
-    const { values, dirty, dirtyMap, errorMap, error } = useAnyListener(
-        props.form
-    );
-
-    return (
-        <VisualRender>
-            <div style={{ padding: "1em", background: "#eee" }}>
-                <p>
-                    <strong>{dirty ? "MODIFIED" : "UNMODIFIED"}</strong>{" "}
-                    <strong>{error ? "ERROR" : "OK"}</strong>
-                </p>
-                <pre>{JSON.stringify(values, null, 2)}</pre>
-                <pre>{JSON.stringify(dirtyMap, null, 2)}</pre>
-                <pre>{JSON.stringify(errorMap, null, 2)}</pre>
-            </div>
-        </VisualRender>
-    );
-}
-
 interface TodoList {
     name: string;
-    info: {
-        authorName: string;
-        createdAt: number;
-    };
+    author: string;
     todos: Todo[];
 }
 
@@ -74,202 +22,240 @@ interface Todo {
     priority: "low" | "normal" | "high";
 }
 
+/**
+ * A custom input that can be reused everywhere when using useForm
+ */
+function Input<T>({
+    form,
+    name,
+    ...rest
+}: {
+    form: FormState<T, { isSubmitting: boolean }>;
+    name: keyof T;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form">) {
+    const { value, dirty, defaultValue, error, state } = useListener(
+        form,
+        name
+    );
+
+    return (
+        <VisualRender>
+            <input
+                disabled={state.isSubmitting}
+                placeholder={defaultValue as any}
+                style={{
+                    background: dirty ? "#eee" : "#fff",
+                    padding: "0.3em",
+                    fontSize: "inherit",
+                    outline: error ? "4px solid #f306" : "none"
+                }}
+                value={value as any}
+                onChange={(ev) => form.setValue(name, ev.target.value as any)}
+                {...rest}
+            />
+            {error && (
+                <span
+                    style={{
+                        padding: "0.3em",
+                        fontWeight: "bold",
+                        color: "red"
+                    }}
+                >
+                    {error}
+                </span>
+            )}
+        </VisualRender>
+    );
+}
+
 export default function App() {
-    const [values] = useState<TodoList>({
-        info: {
-            authorName: "codestix",
-            createdAt: new Date().getTime()
-        },
-        name: "TODO List",
-        todos: [
-            {
-                id: 0,
-                message: "this is a test",
-                priority: "normal"
-            }
-        ]
-    });
-    const form = useForm(values, { isSubmitting: false }, (values) => {
-        let todoErrors = values.todos.reduce((val, e, i) => {
-            if (e.message.length < 3)
-                val[i] = { message: "Todo message must be longer!" };
-            return val;
-        }, [] as any);
-        return {
-            name: values.name.length < 3 ? "Name must be longer!" : undefined,
-            info: {
-                authorName:
-                    values.info.authorName.length < 3
-                        ? "Author name must be longer!"
-                        : undefined
-            },
-            todos: todoErrors
-        };
+    const [values, setValues] = useState<TodoList>({
+        author: "codestix",
+        name: "My todo list",
+        todos: Array(3)
+            .fill(0)
+            .map((_, i) => ({
+                message: "Fix this " + i,
+                priority: "normal",
+                id: i
+            }))
     });
 
+    const form = useForm(
+        values, // <- Default values, can change
+        { isSubmitting: false }, // <- Global form state, which can contain custom fields (e.g. loading)
+        validateTodoList, // <- Validator
+        true // <- Validate on change
+    );
+
     return (
-        <VisualRender>
-            <form
-                onSubmit={async (ev) => {
-                    ev.preventDefault();
-                    form.setState({ isSubmitting: true });
-                    await new Promise((res) => setTimeout(res, 1000));
-                    form.setState({ isSubmitting: false });
-                    console.log(
-                        "submit",
-                        values,
-                        form.values,
-                        values === form.values
-                    );
-                    form.setValues({ ...form.values }, true);
-                }}
-                style={{
-                    margin: "2em",
-                    padding: "1em",
-                    border: "1px solid #0005"
-                }}
-            >
-                <p>Author name</p>
+        <form
+            onSubmit={async (ev) => {
+                ev.preventDefault();
+
+                form.validate(); // Validate manually when validateOnChange is disabled.
+                if (form.error) return; // Do not submit if errors
+
+                form.setState({ isSubmitting: true }); // Set the form state (updates every component listening for state updates)
+
+                await new Promise((res) => setTimeout(res, 1000)); // Fake fetch
+
+                form.setState({ isSubmitting: false }); // Set the form state (updates every component listening for state updates)
+
+                setValues({ ...form.values }); // Set new default values, (form.setDefaultValues is also possible instead of useState/useForm combo!)
+            }}
+            style={{ padding: "1em", margin: "1em" }}
+        >
+            <VisualRender>
+                <h1>
+                    Form created using{" "}
+                    <a href="https://github.com/CodeStix/typed-react-form">
+                        typed-react-form
+                    </a>
+                </h1>
+                <p>
+                    The red flash indicates which parts of the form are being
+                    rerendered.
+                </p>
+                <hr />
+                <h2>Todo list</h2>
+                <p>Name</p>
+                {/* The name field is type checked, try to name it something else that does not exist on interface TodoList */}
                 <Input form={form} name="name" />
-                <TodoInfo parent={form} />
-                <Todos parent={form} />
-                <Debug form={form} />
-                <button>Save</button>
-                <button type="button" onClick={() => form.resetAll()}>
-                    Reset
-                </button>
-                <button
-                    type="button"
-                    onClick={() =>
-                        form.setErrors({ info: { authorName: "yikm,es" } })
-                    }
-                >
-                    Set error
-                </button>
-            </form>
-        </VisualRender>
+                <p>Author</p>
+                <Input form={form} name="author" />
+                <p>Todo's</p>
+                {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
+                <ArrayForm parent={form} name="todos">
+                    {(
+                        { form, swap, remove, append } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
+                    ) => (
+                        <VisualRender>
+                            <ul style={{ padding: "0" }}>
+                                {form.values.map((e, i) => (
+                                    <TodoItem
+                                        onMoveTop={() => swap(i, 0)}
+                                        onRemove={() => remove(i)}
+                                        key={e.id}
+                                        parent={form}
+                                        index={i}
+                                    />
+                                ))}
+                            </ul>
+                            <button
+                                style={{ margin: "0 0 1em 0" }}
+                                type="button"
+                                onClick={() =>
+                                    append({
+                                        message: "",
+                                        priority: "normal",
+                                        id: new Date().getTime()
+                                    })
+                                }
+                            >
+                                Add item
+                            </button>
+                        </VisualRender>
+                    )}
+                </ArrayForm>
+                <AnyListener form={form}>
+                    {({ state, dirty }) => (
+                        <>
+                            {/* Disable buttons when form is submitting or when nothing has changed, the AnyListener wrapper is required */}
+                            <button
+                                style={{ fontSize: "1.3em" }}
+                                disabled={state.isSubmitting || !dirty}
+                            >
+                                Save
+                            </button>
+                            <button
+                                style={{ fontSize: "1.3em" }}
+                                disabled={state.isSubmitting || !dirty}
+                                type="button"
+                                onClick={() => form.resetAll()}
+                            >
+                                Reset
+                            </button>
+                        </>
+                    )}
+                </AnyListener>
+
+                <h3>Output</h3>
+                <FormValues form={form} />
+            </VisualRender>
+        </form>
     );
 }
 
-function Todos(props: { parent: FormState<TodoList> }) {
-    const form = useChildForm(props.parent, "todos");
-    const arr = useAnyListener(form, true);
-
-    function swap(index: number, newIndex: number) {
-        if (index === newIndex) {
-            return;
-        }
-        let values = [...(form.values as any)];
-        [values[index], values[newIndex]] = [values[newIndex], values[index]];
-        console.log("new values", values);
-        form.setValues(values as any);
-    }
-
-    function remove(index: number) {
-        let newValues = [...(form.values as any)];
-        newValues.splice(index, 1);
-        form.setValues(newValues as any);
-    }
-
-    return (
-        <VisualRender>
-            <div
-                style={{
-                    margin: "1em",
-                    padding: "1em",
-                    border: "1px solid #0005"
-                }}
-            >
-                {arr.values.map((e, i) => (
-                    <Todo
-                        onRemove={() => remove(i)}
-                        onMoveTop={() => swap(i, 0)}
-                        parent={form}
-                        key={e.id}
-                        index={i}
-                    />
-                ))}
-                <button
-                    type="button"
-                    onClick={() =>
-                        form.setValues([
-                            ...arr.values,
-                            {
-                                id: new Date().getTime(),
-                                message: "",
-                                priority: "normal"
-                            }
-                        ])
-                    }
-                >
-                    Add
-                </button>
-            </div>
-        </VisualRender>
-    );
-}
-
-function Todo(props: {
-    parent: FormState<Todo[]>;
+function TodoItem(props: {
+    parent: FormState<Todo[], { isSubmitting: boolean }>;
     index: number;
-    onRemove: () => void;
     onMoveTop: () => void;
+    onRemove: () => void;
 }) {
+    // Use a child form, each layer in the object is a seperate form: TodoList (useForm) -> Todo[] (useArrayForm) -> Todo (useChildForm)
     const form = useChildForm(props.parent, props.index);
 
     return (
-        <VisualRender>
-            <div
-                style={{
-                    margin: "1em",
-                    padding: "1em",
-                    border: "1px solid #0005"
-                }}
-            >
-                <p>
-                    {form.formId} /{" "}
-                    {JSON.stringify(props.parent.values[props.index])}
-                </p>
+        <li
+            style={{
+                padding: "1em",
+                margin: "1em",
+                border: "1px solid #0003"
+            }}
+        >
+            <VisualRender>
                 <Input form={form} name="message" />
-                <button type="button" onClick={() => props.onRemove()}>
+                <button type="button" onClick={props.onMoveTop}>
+                    Go to top
+                </button>
+                <button type="button" onClick={props.onRemove}>
                     Remove
                 </button>
-                <button type="button" onClick={() => props.onMoveTop()}>
-                    Move to top
-                </button>
+            </VisualRender>
+        </li>
+    );
+}
+
+/**
+ *  Shows a JSON representation of a form
+ */
+function FormValues<T>(props: { form: FormState<T> }) {
+    const form = useAnyListener(props.form);
+    return (
+        <VisualRender>
+            <div style={{ background: "#0001" }}>
+                <p>
+                    {/* <em>{val.formId}</em> */}
+                    {form.dirty && (
+                        <strong style={{ color: "blue" }}>DIRTY</strong>
+                    )}
+                    {form.error && (
+                        <strong style={{ color: "red" }}>ERROR</strong>
+                    )}
+                </p>
+                <pre>{JSON.stringify(form.values, null, 2)}</pre>
+                {/* <pre>{JSON.stringify(val.defaultValues)}</pre> */}
+                {/* <pre>{JSON.stringify(val.errorMap, null, 2)}</pre> */}
+                <pre>{JSON.stringify(form.dirtyMap, null, 2)}</pre>
+                {/* <pre>{JSON.stringify(val.state, null, 2)}</pre> */}
             </div>
         </VisualRender>
     );
 }
 
-function TodoInfo(props: { parent: FormState<TodoList> }) {
-    const form = useChildForm(props.parent, "info");
-
-    return (
-        <VisualRender>
-            <div
-                style={{
-                    margin: "1em",
-                    padding: "1em",
-                    border: "1px solid #0005"
-                }}
-            >
-                <p>Author name</p>
-                <Input form={form} name="authorName" />
-                <button
-                    type="button"
-                    onClick={() =>
-                        form.setError(
-                            "authorName",
-                            form.errorMap["authorName"]
-                                ? undefined
-                                : "Author name not epic"
-                        )
-                    }
-                >
-                    Set error
-                </button>
-            </div>
-        </VisualRender>
-    );
+// You should use a validation library (yup, class-validator) instead of this mess...
+function validateTodoList(values: TodoList) {
+    let todoErrors = values.todos.reduce((prev, val, index) => {
+        if (val.message.length < 5) {
+            prev[index] = { message: "Todo message should be longer!" };
+        }
+        return prev;
+    }, [] as any[]);
+    return {
+        author:
+            values.author.length < 3 ? "Author name is too short." : undefined,
+        name: values.name.length < 3 ? "Title is too short." : undefined,
+        todos: todoErrors.length > 0 ? todoErrors : undefined
+    };
 }
