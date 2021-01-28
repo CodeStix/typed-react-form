@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export type ListenerCallback = () => void;
+export type ListenerCallback = (setValuesWasUsed: boolean) => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
 export type Validator<T, Error> = (values: T) => ErrorMap<T, Error>;
 
@@ -110,11 +110,11 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
             }
         }
 
-        this.fireListeners(key);
+        this.fireListeners(key, false);
         if (fireAny) {
             // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
             if (notifyParent) this.updateParentValues(isDefault);
-            this.fireAnyListeners();
+            this.fireAnyListeners(false);
         }
 
         if (this.validator && validate) this.validate();
@@ -206,7 +206,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
             );
         }
         if (notifyParent) this.updateParentValues(isDefault);
-        this.fireAnyListeners();
+        this.fireAnyListeners(true);
 
         if (this.validator) this.validate();
     }
@@ -234,10 +234,10 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
         else this.errorMap[key] = error;
 
         if (notifyChild) this.childMap[key]?.setErrors((error ?? {}) as any);
-        this.fireListeners(key);
+        this.fireListeners(key, false);
         if (fireAny) {
             if (notifyParent) this.updateParentErrors();
-            this.fireAnyListeners();
+            this.fireAnyListeners(false);
         }
     }
 
@@ -260,7 +260,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
             );
         }
         if (notifyParent) this.updateParentErrors();
-        this.fireAnyListeners();
+        this.fireAnyListeners(false);
     }
 
     public resetAll() {
@@ -284,9 +284,9 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
                 this.childMap[e]?.setState(state, notifyChild, notifyParent)
             );
 
-        c.forEach((e) => this.fireListeners(e as keyof T));
+        c.forEach((e) => this.fireListeners(e as keyof T, false));
         if (notifyParent) this.updateParentState();
-        this.fireAnyListeners();
+        this.fireAnyListeners(false);
     }
 
     public listen(key: keyof T, listener: ListenerCallback): string {
@@ -323,17 +323,17 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
         delete setters[id];
     }
 
-    protected fireListeners(key: keyof T) {
+    protected fireListeners(key: keyof T, setValuesWasUsed: boolean) {
         let a = this.listeners[key];
         if (a) {
             let l = Object.keys(a!);
-            l.forEach((e) => a![e]!());
+            l.forEach((e) => a![e]!(setValuesWasUsed));
         }
     }
 
-    protected fireAnyListeners() {
+    protected fireAnyListeners(setValuesWasUsed: boolean) {
         let al = Object.keys(this.anyListeners);
-        al.forEach((e) => this.anyListeners[e]!());
+        al.forEach((e) => this.anyListeners[e]!(setValuesWasUsed));
     }
 }
 
@@ -455,11 +455,17 @@ export function useListener<T, State, Error, Key extends keyof T>(
     };
 }
 
-export function useAnyListener<T, State, Error>(form: Form<T, State, Error>) {
+export function useAnyListener<T, State, Error>(
+    form: Form<T, State, Error>,
+    onlyOnSetValues = false
+) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        let id = form.listenAny(() => setRender((e) => e + 1));
+        let id = form.listenAny((all) => {
+            if (form.formId === 3) console.trace("all?", all);
+            if (!onlyOnSetValues || all) setRender((e) => e + 1);
+        });
         return () => form.ignoreAny(id);
     }, [form]);
 

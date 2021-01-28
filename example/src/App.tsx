@@ -153,7 +153,7 @@ export default function App() {
 
 function Todos(props: { parent: Form<TodoList> }) {
     const form = useChildForm(props.parent, "todos");
-    const arr = useAnyListener(form);
+    const arr = useAnyListener(form, true);
 
     function swap(index: number, newIndex: number) {
         if (index === newIndex) {
