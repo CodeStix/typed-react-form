@@ -431,6 +431,10 @@ export function useChildForm<T, State, Error, Key extends keyof T>(
             true,
             false
         );
+        return () => {
+            delete parentForm.errorMap[name];
+            delete parentForm.dirtyMap[name];
+        };
     }, [parentForm, name]);
 
     return c.current;
