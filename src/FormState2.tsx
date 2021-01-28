@@ -1,53 +1,47 @@
-// type ObjectOrArray = {
-//     [key: string]: any;
-//     [key: number]: any;
+import { useEffect, useRef, useState } from "react";
 
-import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from "constants";
-import { useEffect, useRef } from "react";
-
-// };
 export type ListenerCallback = () => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
 
-function memberCopy<T>(value: T): T {
-    if (Array.isArray(value)) {
-        return [...value] as any;
-    } else if (typeof value === "object") {
-        return { ...value };
-    } else {
-        throw new Error("Can only memberCopy() arrays and objects.");
-    }
-}
+// function memberCopy<T>(value: T): T {
+//     if (Array.isArray(value)) {
+//         return [...value] as any;
+//     } else if (typeof value === "object") {
+//         return { ...value };
+//     } else {
+//         throw new Error("Can only memberCopy() arrays and objects.");
+//     }
+// }
 
-function changedKeys<T>(
-    a: T,
-    b: T,
-    objectCompareMode: "skip" | "truthy" | "compare" = "truthy"
-): (keyof T)[] {
-    if (a === b) return [];
-    let aKeys = Object.keys(a);
-    let bKeys = Object.keys(b);
-    let largest = aKeys.length > bKeys.length ? aKeys : bKeys;
-    let changed = [];
-    const o = {};
-    for (let i = 0; i < largest.length; i++) {
-        let k = largest[i];
-        let av = a[k as any];
-        let bv = b[k as any];
-        if (typeof av === "object" || typeof bv === "object") {
-            if (objectCompareMode === "truthy") {
-                if (typeof av === "object") av = av ? o : undefined;
-                if (typeof bv === "object") bv = bv ? o : undefined;
-            } else if (objectCompareMode === "skip") {
-                continue;
-            }
-        }
-        if (av !== bv) {
-            changed.push(k);
-        }
-    }
-    return changed as (keyof T)[];
-}
+// function changedKeys<T>(
+//     a: T,
+//     b: T,
+//     objectCompareMode: "skip" | "truthy" | "compare" = "truthy"
+// ): (keyof T)[] {
+//     if (a === b) return [];
+//     let aKeys = Object.keys(a);
+//     let bKeys = Object.keys(b);
+//     let largest = aKeys.length > bKeys.length ? aKeys : bKeys;
+//     let changed = [];
+//     const o = {};
+//     for (let i = 0; i < largest.length; i++) {
+//         let k = largest[i];
+//         let av = a[k as any];
+//         let bv = b[k as any];
+//         if (typeof av === "object" || typeof bv === "object") {
+//             if (objectCompareMode === "truthy") {
+//                 if (typeof av === "object") av = av ? o : undefined;
+//                 if (typeof bv === "object") bv = bv ? o : undefined;
+//             } else if (objectCompareMode === "skip") {
+//                 continue;
+//             }
+//         }
+//         if (av !== bv) {
+//             changed.push(k);
+//         }
+//     }
+//     return changed as (keyof T)[];
+// }
 
 type ChildFormMap<T> = {
     [Key in keyof T]?: ChildForm<T, Key>;
@@ -165,14 +159,14 @@ export class Form<T> {
     protected fireListeners(key: keyof T) {
         let a = this.listeners[key];
         if (a) {
-            let l = Object.keys(a ?? {});
+            let l = Object.keys(a!);
             l.forEach((e) => a![e]!());
         }
     }
 
     protected fireAnyListeners() {
         let al = Object.keys(this.anyListeners);
-        al.forEach((e) => al[e]());
+        al.forEach((e) => this.anyListeners[e]!());
     }
 }
 
@@ -244,6 +238,32 @@ export function useChildForm<T, Key extends keyof T>(
     }, [parentForm, name]);
 
     return c.current;
+}
+
+export function useListener<T, Key extends keyof T>(form: Form<T>, name: Key) {
+    const [, setRender] = useState(0);
+
+    useEffect(() => {
+        let id = form.listen(name, () => setRender((e) => e + 1));
+        return () => form.ignore(name, id);
+    }, [form, name]);
+
+    return {
+        value: form.values[name],
+        setValue: (value: T[Key]) => form.setValue(name, value),
+        form
+    };
+}
+
+export function useAnyListener<T>(form: Form<T>) {
+    const [, setRender] = useState(0);
+
+    useEffect(() => {
+        let id = form.listenAny(() => setRender((e) => e + 1));
+        return () => form.ignoreAny(id);
+    }, [form]);
+
+    return form;
 }
 
 // let form = new Form({ firstName: "stijn", info: { age: 20 } });
