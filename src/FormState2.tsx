@@ -2,46 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 export type ListenerCallback = () => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
-
-// function memberCopy<T>(value: T): T {
-//     if (Array.isArray(value)) {
-//         return [...value] as any;
-//     } else if (typeof value === "object") {
-//         return { ...value };
-//     } else {
-//         throw new Error("Can only memberCopy() arrays and objects.");
-//     }
-// }
-
-// function changedKeys<T>(
-//     a: T,
-//     b: T,
-//     objectCompareMode: "skip" | "truthy" | "compare" = "truthy"
-// ): (keyof T)[] {
-//     if (a === b) return [];
-//     let aKeys = Object.keys(a);
-//     let bKeys = Object.keys(b);
-//     let largest = aKeys.length > bKeys.length ? aKeys : bKeys;
-//     let changed = [];
-//     const o = {};
-//     for (let i = 0; i < largest.length; i++) {
-//         let k = largest[i];
-//         let av = a[k as any];
-//         let bv = b[k as any];
-//         if (typeof av === "object" || typeof bv === "object") {
-//             if (objectCompareMode === "truthy") {
-//                 if (typeof av === "object") av = av ? o : undefined;
-//                 if (typeof bv === "object") bv = bv ? o : undefined;
-//             } else if (objectCompareMode === "skip") {
-//                 continue;
-//             }
-//         }
-//         if (av !== bv) {
-//             changed.push(k);
-//         }
-//     }
-//     return changed as (keyof T)[];
-// }
+export type Validator<T, Error> = (values: T) => ErrorMap<T, Error>;
 
 type ChildFormMap<T, State, Error> = {
     [Key in keyof T]?: ChildForm<T, State, Error, Key>;
@@ -75,14 +36,23 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
     public anyListeners: ListenerMap = {};
     public formId = ++Form.formCounter;
     public state: State;
+    public validator?: Validator<T, Error>;
+    public validateOnChange: boolean;
 
     private static formCounter = 0;
     private counter = 0;
 
-    public constructor(defaultValues: T, defaultState: State) {
+    public constructor(
+        defaultValues: T,
+        defaultState: State,
+        validator?: Validator<T, Error>,
+        validateOnChange = true
+    ) {
         this.values = { ...defaultValues };
         this.defaultValues = { ...defaultValues };
         this.state = { ...defaultState };
+        this.validator = validator;
+        this.validateOnChange = validateOnChange;
     }
 
     public get dirty() {
@@ -97,6 +67,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
         key: Key,
         value: T[Key],
         dirty: boolean | undefined,
+        validate: boolean,
         isDefault: boolean,
         notifyChild: boolean,
         notifyParent: boolean,
@@ -129,6 +100,8 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
             if (notifyParent) this.updateParentValues(isDefault);
             this.fireAnyListeners();
         }
+
+        if (this.validator && validate) this.validate();
     }
 
     protected updateParentValues(_isDefault: boolean) {
@@ -146,6 +119,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
     public setValue<Key extends keyof T>(
         key: Key,
         value: T[Key],
+        validate: boolean = true,
         isDefault: boolean = false,
         notifyChild: boolean = true,
         notifyParent: boolean = true,
@@ -156,6 +130,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
                 key,
                 value,
                 undefined,
+                validate,
                 isDefault,
                 notifyChild,
                 notifyParent,
@@ -180,6 +155,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
                 isDefault
                     ? value !== this.values[key]
                     : value !== this.defaultValues[key],
+                validate,
                 isDefault,
                 notifyChild,
                 notifyParent,
@@ -203,14 +179,27 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
             this.setValue(
                 key,
                 values[key],
+                false, // Will validate after all values are copied
                 isDefault,
                 notifyChild,
                 notifyParent,
-                false // Will call fireAnyListener by itself, see 3 lines down
+                false // Will call fireAnyListener after all values are copied, see 3 lines down
             );
         }
         if (notifyParent) this.updateParentValues(isDefault);
         this.fireAnyListeners();
+
+        if (this.validator) this.validate();
+    }
+
+    public validate() {
+        if (!this.validator) {
+            console.warn(
+                "validate() was called on a form which does not have a validator set."
+            );
+            return;
+        }
+        this.setErrors(this.validator(this.values));
     }
 
     public setError<Key extends keyof T>(
@@ -351,6 +340,7 @@ export class ChildForm<
             this.name,
             isDefault ? { ...this.defaultValues } : { ...this.values },
             this.dirty,
+            true,
             isDefault,
             false,
             true,
@@ -374,12 +364,19 @@ export class ChildForm<
 
 export function useForm<T, State = DefaultState, Error = DefaultError>(
     defaultValues: T,
-    defaultState: State
+    defaultState: State,
+    validator?: Validator<T, Error>,
+    validateOnChange = true
 ) {
     let c = useRef<Form<T, State, Error> | null>(null);
 
     if (!c.current) {
-        c.current = new Form(defaultValues, defaultState);
+        c.current = new Form(
+            defaultValues,
+            defaultState,
+            validator,
+            validateOnChange
+        );
     }
 
     useEffect(() => {

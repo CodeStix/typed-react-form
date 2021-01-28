@@ -86,7 +86,15 @@ export default function App() {
         name: "TODO List",
         todos: []
     });
-    const form = useForm(values, { isSubmitting: false });
+    const form = useForm(values, { isSubmitting: false }, (values) => ({
+        name: values.name.length < 3 ? "Name must be longer!" : undefined,
+        info: {
+            authorName:
+                values.info.authorName.length < 3
+                    ? "Author name must be longer!"
+                    : undefined
+        }
+    }));
 
     return (
         <VisualRender>
