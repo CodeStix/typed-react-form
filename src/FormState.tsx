@@ -38,20 +38,22 @@ function memberCopy<T>(value: T): T {
 }
 
 export class FormState<T, State = DefaultState, Error = DefaultError> {
-    public values: T;
-    public defaultValues: T;
-    public childMap: ChildFormMap<T, State, Error> = {};
-    public dirtyMap: DirtyMap<T> = {};
-    public errorMap: ErrorMap<T, Error> = {};
-    public listeners: { [Key in keyof T]?: ListenerMap } = {};
-    public anyListeners: ListenerMap = {};
-    public formId = ++FormState.formCounter;
-    public state: State;
+    public readonly formId = ++FormState.formCounter;
     public validator?: Validator<T, Error>;
     public validateOnChange: boolean;
 
-    private static formCounter = 0;
+    public readonly values: T;
+    public readonly defaultValues: T;
+    public readonly childMap: ChildFormMap<T, State, Error> = {};
+    public readonly dirtyMap: DirtyMap<T> = {};
+    public readonly errorMap: ErrorMap<T, Error> = {};
+
+    private _state: State;
+    private listeners: { [Key in keyof T]?: ListenerMap } = {};
+    private anyListeners: ListenerMap = {};
     private counter = 0;
+
+    protected static formCounter = 0;
 
     public constructor(
         values: T,
@@ -62,9 +64,13 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     ) {
         this.values = memberCopy(values);
         this.defaultValues = memberCopy(defaultValues);
-        this.state = memberCopy(defaultState);
+        this._state = memberCopy(defaultState);
         this.validator = validator;
         this.validateOnChange = validateOnChange;
+    }
+
+    public get state() {
+        return this._state;
     }
 
     public get dirty() {
@@ -277,7 +283,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         notifyChild: boolean = true,
         notifyParent: boolean = true
     ) {
-        this.state = state;
+        this._state = state;
 
         let c = Object.keys(this.values);
         if (notifyChild)
@@ -344,8 +350,8 @@ export class ChildFormState<
     ParentError,
     Key extends keyof Parent
 > extends FormState<Parent[Key], ParentState, ParentError> {
-    public name: Key;
-    public parent: FormState<Parent, ParentState, ParentError>;
+    public readonly name: Key;
+    public readonly parent: FormState<Parent, ParentState, ParentError>;
 
     public constructor(
         parent: FormState<Parent, ParentState, ParentError>,

@@ -155,7 +155,6 @@ export default function App() {
                             >
                                 Add item
                             </button>
-                            <FormValues form={form} />
                         </VisualRender>
                     )}
                 </ArrayForm>
