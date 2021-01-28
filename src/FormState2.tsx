@@ -203,12 +203,16 @@ export class Form<T, Error = string> {
 
     public setError<Key extends keyof T>(
         key: Key,
-        error: ErrorType<T[Key], Error>,
+        error: ErrorType<T[Key], Error> | undefined,
         notifyChild: boolean = true,
         notifyParent: boolean = true,
         fireAny: boolean = true
     ) {
-        this.errorMap[key] = error;
+        if (this.errorMap[key] === error) return;
+
+        if (!error) delete this.errorMap[key];
+        else this.errorMap[key] = error;
+
         if (notifyChild) this.childMap[key]?.setErrors(error as any);
         this.fireListeners(key);
         if (fireAny) {
@@ -317,7 +321,7 @@ export class ChildForm<Parent, Key extends keyof Parent> extends Form<
     protected updateParentErrors() {
         this.parent.setError(
             this.name,
-            { ...this.errorMap } as any,
+            this.error ? ({ ...this.errorMap } as any) : undefined,
             false,
             true
         );

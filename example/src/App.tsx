@@ -116,7 +116,12 @@ export default function App() {
                 </button>
                 <button
                     type="button"
-                    onClick={() => form.setError("name", "Name not epic")}
+                    onClick={() =>
+                        form.setError(
+                            "name",
+                            form.errorMap["name"] ? undefined : "Name not epic"
+                        )
+                    }
                 >
                     Set error
                 </button>
@@ -143,7 +148,12 @@ function TodoInfo(props: { parent: Form<TodoList> }) {
                 <button
                     type="button"
                     onClick={() =>
-                        form.setError("authorName", "Author name not epic")
+                        form.setError(
+                            "authorName",
+                            form.errorMap["authorName"]
+                                ? undefined
+                                : "Author name not epic"
+                        )
                     }
                 >
                     Set error
