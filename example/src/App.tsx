@@ -89,15 +89,23 @@ export default function App() {
             }
         ]
     });
-    const form = useForm(values, { isSubmitting: false }, (values) => ({
-        name: values.name.length < 3 ? "Name must be longer!" : undefined,
-        info: {
-            authorName:
-                values.info.authorName.length < 3
-                    ? "Author name must be longer!"
-                    : undefined
-        }
-    }));
+    const form = useForm(values, { isSubmitting: false }, (values) => {
+        let todoErrors = values.todos.reduce((val, e, i) => {
+            if (e.message.length < 3)
+                val[i] = { message: "Todo message must be longer!" };
+            return val;
+        }, [] as any);
+        return {
+            name: values.name.length < 3 ? "Name must be longer!" : undefined,
+            info: {
+                authorName:
+                    values.info.authorName.length < 3
+                        ? "Author name must be longer!"
+                        : undefined
+            },
+            todos: todoErrors
+        };
+    });
 
     return (
         <VisualRender>

@@ -233,7 +233,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
         if (!error) delete this.errorMap[key];
         else this.errorMap[key] = error;
 
-        if (notifyChild) this.childMap[key]?.setErrors(error as any);
+        if (notifyChild) this.childMap[key]?.setErrors((error ?? {}) as any);
         this.fireListeners(key);
         if (fireAny) {
             if (notifyParent) this.updateParentErrors();
@@ -246,9 +246,11 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
         notifyChild: boolean = true,
         notifyParent: boolean = true
     ) {
-        let k = Object.keys(errors);
-        for (let i = 0; i < k.length; i++) {
-            let key = k[i] as keyof T;
+        let localKeys = Object.keys(this.errorMap);
+        let newKeys = Object.keys(errors);
+        let mostKeys = newKeys.length > localKeys.length ? newKeys : localKeys;
+        for (let i = 0; i < mostKeys.length; i++) {
+            let key = mostKeys[i] as keyof T;
             this.setError(
                 key,
                 errors[key] as any,
