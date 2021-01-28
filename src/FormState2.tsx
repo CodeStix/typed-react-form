@@ -43,8 +43,8 @@ export type ListenerMap = { [T in string]?: ListenerCallback };
 //     return changed as (keyof T)[];
 // }
 
-type ChildFormMap<T> = {
-    [Key in keyof T]?: ChildForm<T, Key>;
+type ChildFormMap<T, State, Error> = {
+    [Key in keyof T]?: ChildForm<T, State, Error, Key>;
 };
 
 type DirtyMap<T> = {
@@ -62,22 +62,27 @@ type ErrorMap<T, Error> = {
     [Key in keyof T]?: ErrorType<T[Key], Error>;
 };
 
-export class Form<T, Error = string> {
+export type DefaultError = string;
+export type DefaultState = { isSubmitting: boolean };
+
+export class Form<T, State = DefaultState, Error = DefaultError> {
     public values: T;
     public defaultValues: T;
-    public childMap: ChildFormMap<T> = {};
+    public childMap: ChildFormMap<T, State, Error> = {};
     public dirtyMap: DirtyMap<T> = {};
     public errorMap: ErrorMap<T, Error> = {};
     public listeners: { [Key in keyof T]?: ListenerMap } = {};
     public anyListeners: ListenerMap = {};
     public formId = ++Form.formCounter;
+    public state: State;
 
     private static formCounter = 0;
     private counter = 0;
 
-    public constructor(defaultValues: T) {
+    public constructor(defaultValues: T, defaultState: State) {
         this.values = { ...defaultValues };
         this.defaultValues = { ...defaultValues };
+        this.state = { ...defaultState };
     }
 
     public get dirty() {
@@ -107,7 +112,9 @@ export class Form<T, Error = string> {
         );
         if (isDefault) this.defaultValues[key] = value;
         else this.values[key] = value;
+
         if (dirty !== undefined) this.dirtyMap[key] = dirty;
+
         if (notifyChild) {
             let child = this.childMap[key];
             if (child) {
@@ -115,6 +122,7 @@ export class Form<T, Error = string> {
                 this.dirtyMap[key] = child.dirty;
             }
         }
+
         this.fireListeners(key);
         if (fireAny) {
             // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
@@ -128,6 +136,10 @@ export class Form<T, Error = string> {
     }
 
     protected updateParentErrors() {
+        // Not implemented for root form, as it does not have a parent
+    }
+
+    protected updateParentState() {
         // Not implemented for root form, as it does not have a parent
     }
 
@@ -241,8 +253,30 @@ export class Form<T, Error = string> {
         this.fireAnyListeners();
     }
 
-    public reset() {
+    public resetAll() {
         this.setValues(this.defaultValues);
+    }
+
+    public reset(key: keyof T) {
+        this.setValue(key, this.defaultValues[key]);
+    }
+
+    public setState(
+        state: State,
+        notifyChild: boolean = true,
+        notifyParent: boolean = true
+    ) {
+        this.state = state;
+
+        let c = Object.keys(this.values);
+        if (notifyChild)
+            c.forEach((e) =>
+                this.childMap[e]?.setState(state, notifyChild, notifyParent)
+            );
+
+        c.forEach((e) => this.fireListeners(e as keyof T));
+        if (notifyParent) this.updateParentState();
+        this.fireAnyListeners();
     }
 
     public listen(key: keyof T, listener: ListenerCallback): string {
@@ -293,14 +327,20 @@ export class Form<T, Error = string> {
     }
 }
 
-export class ChildForm<Parent, Key extends keyof Parent> extends Form<
-    Parent[Key]
-> {
+export class ChildForm<
+    Parent,
+    ParentState,
+    ParentError,
+    Key extends keyof Parent
+> extends Form<Parent[Key], ParentState, ParentError> {
     public name: Key;
-    public parent: Form<Parent>;
+    public parent: Form<Parent, ParentState, ParentError>;
 
-    public constructor(parent: Form<Parent>, name: Key) {
-        super(parent.defaultValues[name]);
+    public constructor(
+        parent: Form<Parent, ParentState, ParentError>,
+        name: Key
+    ) {
+        super(parent.defaultValues[name], parent.state);
         this.parent = parent;
         this.name = name;
         parent.childMap[name] = this;
@@ -326,13 +366,20 @@ export class ChildForm<Parent, Key extends keyof Parent> extends Form<
             true
         );
     }
+
+    protected updateParentState() {
+        this.parent.setState(this.state, false, true);
+    }
 }
 
-export function useForm<T>(defaultValues: T) {
-    let c = useRef<Form<T> | null>(null);
+export function useForm<T, State = DefaultState, Error = DefaultError>(
+    defaultValues: T,
+    defaultState: State
+) {
+    let c = useRef<Form<T, State, Error> | null>(null);
 
     if (!c.current) {
-        c.current = new Form(defaultValues);
+        c.current = new Form(defaultValues, defaultState);
     }
 
     useEffect(() => {
@@ -342,11 +389,11 @@ export function useForm<T>(defaultValues: T) {
     return c.current;
 }
 
-export function useChildForm<T, Key extends keyof T>(
-    parentForm: Form<T>,
+export function useChildForm<T, State, Error, Key extends keyof T>(
+    parentForm: Form<T, State, Error>,
     name: Key
 ) {
-    let c = useRef<ChildForm<T, Key> | null>(null);
+    let c = useRef<ChildForm<T, State, Error, Key> | null>(null);
     if (!c.current) {
         c.current = new ChildForm(parentForm, name);
     }
@@ -359,7 +406,10 @@ export function useChildForm<T, Key extends keyof T>(
     return c.current;
 }
 
-export function useListener<T, Key extends keyof T>(form: Form<T>, name: Key) {
+export function useListener<T, State, Error, Key extends keyof T>(
+    form: Form<T, State, Error>,
+    name: Key
+) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
@@ -376,7 +426,7 @@ export function useListener<T, Key extends keyof T>(form: Form<T>, name: Key) {
     };
 }
 
-export function useAnyListener<T>(form: Form<T>) {
+export function useAnyListener<T, State, Error>(form: Form<T, State, Error>) {
     const [, setRender] = useState(0);
 
     useEffect(() => {

@@ -20,6 +20,7 @@ function Input<T extends { [key: string]: any }>({
     return (
         <VisualRender>
             <input
+                disabled={form.state.isSubmitting}
                 style={{
                     border: error ? "1px solid red" : undefined,
                     background: dirty ? "#eee" : undefined
@@ -85,13 +86,16 @@ export default function App() {
         name: "TODO List",
         todos: []
     });
-    const form = useForm(values);
+    const form = useForm(values, { isSubmitting: false });
 
     return (
         <VisualRender>
             <form
-                onSubmit={(ev) => {
+                onSubmit={async (ev) => {
                     ev.preventDefault();
+                    form.setState({ isSubmitting: true });
+                    await new Promise((res) => setTimeout(res, 1000));
+                    form.setState({ isSubmitting: false });
                     console.log(
                         "submit",
                         values,
@@ -111,16 +115,13 @@ export default function App() {
                 <TodoInfo parent={form} />
                 <Debug form={form} />
                 <button>Save</button>
-                <button type="button" onClick={() => form.reset()}>
+                <button type="button" onClick={() => form.resetAll()}>
                     Reset
                 </button>
                 <button
                     type="button"
                     onClick={() =>
-                        form.setError(
-                            "name",
-                            form.errorMap["name"] ? undefined : "Name not epic"
-                        )
+                        form.setErrors({ info: { authorName: "yikm,es" } })
                     }
                 >
                     Set error
