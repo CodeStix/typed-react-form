@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-    Form,
+    FormState,
     useForm,
     useListener,
     useAnyListener,
@@ -12,7 +12,7 @@ function Input<T extends { [key: string]: any }>({
     form,
     name
 }: {
-    form: Form<T>;
+    form: FormState<T>;
     name: keyof T;
 }) {
     const { value, setValue, error, dirty } = useListener(form, name);
@@ -39,7 +39,7 @@ function Input<T extends { [key: string]: any }>({
     );
 }
 
-function Debug(props: { form: Form<any> }) {
+function Debug(props: { form: FormState<any> }) {
     const { values, dirty, dirtyMap, errorMap, error } = useAnyListener(
         props.form
     );
@@ -151,7 +151,7 @@ export default function App() {
     );
 }
 
-function Todos(props: { parent: Form<TodoList> }) {
+function Todos(props: { parent: FormState<TodoList> }) {
     const form = useChildForm(props.parent, "todos");
     const arr = useAnyListener(form, true);
 
@@ -210,7 +210,7 @@ function Todos(props: { parent: Form<TodoList> }) {
 }
 
 function Todo(props: {
-    parent: Form<Todo[]>;
+    parent: FormState<Todo[]>;
     index: number;
     onRemove: () => void;
     onMoveTop: () => void;
@@ -242,7 +242,7 @@ function Todo(props: {
     );
 }
 
-function TodoInfo(props: { parent: Form<TodoList> }) {
+function TodoInfo(props: { parent: FormState<TodoList> }) {
     const form = useChildForm(props.parent, "info");
 
     return (

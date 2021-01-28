@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useRef, useState } from "react";
 
 export type ListenerCallback = (setValuesWasUsed: boolean) => void;
@@ -5,7 +6,7 @@ export type ListenerMap = { [T in string]?: ListenerCallback };
 export type Validator<T, Error> = (values: T) => ErrorMap<T, Error>;
 
 type ChildFormMap<T, State, Error> = {
-    [Key in keyof T]?: ChildForm<T, State, Error, Key>;
+    [Key in keyof T]?: ChildFormState<T, State, Error, Key>;
 };
 
 type DirtyMap<T> = {
@@ -36,7 +37,7 @@ function memberCopy<T>(value: T): T {
     }
 }
 
-export class Form<T, State = DefaultState, Error = DefaultError> {
+export class FormState<T, State = DefaultState, Error = DefaultError> {
     public values: T;
     public defaultValues: T;
     public childMap: ChildFormMap<T, State, Error> = {};
@@ -44,7 +45,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
     public errorMap: ErrorMap<T, Error> = {};
     public listeners: { [Key in keyof T]?: ListenerMap } = {};
     public anyListeners: ListenerMap = {};
-    public formId = ++Form.formCounter;
+    public formId = ++FormState.formCounter;
     public state: State;
     public validator?: Validator<T, Error>;
     public validateOnChange: boolean;
@@ -337,17 +338,17 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
     }
 }
 
-export class ChildForm<
+export class ChildFormState<
     Parent,
     ParentState,
     ParentError,
     Key extends keyof Parent
-> extends Form<Parent[Key], ParentState, ParentError> {
+> extends FormState<Parent[Key], ParentState, ParentError> {
     public name: Key;
-    public parent: Form<Parent, ParentState, ParentError>;
+    public parent: FormState<Parent, ParentState, ParentError>;
 
     public constructor(
-        parent: Form<Parent, ParentState, ParentError>,
+        parent: FormState<Parent, ParentState, ParentError>,
         name: Key
     ) {
         super(
@@ -395,10 +396,10 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
     validator?: Validator<T, Error>,
     validateOnChange = true
 ) {
-    let c = useRef<Form<T, State, Error> | null>(null);
+    let c = useRef<FormState<T, State, Error> | null>(null);
 
     if (!c.current) {
-        c.current = new Form(
+        c.current = new FormState(
             defaultValues,
             defaultValues,
             defaultState,
@@ -415,12 +416,12 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
 }
 
 export function useChildForm<T, State, Error, Key extends keyof T>(
-    parentForm: Form<T, State, Error>,
+    parentForm: FormState<T, State, Error>,
     name: Key
 ) {
-    let c = useRef<ChildForm<T, State, Error, Key> | null>(null);
+    let c = useRef<ChildFormState<T, State, Error, Key> | null>(null);
     if (!c.current) {
-        c.current = new ChildForm(parentForm, name);
+        c.current = new ChildFormState(parentForm, name);
     }
 
     useEffect(() => {
@@ -436,7 +437,7 @@ export function useChildForm<T, State, Error, Key extends keyof T>(
 }
 
 export function useListener<T, State, Error, Key extends keyof T>(
-    form: Form<T, State, Error>,
+    form: FormState<T, State, Error>,
     name: Key
 ) {
     const [, setRender] = useState(0);
@@ -451,12 +452,13 @@ export function useListener<T, State, Error, Key extends keyof T>(
         setValue: (value: T[Key]) => form.setValue(name, value),
         dirty: form.dirtyMap[name],
         error: form.errorMap[name],
+        state: form.state,
         form
     };
 }
 
 export function useAnyListener<T, State, Error>(
-    form: Form<T, State, Error>,
+    form: FormState<T, State, Error>,
     onlyOnSetValues = false
 ) {
     const [, setRender] = useState(0);
@@ -472,5 +474,133 @@ export function useAnyListener<T, State, Error>(
     return form;
 }
 
-// let form = new Form({ firstName: "stijn", info: { age: 20 } });
-// let form2 = new ChildForm(form, "info");
+export function useArrayForm<
+    Parent extends ObjectOrArray,
+    ParentState extends ObjectOrArray,
+    ParentError,
+    Key extends keyof Parent
+>(parent: FormState<Parent, ParentState, ParentError>, name: Key) {
+    const form = useChildForm<Parent, ParentState, ParentError, Key>(
+        parent,
+        name
+    );
+    useAnyListener(form, true);
+
+    function append(value: Parent[Key][number]) {
+        form.setValues([...(form.values as any), value] as any);
+    }
+
+    function remove(index: number) {
+        let newValues = [...(form.values as any)];
+        newValues.splice(index, 1);
+        form.setValues(newValues as any);
+    }
+
+    function clear() {
+        form.setValues([] as any);
+    }
+
+    function move(from: number, to: number) {
+        if (to === from) return;
+        let newArr = [...(form.values as any)];
+        var target = newArr[from];
+        var increment = to < from ? -1 : 1;
+        for (var k = from; k !== to; k += increment) {
+            newArr[k] = newArr[k + increment];
+        }
+        newArr[to] = target;
+        form.setValues(newArr as any);
+    }
+
+    function swap(index: number, newIndex: number) {
+        if (index === newIndex) {
+            return;
+        }
+        let values = [...(form.values as any)];
+        [values[index], values[newIndex]] = [values[newIndex], values[index]];
+        form.setValues(values as any);
+    }
+
+    return {
+        remove,
+        move,
+        swap,
+        clear,
+        append,
+        form: form,
+        values: form.values,
+        setValues: form.setValues
+    };
+}
+
+export function ArrayForm<
+    Parent extends ObjectOrArray,
+    ParentState extends ObjectOrArray,
+    ParentError,
+    Key extends keyof Parent
+>(props: {
+    parent: FormState<Parent, ParentState, ParentError>;
+    name: Key;
+    children: (props: {
+        form: FormState<Parent[Key], ParentState, ParentError>;
+        remove: (index: number) => void;
+        clear: () => void;
+        move: (index: number, newIndex: number) => void;
+        swap: (index: number, newIndex: number) => void;
+        append: (value: Parent[Key][number]) => void;
+        values: Parent[Key];
+        setValues: (values: Parent[Key]) => void;
+    }) => React.ReactNode;
+}) {
+    const arr = useArrayForm(props.parent, props.name);
+    return <React.Fragment>{props.children(arr)}</React.Fragment>;
+}
+
+export function Listener<
+    T extends ObjectOrArray,
+    State extends ObjectOrArray,
+    Error,
+    Key extends keyof T
+>(props: {
+    form: FormState<T, State, Error>;
+    name: Key;
+    children: (props: {
+        value: T[Key];
+        setValue: (value: T[Key]) => boolean;
+        dirty: DirtyMap<T>[Key];
+        error: ErrorMap<T, Error>[Key];
+        state: State;
+        form: FormState<T, State, Error>;
+    }) => React.ReactNode;
+}) {
+    const l = useListener(props.form, props.name);
+    return <React.Fragment>{props.children(l)}</React.Fragment>;
+}
+
+export function AnyListener<
+    T extends ObjectOrArray,
+    State extends ObjectOrArray,
+    Error
+>(props: {
+    form: FormState<T, State, Error>;
+    children: (props: FormState<T, State, Error>) => React.ReactNode;
+}) {
+    const l = useAnyListener(props.form);
+    return <React.Fragment>{props.children(l)}</React.Fragment>;
+}
+
+export function ChildForm<
+    Parent extends ObjectOrArray,
+    ParentState extends ObjectOrArray,
+    ParentError,
+    Key extends keyof Parent
+>(props: {
+    parent: FormState<Parent, ParentState, ParentError>;
+    name: Key;
+    children: (
+        props: FormState<Parent[Key], ParentState, ParentError>
+    ) => React.ReactNode;
+}) {
+    const arr = useChildForm(props.parent, props.name);
+    return <React.Fragment>{props.children(arr)}</React.Fragment>;
+}
