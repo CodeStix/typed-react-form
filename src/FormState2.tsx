@@ -53,12 +53,13 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
     private counter = 0;
 
     public constructor(
+        values: T,
         defaultValues: T,
         defaultState: State,
         validator?: Validator<T, Error>,
         validateOnChange = true
     ) {
-        this.values = memberCopy(defaultValues);
+        this.values = memberCopy(values);
         this.defaultValues = memberCopy(defaultValues);
         this.state = memberCopy(defaultState);
         this.validator = validator;
@@ -75,7 +76,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
 
     public setValueInternal<Key extends keyof T>(
         key: Key,
-        value: T[Key],
+        value: T[Key] | undefined,
         dirty: boolean | undefined,
         validate: boolean,
         isDefault: boolean,
@@ -91,12 +92,17 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
             dirty,
             isDefault
         );
-        if (isDefault) this.defaultValues[key] = value;
-        else this.values[key] = value;
+        let map = isDefault ? this.defaultValues : this.values;
+        if (value === undefined) {
+            if (Array.isArray(map)) map.splice(key as number, 1);
+            else delete map[key];
+        } else {
+            map[key] = value;
+        }
 
         if (dirty !== undefined) this.dirtyMap[key] = dirty;
 
-        if (notifyChild) {
+        if (notifyChild && value !== undefined) {
             let child = this.childMap[key];
             if (child) {
                 child.setValues(value, isDefault, true, false);
@@ -128,7 +134,7 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
 
     public setValue<Key extends keyof T>(
         key: Key,
-        value: T[Key],
+        value: T[Key] | undefined,
         validate: boolean = true,
         isDefault: boolean = false,
         notifyChild: boolean = true,
@@ -182,10 +188,13 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
         notifyParent: boolean = true
     ) {
         console.log(this.formId, "setValues", values, isDefault);
+
         // Copy the values to the local form object
-        let k = Object.keys(values);
-        for (let i = 0; i < k.length; i++) {
-            let key = k[i] as keyof T;
+        let newKeys = Object.keys(isDefault ? this.defaultValues : this.values);
+        let localKeys = Object.keys(values);
+        let mostKeys = newKeys.length > localKeys.length ? newKeys : localKeys;
+        for (let i = 0; i < mostKeys.length; i++) {
+            let key = mostKeys[i] as keyof T;
             this.setValue(
                 key,
                 values[key],
@@ -339,7 +348,11 @@ export class ChildForm<
         parent: Form<Parent, ParentState, ParentError>,
         name: Key
     ) {
-        super(parent.defaultValues[name], parent.state);
+        super(
+            parent.values[name] ?? ({} as any),
+            parent.defaultValues[name] ?? ({} as any),
+            parent.state
+        );
         this.parent = parent;
         this.name = name;
         parent.childMap[name] = this;
@@ -385,6 +398,7 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
     if (!c.current) {
         c.current = new Form(
             defaultValues,
+            defaultValues,
             defaultState,
             validator,
             validateOnChange
@@ -408,8 +422,12 @@ export function useChildForm<T, State, Error, Key extends keyof T>(
     }
 
     useEffect(() => {
-        console.log("register child form");
-        return () => console.log("unregister child form");
+        c.current!.setValues(
+            parentForm.values[name] ?? ({} as any),
+            false,
+            true,
+            false
+        );
     }, [parentForm, name]);
 
     return c.current;

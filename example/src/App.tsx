@@ -145,6 +145,23 @@ export default function App() {
 
 function Todos(props: { parent: Form<TodoList> }) {
     const form = useChildForm(props.parent, "todos");
+    const arr = useAnyListener(form);
+
+    function swap(index: number, newIndex: number) {
+        if (index === newIndex) {
+            return;
+        }
+        let values = [...(form.values as any)];
+        [values[index], values[newIndex]] = [values[newIndex], values[index]];
+        console.log("new values", values);
+        form.setValues(values as any);
+    }
+
+    function remove(index: number) {
+        let newValues = [...(form.values as any)];
+        newValues.splice(index, 1);
+        form.setValues(newValues as any);
+    }
 
     return (
         <VisualRender>
@@ -155,15 +172,41 @@ function Todos(props: { parent: Form<TodoList> }) {
                     border: "1px solid #0005"
                 }}
             >
-                {form.values.map((e, i) => (
-                    <Todo parent={form} key={e.id} index={i} />
+                {arr.values.map((e, i) => (
+                    <Todo
+                        onRemove={() => remove(i)}
+                        onMoveTop={() => swap(i, 0)}
+                        parent={form}
+                        key={e.id}
+                        index={i}
+                    />
                 ))}
+                <button
+                    type="button"
+                    onClick={() =>
+                        form.setValues([
+                            ...arr.values,
+                            {
+                                id: new Date().getTime(),
+                                message: "",
+                                priority: "normal"
+                            }
+                        ])
+                    }
+                >
+                    Add
+                </button>
             </div>
         </VisualRender>
     );
 }
 
-function Todo(props: { parent: Form<Todo[]>; index: number }) {
+function Todo(props: {
+    parent: Form<Todo[]>;
+    index: number;
+    onRemove: () => void;
+    onMoveTop: () => void;
+}) {
     const form = useChildForm(props.parent, props.index);
 
     return (
@@ -175,7 +218,17 @@ function Todo(props: { parent: Form<Todo[]>; index: number }) {
                     border: "1px solid #0005"
                 }}
             >
+                <p>
+                    {form.formId} /{" "}
+                    {JSON.stringify(props.parent.values[props.index])}
+                </p>
                 <Input form={form} name="message" />
+                <button type="button" onClick={() => props.onRemove()}>
+                    Remove
+                </button>
+                <button type="button" onClick={() => props.onMoveTop()}>
+                    Move to top
+                </button>
             </div>
         </VisualRender>
     );
