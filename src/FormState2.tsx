@@ -58,7 +58,9 @@ export class Form<T> {
     public dirtyMap: DirtyMap<T> = {};
     public listeners: { [Key in keyof T]?: ListenerMap } = {};
     public anyListeners: ListenerMap = {};
+    public formId = ++Form.formCounter;
 
+    private static formCounter = 0;
     private counter = 0;
 
     public constructor(defaultValues: T) {
@@ -79,10 +81,24 @@ export class Form<T> {
         notifyParent: boolean,
         fireAny: boolean
     ) {
+        console.log(
+            this.formId,
+            "setValueInternal",
+            key,
+            value,
+            dirty,
+            isDefault
+        );
         if (isDefault) this.defaultValues[key] = value;
         else this.values[key] = value;
         if (dirty !== undefined) this.dirtyMap[key] = dirty;
-        if (notifyChild) this.childMap[key]?.setValues(value, isDefault);
+        if (notifyChild) {
+            let child = this.childMap[key];
+            if (child) {
+                child.setValues(value, isDefault, true, false);
+                this.dirtyMap[key] = child.dirty;
+            }
+        }
         if (notifyParent) void 0; // Not implemented for topmost form
         this.fireListeners(key);
         if (fireAny) this.fireAnyListeners(); // Will be false when using setValues, he will call fireAnyListeners itself
@@ -91,7 +107,9 @@ export class Form<T> {
     public setValue<Key extends keyof T>(
         key: Key,
         value: T[Key],
-        isDefault: boolean = false
+        isDefault: boolean = false,
+        notifyChild: boolean = true,
+        notifyParent: boolean = true
     ) {
         if (typeof value === "object") {
             this.setValueInternal(
@@ -99,12 +117,24 @@ export class Form<T> {
                 value,
                 undefined,
                 isDefault,
-                true,
-                true,
+                notifyChild,
+                notifyParent,
                 true
             );
         } else {
-            if (this.values[key] === value) return false;
+            if (
+                (isDefault && this.defaultValues[key] === value) ||
+                (!isDefault && this.values[key] === value)
+            ) {
+                console.log(
+                    this.formId,
+                    "already set",
+                    value,
+                    this.values[key],
+                    this.defaultValues[key]
+                );
+                return false;
+            }
             this.setValueInternal(
                 key,
                 value,
@@ -112,25 +142,37 @@ export class Form<T> {
                     ? value !== this.values[key]
                     : value !== this.defaultValues[key],
                 isDefault,
-                true,
-                true,
+                notifyChild,
+                notifyParent,
                 true
             );
         }
         return true;
     }
 
-    public setValues(values: T, isDefault: boolean = false) {
+    public setValues(
+        values: T,
+        isDefault: boolean = false,
+        notifyChild: boolean = true,
+        notifyParent: boolean = true
+    ) {
+        console.log(this.formId, "setValues", values, isDefault);
         let k = Object.keys(values);
         for (let i = 0; i < k.length; i++) {
             let key = k[i] as keyof T;
-            this.setValue(key, values[key], isDefault);
+            this.setValue(
+                key,
+                values[key],
+                isDefault,
+                notifyChild,
+                notifyParent
+            );
         }
         this.fireAnyListeners();
     }
 
     public reset() {
-        this.setValues({ ...this.defaultValues }, true);
+        this.setValues(this.defaultValues);
     }
 
     public listen(key: keyof T, listener: ListenerCallback): string {
@@ -203,14 +245,28 @@ export class ChildForm<Parent, Key extends keyof Parent> extends Form<
         notifyParent: boolean,
         fireAny: boolean
     ) {
+        console.log(
+            this.formId,
+            "setValueInternal(child)",
+            key,
+            value,
+            dirty,
+            isDefault
+        );
         if (isDefault) this.defaultValues[key] = value;
         else this.values[key] = value;
         if (dirty !== undefined) this.dirtyMap[key] = dirty;
-        if (notifyChild) this.childMap[key]?.setValues(value, isDefault);
+        if (notifyChild) {
+            let child = this.childMap[key];
+            if (child) {
+                child.setValues(value, isDefault, true, false);
+                this.dirtyMap[key] = child.dirty;
+            }
+        }
         if (notifyParent)
             this.parent.setValueInternal(
                 this.name,
-                this.values,
+                isDefault ? { ...this.defaultValues } : { ...this.values },
                 this.dirty,
                 isDefault,
                 false,

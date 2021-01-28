@@ -63,7 +63,7 @@ interface Todo {
 }
 
 export default function App() {
-    const [values, setValues] = useState<TodoList>({
+    const [values] = useState<TodoList>({
         info: {
             authorName: "codestix",
             createdAt: new Date().getTime(),
@@ -75,19 +75,34 @@ export default function App() {
     const form = useForm(values);
 
     return (
-        <form
-            onSubmit={(ev) => {
-                ev.preventDefault();
-                console.log("submit", form.values);
-                setValues(form.values);
-            }}
-            style={{ margin: "2em", padding: "1em", border: "1px solid #0005" }}
-        >
-            <p>Author name</p>
-            <Input form={form} name="name" />
-            <TodoInfo parent={form} />
-            <Debug form={form} />
-        </form>
+        <VisualRender>
+            <form
+                onSubmit={(ev) => {
+                    ev.preventDefault();
+                    console.log(
+                        "submit",
+                        values,
+                        form.values,
+                        values === form.values
+                    );
+                    form.setValues({ ...form.values }, true);
+                }}
+                style={{
+                    margin: "2em",
+                    padding: "1em",
+                    border: "1px solid #0005"
+                }}
+            >
+                <p>Author name</p>
+                <Input form={form} name="name" />
+                <TodoInfo parent={form} />
+                <Debug form={form} />
+                <button>Save</button>
+                <button type="button" onClick={() => form.reset()}>
+                    Reset
+                </button>
+            </form>
+        </VisualRender>
     );
 }
 
@@ -95,11 +110,19 @@ function TodoInfo(props: { parent: Form<TodoList> }) {
     const form = useChildForm(props.parent, "info");
 
     return (
-        <div style={{ padding: "1em", border: "1px solid #0005" }}>
-            <p>Author name</p>
-            <Input form={form} name="authorName" />
-            <TodoInfoMore parent={form} />
-        </div>
+        <VisualRender>
+            <div
+                style={{
+                    margin: "1em",
+                    padding: "1em",
+                    border: "1px solid #0005"
+                }}
+            >
+                <p>Author name</p>
+                <Input form={form} name="authorName" />
+                <TodoInfoMore parent={form} />
+            </div>
+        </VisualRender>
     );
 }
 
@@ -107,9 +130,17 @@ function TodoInfoMore(props: { parent: Form<TodoList["info"]> }) {
     const form = useChildForm(props.parent, "more");
 
     return (
-        <div style={{ padding: "1em", border: "1px solid #0005" }}>
-            <p>Slug</p>
-            <Input form={form} name="slug" />
-        </div>
+        <VisualRender>
+            <div
+                style={{
+                    margin: "1em",
+                    padding: "1em",
+                    border: "1px solid #0005"
+                }}
+            >
+                <p>Slug</p>
+                <Input form={form} name="slug" />
+            </div>
+        </VisualRender>
     );
 }
