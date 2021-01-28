@@ -26,6 +26,16 @@ type ErrorMap<T, Error> = {
 export type DefaultError = string;
 export type DefaultState = { isSubmitting: boolean };
 
+function memberCopy<T>(value: T): T {
+    if (Array.isArray(value)) {
+        return [...value] as any;
+    } else if (typeof value === "object") {
+        return { ...value };
+    } else {
+        throw new Error("Can only memberCopy() arrays and objects.");
+    }
+}
+
 export class Form<T, State = DefaultState, Error = DefaultError> {
     public values: T;
     public defaultValues: T;
@@ -48,9 +58,9 @@ export class Form<T, State = DefaultState, Error = DefaultError> {
         validator?: Validator<T, Error>,
         validateOnChange = true
     ) {
-        this.values = { ...defaultValues };
-        this.defaultValues = { ...defaultValues };
-        this.state = { ...defaultState };
+        this.values = memberCopy(defaultValues);
+        this.defaultValues = memberCopy(defaultValues);
+        this.state = memberCopy(defaultState);
         this.validator = validator;
         this.validateOnChange = validateOnChange;
     }
@@ -338,7 +348,9 @@ export class ChildForm<
     protected updateParentValues(isDefault: boolean) {
         this.parent.setValueInternal(
             this.name,
-            isDefault ? { ...this.defaultValues } : { ...this.values },
+            isDefault
+                ? memberCopy(this.defaultValues)
+                : memberCopy(this.values),
             this.dirty,
             true,
             isDefault,
@@ -351,14 +363,14 @@ export class ChildForm<
     protected updateParentErrors() {
         this.parent.setError(
             this.name,
-            this.error ? ({ ...this.errorMap } as any) : undefined,
+            this.error ? (memberCopy(this.errorMap) as any) : undefined,
             false,
             true
         );
     }
 
     protected updateParentState() {
-        this.parent.setState(this.state, false, true);
+        this.parent.setState(memberCopy(this.state), false, true);
     }
 }
 
