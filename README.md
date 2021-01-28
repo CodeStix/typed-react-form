@@ -1,6 +1,6 @@
 # Typed React form
 
-A React form state manager, focussed on flawless typescript integration and minimal rerenders.
+A React form state manager, focussed on flawless typescript integration and minimal rerenders. Supports nested objects/arrays.
 
 [![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form)
 
@@ -47,7 +47,44 @@ return (
 );
 ```
 
-### Wrapping your inputs
+### Array/object fields
+
+To implement array and object fields, you should use `useArrayForm` and `useChildForm` (see below). Each object/array layer is seen as a seperate form.
+
+## Documentation
+
+#### `useForm`
+
+Hook which creates a new form state manager, and returns it, which can then be used with any of the components and hooks below.
+
+#### `<Listener form={} name="" />`
+
+Component (wrapper around useListener) to listen for changes on a form's field without rerendering the whole form.
+
+#### `<AnyListener form={} />`
+
+Component (wrapper around useAnyListener) to listen any changes in a form without rerendering.
+
+#### `<ChildForm parent={} name="" />`
+
+Component (wrapper around useChildForm) to create a form out of one of its parent's object fields.
+Name should be the name of a field in the parent form which is an object.
+When the parent form is an array form, you should pass the index to the name field.
+
+#### `<ArrayForm parent={} name="">`
+
+Component (wrapper around useArrayForm) to create a form out of one of its parent's array fields.
+Name should be the name of a field in the parent form which is an array.
+
+#### `useListener(form, name)`
+
+Hook to listen for changes on a form's field, you should not use this in large components as it will cause a rerender. Use multiple Listener components instead.
+
+#### `useAnyListener(form)`
+
+Hook to listen for any change on a form without rerendering the whole form. Do not use this in large components, because this will cause a rerender each time a form changes. Use multiple AnyListener's instead.
+
+## Wrapping your inputs
 
 Example of a simple stateful input.
 
@@ -115,38 +152,6 @@ function Input<T extends ObjectOrArray>({
 }
 ```
 
-## Documentation
-
-#### `useForm`
-
-Hook which creates a new form state manager, and returns it, which can then be used with any of the components and hooks below.
-
-#### `<Listener form={} name="" />`
-
-Component (wrapper around useListener) to listen for changes on a form's field without rerendering the whole form.
-
-#### `<AnyListener form={} />`
-
-Component (wrapper around useAnyListener) to listen any changes in a form without rerendering.
-
-#### `<ChildForm parent={} name="" />`
-
-Component (wrapper around useChildForm) to create a form out of one of its parent's object fields.
-Name should be the name of a field in the parent form which is an object.
-When the parent form is an array form, you should pass the index to the name field.
-
-#### `<ArrayForm parent={} name="">`
-
-Component (wrapper around useArrayForm) to create a form out of one of its parent's array fields.
-Name should be the name of a field in the parent form which is an array.
-
-#### `useListener(form, name)`
-
-Hook to listen for changes on a form's field, you should not use this in large components as it will cause a rerender. Use multiple Listener components instead.
-
-#### `useAnyListener(form)`
-
-Hook to listen for any change on a form without rerendering the whole form. Do not use this in large components, because this will cause a rerender each time a form changes. Use multiple AnyListener's instead.
 
 ## License
 
