@@ -26,7 +26,7 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
     }
 
     useEffect(() => {
-        c.current!.setValues(defaultValues, true);
+        c.current!.setValues(defaultValues, true, true);
     }, [defaultValues]);
 
     return c.current;
@@ -50,12 +50,14 @@ export function useChildForm<T, State, Error, Key extends keyof T>(
         c.current!.setValues(
             parentForm.defaultValues[name] ?? ({} as any),
             true,
+            true,
             false,
             false
         );
         // Then, set new values, and notify parent and children
         c.current!.setValues(
             parentForm.values[name] ?? ({} as any),
+            true,
             false,
             true,
             true

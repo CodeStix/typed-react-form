@@ -37,22 +37,51 @@ export function memberCopy<T>(value: T): T {
 }
 
 export class FormState<T, State = DefaultState, Error = DefaultError> {
+    /**
+     * The id of this form, for debugging purposes.
+     */
     public readonly formId = ++FormState.formCounter;
+
+    /**
+     * The form's validator.
+     */
     public validator?: Validator<T, Error>;
+
+    /**
+     * Should the form validate on each value change?
+     */
     public validateOnChange: boolean;
 
+    /**
+     * The values on this form. Use setValues() to set these.
+     */
     public readonly values: T;
+
+    /**
+     * The default values on this form. Use setValues(..., true) to set these.
+     */
     public readonly defaultValues: T;
+
+    /**
+     * The dictionary that maps object fields to child forms.
+     */
     public readonly childMap: ChildFormMap<T, State, Error> = {};
+
+    /**
+     * The dictionary that contains dirty states for each field.
+     */
     public readonly dirtyMap: DirtyMap<T> = {};
+
+    /**
+     * The dictionary that contains errors for each field.
+     */
     public readonly errorMap: ErrorMap<T, Error> = {};
 
     private _state: State;
     private listeners: { [Key in keyof T]?: ListenerMap } = {};
     private anyListeners: ListenerMap = {};
     private counter = 0;
-
-    protected static formCounter = 0;
+    private static formCounter = 0;
 
     public constructor(
         values: T,
@@ -68,18 +97,38 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         this.validateOnChange = validateOnChange;
     }
 
+    /**
+     * Gets the state of the current form.
+     */
     public get state() {
         return this._state;
     }
 
+    /**
+     * Is this form modified?
+     */
     public get dirty() {
         return Object.keys(this.dirtyMap).some((e) => this.dirtyMap[e]);
     }
 
+    /**
+     * Does this form contain any error?
+     */
     public get error() {
         return Object.keys(this.errorMap).some((e) => this.errorMap[e]);
     }
 
+    /**
+     * Sets a value the advanced way.
+     * @param key The field to set.
+     * @param value The value to set in the field.
+     * @param dirty Is this field dirty? Leave undefined to not set any dirty value. (dirty value can always be overridden by child forms)
+     * @param validate Should the form validate after value set?
+     * @param isDefault Is this the default value for the said field?
+     * @param notifyChild Should this form notify any child form about the change?
+     * @param notifyParent Should this form notify any parent form about the change?
+     * @param fireAny Fire all anyListeners after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
+     */
     public setValueInternal<Key extends keyof T>(
         key: Key,
         value: T[Key] | undefined,
@@ -90,20 +139,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         notifyParent: boolean,
         fireAny: boolean
     ) {
-        console.log(
-            this.formId,
-            "setValueInternal",
-            key,
-            value,
-            dirty,
-            isDefault
-        );
-        let map = isDefault ? this.defaultValues : this.values;
+        let valueMap = isDefault ? this.defaultValues : this.values;
         if (value === undefined) {
-            if (Array.isArray(map)) map.splice(key as number, 1);
-            else delete map[key];
+            if (Array.isArray(valueMap)) valueMap.splice(key as number, 1);
+            else delete valueMap[key];
         } else {
-            map[key] = value;
+            valueMap[key] = value;
         }
 
         if (dirty !== undefined) this.dirtyMap[key] = dirty;
@@ -111,7 +152,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (notifyChild && value !== undefined) {
             let child = this.childMap[key];
             if (child) {
-                child.setValues(value, isDefault, true, false);
+                child.setValues(value, true, isDefault, true, false);
                 this.dirtyMap[key] = child.dirty;
             }
         }
@@ -119,25 +160,23 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         this.fireListeners(key, false);
         if (fireAny) {
             // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
-            if (notifyParent) this.updateParentValues(isDefault);
+            if (notifyParent) this.updateParentValues(isDefault); // Will call setValueInternal on parent
             this.fireAnyListeners(false);
         }
 
         if (this.validator && validate) this.validate();
     }
 
-    protected updateParentValues(_isDefault: boolean) {
-        // Not implemented for root form, as it does not have a parent
-    }
-
-    protected updateParentErrors() {
-        // Not implemented for root form, as it does not have a parent
-    }
-
-    protected updateParentState() {
-        // Not implemented for root form, as it does not have a parent
-    }
-
+    /**
+     * Set a value on this form.
+     * @param key The field to set.
+     * @param value The field's new value.
+     * @param validate Should the form validate?
+     * @param isDefault Is this the default value?
+     * @param notifyChild Should this form notify the child form about this change?
+     * @param notifyParent Should this form notify the parent form about this change?
+     * @param fireAny Fire all anyListeners after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
+     */
     public setValue<Key extends keyof T>(
         key: Key,
         value: T[Key] | undefined,
@@ -148,6 +187,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         fireAny: boolean = true
     ) {
         if (typeof value === "object") {
+            // Do not compare objects, child form should mark dirty
             this.setValueInternal(
                 key,
                 value,
@@ -159,18 +199,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 fireAny
             );
         } else {
+            // Calculate and compare value types, determine dirty?
             if (
                 (isDefault && this.defaultValues[key] === value) ||
                 (!isDefault && this.values[key] === value)
-            ) {
-                console.log(
-                    this.formId,
-                    "already set",
-                    value,
-                    isDefault ? this.defaultValues[key] : this.values[key]
-                );
+            )
                 return false;
-            }
             this.setValueInternal(
                 key,
                 value,
@@ -187,14 +221,21 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         return true;
     }
 
+    /**
+     * Set all values on this form.
+     * @param values The new values to set on this form.
+     * @param validate Validate?
+     * @param isDefault Are these values the default values for this form?
+     * @param notifyChild Should this form notify the child form about this change?
+     * @param notifyParent Should this form notify the parent form about this change?
+     */
     public setValues(
         values: T,
+        validate: boolean = true,
         isDefault: boolean = false,
         notifyChild: boolean = true,
         notifyParent: boolean = true
     ) {
-        console.log(this.formId, "setValues", values, isDefault);
-
         // Copy the values to the local form object
         let newKeys = Object.keys(isDefault ? this.defaultValues : this.values);
         let localKeys = Object.keys(values);
@@ -214,9 +255,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (notifyParent) this.updateParentValues(isDefault);
         this.fireAnyListeners(true);
 
-        if (this.validator) this.validate();
+        if (validate && this.validator) this.validate();
     }
 
+    /**
+     * Force validation on this field. Required when validateOnChange is disabled.
+     */
     public validate() {
         if (!this.validator) {
             console.warn(
@@ -227,6 +271,14 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         this.setErrors(this.validator(this.values));
     }
 
+    /**
+     * Sets an error on this form
+     * @param key The field to set an error on.
+     * @param error The error.
+     * @param notifyChild Should this form notify the child form about this change?
+     * @param notifyParent Should this form notify the parent form about this change?
+     * @param fireAny
+     */
     public setError<Key extends keyof T>(
         key: Key,
         error: ErrorType<T[Key], Error> | undefined,
@@ -242,11 +294,17 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (notifyChild) this.childMap[key]?.setErrors((error ?? {}) as any);
         this.fireListeners(key, false);
         if (fireAny) {
-            if (notifyParent) this.updateParentErrors();
+            if (notifyParent) this.updateParentErrors(); // Will call setError on parent
             this.fireAnyListeners(false);
         }
     }
 
+    /**
+     * Sets all the errors on this form.
+     * @param errors The new errors for this form. Use {} to clear errors.
+     * @param notifyChild Should this form notify the child form about this change?
+     * @param notifyParent Should this form notify the parent form about this change?
+     */
     public setErrors(
         errors: ErrorMap<T, Error>,
         notifyChild: boolean = true,
@@ -269,14 +327,27 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         this.fireAnyListeners(false);
     }
 
+    /**
+     * Reset this form's values to the default values.
+     */
     public resetAll() {
         this.setValues(this.defaultValues);
     }
 
+    /**
+     * Reset a form's field to its default value.
+     * @param key The field to reset.
+     */
     public reset(key: keyof T) {
         this.setValue(key, this.defaultValues[key]);
     }
 
+    /**
+     * Sets the state for this form, and also on child and parent forms by default.
+     * @param state The new form state.
+     * @param notifyChild Set the state on the child too?
+     * @param notifyParent Set the state on the parent too?
+     */
     public setState(
         state: State,
         notifyChild: boolean = true,
@@ -295,6 +366,11 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         this.fireAnyListeners(false);
     }
 
+    /**
+     * Listen for changes on a field, will trigger when value, defaultValue, dirty and error changes for a field. Make sure you pass its return value back to ignore() after you are done listening.
+     * @param key The field to listen to.
+     * @param listener Change callback.
+     */
     public listen(key: keyof T, listener: ListenerCallback): string {
         if (!this.listeners) this.listeners = {};
         let setters = this.listeners[key];
@@ -307,6 +383,10 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         return id;
     }
 
+    /**
+     * Listen for any change on this form. Make sure you pass its return value back to ignoreAny() after you are done listening.
+     * @param listener Change callback.
+     */
     public listenAny(listener: ListenerCallback) {
         if (!this.anyListeners) this.anyListeners = {};
         let id = "" + this.counter++;
@@ -314,11 +394,11 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         return id;
     }
 
-    public ignoreAny(id: string) {
-        if (!this.anyListeners) return;
-        delete this.anyListeners[id];
-    }
-
+    /**
+     * Ignore changes on a field.
+     * @param key The field to ignore.
+     * @param id The callback to ignore.
+     */
     public ignore(key: keyof T, id: string) {
         if (!this.listeners) return;
         let setters = this.listeners[key];
@@ -327,6 +407,15 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
             return;
         }
         delete setters[id];
+    }
+
+    /**
+     * Ignore changes on this form.
+     * @param id The callback to ignore.
+     */
+    public ignoreAny(id: string) {
+        if (!this.anyListeners) return;
+        delete this.anyListeners[id];
     }
 
     protected fireListeners(key: keyof T, setValuesWasUsed: boolean) {
@@ -340,6 +429,18 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     protected fireAnyListeners(setValuesWasUsed: boolean) {
         let al = Object.keys(this.anyListeners);
         al.forEach((e) => this.anyListeners[e]!(setValuesWasUsed));
+    }
+
+    protected updateParentValues(_isDefault: boolean) {
+        // Not implemented for root form, as it does not have a parent
+    }
+
+    protected updateParentErrors() {
+        // Not implemented for root form, as it does not have a parent
+    }
+
+    protected updateParentState() {
+        // Not implemented for root form, as it does not have a parent
     }
 }
 
