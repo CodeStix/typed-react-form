@@ -91,7 +91,7 @@ export default function App() {
 
                 form.setState({ isSubmitting: false }); // Set the form state (updates every component listening for state updates)
 
-                setValues({ ...form.values }); // Set new default values, (form.setValues(..., true) is also possible instead of useState/useForm combo!)
+                setValues({ ...form.values }); // Set new default values, (form.setValues(..., true, true) is also possible instead of useState/useForm combo!)
             }}
             style={{ padding: "1em", margin: "1em" }}
         >
@@ -99,7 +99,10 @@ export default function App() {
                 <h1>
                     Form created using <a href="https://github.com/CodeStix/typed-react-form">typed-react-form</a>
                 </h1>
-                <p>The red flash indicates which parts of the form are being rerendered.</p>
+                <p>
+                    The red flash indicates which parts of the form are being rerendered. Browse the source code <a href="https://github.com/CodeStix/typed-react-form/tree/master/example/src">here</a>
+                    .
+                </p>
                 <hr />
                 <h2>Todo list</h2>
                 <p>Name</p>
@@ -108,6 +111,7 @@ export default function App() {
                 <p>Author</p>
                 <Input form={form} name="author" />
                 <p>Todo's</p>
+
                 {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
                 <ArrayListener parent={form} name="todos">
                     {(
@@ -135,19 +139,30 @@ export default function App() {
                         </VisualRender>
                     )}
                 </ArrayListener>
-                <AnyListener form={form}>
-                    {({ state, dirty }) => (
-                        <>
-                            {/* Disable buttons when form is submitting or when nothing has changed, the AnyListener wrapper is required */}
-                            <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty}>
-                                Save
-                            </button>
-                            <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty} type="button" onClick={() => form.resetAll()}>
-                                Reset
-                            </button>
-                        </>
-                    )}
-                </AnyListener>
+                <div style={{ background: "#eee" }}>
+                    <AnyListener form={form}>
+                        {({ state, dirty }) => (
+                            <>
+                                {/* Disable buttons when form is submitting or when nothing has changed, the AnyListener wrapper is required */}
+                                <button style={{ fontSize: "1.3em", margin: "0.5em 0" }} disabled={state.isSubmitting || !dirty}>
+                                    Submit
+                                </button>
+                                <button style={{ fontSize: "1.3em", margin: "0.5em 0" }} disabled={state.isSubmitting || !dirty} type="button" onClick={() => form.resetAll()}>
+                                    Reset
+                                </button>
+                            </>
+                        )}
+                    </AnyListener>
+                    <div>
+                        <button style={{ fontSize: "1.3em" }} type="button" onClick={() => form.validate()}>
+                            Validate
+                        </button>
+                        <label>
+                            <code>validateOnChange</code>
+                            <input type="checkbox" defaultChecked={form.validateOnChange} onChange={(e) => (form.validateOnChange = e.target.checked)} />
+                        </label>
+                    </div>
+                </div>
 
                 <h3>Output</h3>
                 <FormValues form={form} />
@@ -195,8 +210,8 @@ function FormValues<T>(props: { form: FormState<T> }) {
                     {form.error && <strong style={{ color: "red" }}>ERROR</strong>}
                 </p>
                 <pre>{JSON.stringify(form.values, null, 2)}</pre>
-                <pre>{JSON.stringify(form.defaultValues)}</pre>
-                {/* <pre>{JSON.stringify(form.errorMap, null, 2)}</pre> */}
+                {/* <pre>{JSON.stringify(form.defaultValues)}</pre> */}
+                <pre>{JSON.stringify(form.errorMap, null, 2)}</pre>
                 <pre>{JSON.stringify(form.dirtyMap, null, 2)}</pre>
                 {/* <pre>{JSON.stringify(form.state, null, 2)}</pre> */}
             </div>

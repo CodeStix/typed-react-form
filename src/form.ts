@@ -115,11 +115,11 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param key The field to set.
      * @param value The value to set in the field.
      * @param dirty Is this field dirty? Leave undefined to not set any dirty value. (dirty value can always be overridden by child forms)
-     * @param validate Should the form validate after value set?
+     * @param validate Should the form validate after value set? This does not override `validateOnChange`.
      * @param isDefault Is this the default value for the said field?
      * @param notifyChild Should this form notify any child form about the change?
      * @param notifyParent Should this form notify any parent form about the change?
-     * @param fireAny Fire all anyListeners after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
+     * @param fireAny Fire all `anyListeners` after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
      */
     public setValueInternal<Key extends keyof T>(
         key: Key,
@@ -156,7 +156,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
             this.fireAnyListeners(false);
         }
 
-        if (this.validator && validate) this.validate();
+        if (validate && this.validateOnChange && this.validator) this.validate();
     }
 
     /**
@@ -167,7 +167,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param isDefault Is this the default value?
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
-     * @param fireAny Fire all anyListeners after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
+     * @param fireAny Fire all `anyListeners` after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
      */
     public setValue<Key extends keyof T>(
         key: Key,
@@ -192,7 +192,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     /**
      * Set all values on this form.
      * @param values The new values to set on this form.
-     * @param validate Validate?
+     * @param validate Validate? Does not override `validateOnChange`.
      * @param isDefault Are these values the default values for this form?
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
@@ -217,11 +217,22 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (notifyParent) this.updateParentValues(isDefault);
         this.fireAnyListeners(true);
 
-        if (validate && this.validator) this.validate();
+        if (validate && this.validateOnChange && this.validator) this.validate();
     }
 
     /**
-     * Force validation on this field. Required when validateOnChange is disabled.
+     * Set default values for this form. (Convenience wrapper around `setValues()`)
+     * @param values The new default values to set on this form.
+     * @param validate Validate?
+     * @param notifyChild Should this form notify the child form about this change?
+     * @param notifyParent Should this form notify the parent form about this change?
+     */
+    public setDefaultValues(values: T, validate: boolean = true, notifyChild: boolean = true, notifyParent: boolean = true) {
+        this.setValues(values, validate, true, notifyChild, notifyParent);
+    }
+
+    /**
+     * Force validation on this field. Required when `validateOnChange` is disabled.
      */
     public validate() {
         if (!this.validator) {
@@ -255,7 +266,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
 
     /**
      * Sets all the errors on this form.
-     * @param errors The new errors for this form. Use {} to clear errors.
+     * @param errors The new errors for this form. Use {} to clear errors. **The format of this error object must follow the same structure of the values object, but each value is replaced by its error.**
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
@@ -310,7 +321,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 
     /**
-     * Listen for changes on a field, will trigger when value, defaultValue, dirty and error changes for a field. Make sure you pass its return value back to ignore() after you are done listening.
+     * Listen for changes on a field, will trigger when value, defaultValue, dirty and error changes for a field. Make sure you pass its return value back to `ignore()` after you are done listening.
      * @param key The field to listen to.
      * @param listener Change callback.
      */
@@ -327,7 +338,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 
     /**
-     * Listen for any change on this form. Make sure you pass its return value back to ignoreAny() after you are done listening.
+     * Listen for any change on this form. Make sure you pass its return value back to `ignoreAny()` after you are done listening.
      * @param listener Change callback.
      */
     public listenAny(listener: ListenerCallback) {
