@@ -42,15 +42,32 @@ export function useChildForm<T, State, Error, Key extends keyof T>(
     }
 
     useEffect(() => {
+        // Update parent and child form
+        parentForm.childMap[name] = c.current!;
+        c.current!.name = name;
+
+        // Set new default values, without notifying parent and children
+        c.current!.setValues(
+            parentForm.defaultValues[name] ?? ({} as any),
+            true,
+            false,
+            false
+        );
+        // Then, set new values, and notify parent and children
         c.current!.setValues(
             parentForm.values[name] ?? ({} as any),
             false,
             true,
-            false
+            true
         );
+
         return () => {
-            delete parentForm.errorMap[name];
-            delete parentForm.dirtyMap[name];
+            // Could already be overriden (useEffect ordering)
+            if (parentForm.childMap[name] === c.current!) {
+                delete parentForm.childMap[name];
+                delete parentForm.errorMap[name];
+                delete parentForm.dirtyMap[name];
+            }
         };
     }, [parentForm, name]);
 
@@ -87,7 +104,6 @@ export function useAnyListener<T, State, Error>(
 
     useEffect(() => {
         let id = form.listenAny((all) => {
-            if (form.formId === 3) console.trace("all?", all);
             if (!onlyOnSetValues || all) setRender((e) => e + 1);
         });
         return () => form.ignoreAny(id);

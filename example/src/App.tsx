@@ -102,7 +102,7 @@ export default function App() {
 
                 form.setState({ isSubmitting: false }); // Set the form state (updates every component listening for state updates)
 
-                setValues({ ...form.values }); // Set new default values, (form.setDefaultValues is also possible instead of useState/useForm combo!)
+                setValues({ ...form.values }); // Set new default values, (form.setValues(..., true) is also possible instead of useState/useForm combo!)
             }}
             style={{ padding: "1em", margin: "1em" }}
         >
@@ -235,10 +235,10 @@ function FormValues<T>(props: { form: FormState<T> }) {
                     )}
                 </p>
                 <pre>{JSON.stringify(form.values, null, 2)}</pre>
-                {/* <pre>{JSON.stringify(val.defaultValues)}</pre> */}
-                {/* <pre>{JSON.stringify(val.errorMap, null, 2)}</pre> */}
+                <pre>{JSON.stringify(form.defaultValues)}</pre>
+                {/* <pre>{JSON.stringify(form.errorMap, null, 2)}</pre> */}
                 <pre>{JSON.stringify(form.dirtyMap, null, 2)}</pre>
-                {/* <pre>{JSON.stringify(val.state, null, 2)}</pre> */}
+                {/* <pre>{JSON.stringify(form.state, null, 2)}</pre> */}
             </div>
         </VisualRender>
     );

@@ -26,7 +26,7 @@ export type ErrorMap<T, Error> = {
 export type DefaultError = string;
 export type DefaultState = { isSubmitting: boolean };
 
-function memberCopy<T>(value: T): T {
+export function memberCopy<T>(value: T): T {
     if (Array.isArray(value)) {
         return [...value] as any;
     } else if (typeof value === "object") {
@@ -349,7 +349,7 @@ export class ChildFormState<
     ParentError,
     Key extends keyof Parent
 > extends FormState<Parent[Key], ParentState, ParentError> {
-    public readonly name: Key;
+    public name: Key;
     public readonly parent: FormState<Parent, ParentState, ParentError>;
 
     public constructor(
@@ -363,7 +363,6 @@ export class ChildFormState<
         );
         this.parent = parent;
         this.name = name;
-        parent.childMap[name] = this;
     }
 
     protected updateParentValues(isDefault: boolean) {
