@@ -5,4 +5,5 @@ node_modules/
 tsconfig.json
 yarn.lock
 .prettierrc
+.prettierignore
 .gitignore
