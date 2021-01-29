@@ -1,7 +1,7 @@
 import React, { InputHTMLAttributes, useState } from "react";
 import {
     AnyListener,
-    ArrayForm,
+    ArrayListener,
     FormState,
     useAnyListener,
     useChildForm,
@@ -126,7 +126,7 @@ export default function App() {
                 <Input form={form} name="author" />
                 <p>Todo's</p>
                 {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
-                <ArrayForm parent={form} name="todos">
+                <ArrayListener parent={form} name="todos">
                     {(
                         { form, swap, remove, append } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
                     ) => (
@@ -157,7 +157,7 @@ export default function App() {
                             </button>
                         </VisualRender>
                     )}
-                </ArrayForm>
+                </ArrayListener>
                 <AnyListener form={form}>
                     {({ state, dirty }) => (
                         <>
