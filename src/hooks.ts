@@ -7,6 +7,14 @@ import {
     Validator
 } from "./form";
 
+/**
+ * Creates a new root form.
+ * This hook doesn't cause a rerender.
+ * @param defaultValues The default values for this form.
+ * @param defaultState The default state for this form. Form state contains custom global states, example: isSubmitting, isLoading ...
+ * @param validator The validator to use, optional.
+ * @param validateOnChange Validate on change?
+ */
 export function useForm<T, State = DefaultState, Error = DefaultError>(
     defaultValues: T,
     defaultState: State,
@@ -32,6 +40,12 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
     return c.current;
 }
 
+/**
+ * Creates a nested form for another root or nested form. You must use this for object and array (see useArrayForm) field.
+ * This hook doesn't cause a rerender.
+ * @param parentForm The parent form.
+ * @param name The parent's field to create a child form for.
+ */
 export function useChildForm<T, State, Error, Key extends keyof T>(
     parentForm: FormState<T, State, Error>,
     name: Key
@@ -76,6 +90,12 @@ export function useChildForm<T, State, Error, Key extends keyof T>(
     return c.current;
 }
 
+/**
+ * Listen for changes on a form's field. Behaves like useState.
+ * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <Listener /> instead.
+ * @param form The form to listen on.
+ * @param name The form's field to listen to.
+ */
 export function useListener<T, State, Error, Key extends keyof T>(
     form: FormState<T, State, Error>,
     name: Key
@@ -98,6 +118,12 @@ export function useListener<T, State, Error, Key extends keyof T>(
     };
 }
 
+/**
+ * Listens for any change on this form. Behaves like useState.
+ * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <AnyListener /> instead.
+ * @param form The form to listen to.
+ * @param onlyOnSetValues True if you only want to listen for changes that are set using setValues. (used for arrays)
+ */
 export function useAnyListener<T, State, Error>(
     form: FormState<T, State, Error>,
     onlyOnSetValues = false
@@ -114,6 +140,12 @@ export function useAnyListener<T, State, Error>(
     return form;
 }
 
+/**
+ * This is a wrapper around useChildForm, with useful functions to manipulate arrays.
+ * This hook doesn't cause a rerender.
+ * @param parent The parent form.
+ * @param name The parent's field to create a child form for.
+ */
 export function useArrayForm<
     Parent,
     ParentState,
