@@ -7,6 +7,16 @@
   "repository": "CodeStix/typed-react-form",
   "main": "dist/index.js",
   "source": "src/index.tsx",
+  "keywords": [
+    "react",
+    "form",
+    "state-manager",
+    "react-form",
+    "typescript",
+    "react-typescript",
+    "tsx",
+    "typescript form"
+  ],
   "engines": {
     "node": ">=10"
   },
