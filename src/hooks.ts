@@ -1,11 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import {
-    DefaultState,
-    DefaultError,
-    FormState,
-    ChildFormState,
-    Validator
-} from "./form";
+import { DefaultState, DefaultError, FormState, ChildFormState, Validator } from "./form";
 
 /**
  * Creates a new root form.
@@ -15,22 +9,11 @@ import {
  * @param validator The validator to use, optional.
  * @param validateOnChange Validate on change?
  */
-export function useForm<T, State = DefaultState, Error = DefaultError>(
-    defaultValues: T,
-    defaultState: State,
-    validator?: Validator<T, Error>,
-    validateOnChange = true
-) {
+export function useForm<T, State = DefaultState, Error = DefaultError>(defaultValues: T, defaultState: State, validator?: Validator<T, Error>, validateOnChange = true) {
     let c = useRef<FormState<T, State, Error> | null>(null);
 
     if (!c.current) {
-        c.current = new FormState(
-            defaultValues,
-            defaultValues,
-            defaultState,
-            validator,
-            validateOnChange
-        );
+        c.current = new FormState(defaultValues, defaultValues, defaultState, validator, validateOnChange);
     }
 
     useEffect(() => {
@@ -46,10 +29,7 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useChildForm<T, State, Error, Key extends keyof T>(
-    parentForm: FormState<T, State, Error>,
-    name: Key
-) {
+export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: FormState<T, State, Error>, name: Key) {
     let c = useRef<ChildFormState<T, State, Error, Key> | null>(null);
     if (!c.current) {
         c.current = new ChildFormState(parentForm, name);
@@ -61,21 +41,9 @@ export function useChildForm<T, State, Error, Key extends keyof T>(
         c.current!.name = name;
 
         // Set new default values, without notifying parent and children
-        c.current!.setValues(
-            parentForm.defaultValues[name] ?? ({} as any),
-            true,
-            true,
-            false,
-            false
-        );
+        c.current!.setValues(parentForm.defaultValues[name] ?? ({} as any), true, true, false, false);
         // Then, set new values, and notify parent and children
-        c.current!.setValues(
-            parentForm.values[name] ?? ({} as any),
-            true,
-            false,
-            true,
-            true
-        );
+        c.current!.setValues(parentForm.values[name] ?? ({} as any), true, false, true, true);
 
         return () => {
             // Could already be overriden (useEffect ordering)
@@ -96,10 +64,7 @@ export function useChildForm<T, State, Error, Key extends keyof T>(
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function useListener<T, State, Error, Key extends keyof T>(
-    form: FormState<T, State, Error>,
-    name: Key
-) {
+export function useListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
@@ -124,10 +89,7 @@ export function useListener<T, State, Error, Key extends keyof T>(
  * @param form The form to listen to.
  * @param onlyOnSetValues True if you only want to listen for changes that are set using setValues. (used for arrays)
  */
-export function useAnyListener<T, State, Error>(
-    form: FormState<T, State, Error>,
-    onlyOnSetValues = false
-) {
+export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>, onlyOnSetValues = false) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
@@ -146,16 +108,8 @@ export function useAnyListener<T, State, Error>(
  * @param parent The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useArrayListener<
-    Parent,
-    ParentState,
-    ParentError,
-    Key extends keyof Parent
->(parent: FormState<Parent, ParentState, ParentError>, name: Key) {
-    const form = useChildForm<Parent, ParentState, ParentError, Key>(
-        parent,
-        name
-    );
+export function useArrayListener<Parent, ParentState, ParentError, Key extends keyof Parent>(parent: FormState<Parent, ParentState, ParentError>, name: Key) {
+    const form = useChildForm<Parent, ParentState, ParentError, Key>(parent, name);
     useAnyListener(form, true);
 
     function append(value: Parent[Key][keyof Parent[Key]]) {

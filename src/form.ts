@@ -15,9 +15,7 @@ type ObjectOrArray = {
     [key: number]: any;
 };
 
-export type ErrorType<T, Error> = T extends ObjectOrArray
-    ? ErrorMap<T, Error>
-    : Error;
+export type ErrorType<T, Error> = T extends ObjectOrArray ? ErrorMap<T, Error> : Error;
 
 export type ErrorMap<T, Error> = {
     [Key in keyof T]?: ErrorType<T[Key], Error>;
@@ -83,13 +81,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     private counter = 0;
     private static formCounter = 0;
 
-    public constructor(
-        values: T,
-        defaultValues: T,
-        defaultState: State,
-        validator?: Validator<T, Error>,
-        validateOnChange = true
-    ) {
+    public constructor(values: T, defaultValues: T, defaultState: State, validator?: Validator<T, Error>, validateOnChange = true) {
         this.values = memberCopy(values);
         this.defaultValues = memberCopy(defaultValues);
         this._state = memberCopy(defaultState);
@@ -188,35 +180,11 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     ) {
         if (typeof value === "object") {
             // Do not compare objects, child form should mark dirty
-            this.setValueInternal(
-                key,
-                value,
-                undefined,
-                validate,
-                isDefault,
-                notifyChild,
-                notifyParent,
-                fireAny
-            );
+            this.setValueInternal(key, value, undefined, validate, isDefault, notifyChild, notifyParent, fireAny);
         } else {
             // Calculate and compare value types, determine dirty?
-            if (
-                (isDefault && this.defaultValues[key] === value) ||
-                (!isDefault && this.values[key] === value)
-            )
-                return false;
-            this.setValueInternal(
-                key,
-                value,
-                isDefault
-                    ? value !== this.values[key]
-                    : value !== this.defaultValues[key],
-                validate,
-                isDefault,
-                notifyChild,
-                notifyParent,
-                fireAny
-            );
+            if ((isDefault && this.defaultValues[key] === value) || (!isDefault && this.values[key] === value)) return false;
+            this.setValueInternal(key, value, isDefault ? value !== this.values[key] : value !== this.defaultValues[key], validate, isDefault, notifyChild, notifyParent, fireAny);
         }
         return true;
     }
@@ -229,13 +197,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
-    public setValues(
-        values: T,
-        validate: boolean = true,
-        isDefault: boolean = false,
-        notifyChild: boolean = true,
-        notifyParent: boolean = true
-    ) {
+    public setValues(values: T, validate: boolean = true, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
         // Copy the values to the local form object
         let newKeys = Object.keys(isDefault ? this.defaultValues : this.values);
         let localKeys = Object.keys(values);
@@ -263,9 +225,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      */
     public validate() {
         if (!this.validator) {
-            console.warn(
-                "validate() was called on a form which does not have a validator set."
-            );
+            console.warn("validate() was called on a form which does not have a validator set.");
             return;
         }
         this.setErrors(this.validator(this.values));
@@ -279,13 +239,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyParent Should this form notify the parent form about this change?
      * @param fireAny
      */
-    public setError<Key extends keyof T>(
-        key: Key,
-        error: ErrorType<T[Key], Error> | undefined,
-        notifyChild: boolean = true,
-        notifyParent: boolean = true,
-        fireAny: boolean = true
-    ) {
+    public setError<Key extends keyof T>(key: Key, error: ErrorType<T[Key], Error> | undefined, notifyChild: boolean = true, notifyParent: boolean = true, fireAny: boolean = true) {
         if (this.errorMap[key] === error) return;
 
         if (!error) delete this.errorMap[key];
@@ -305,11 +259,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
-    public setErrors(
-        errors: ErrorMap<T, Error>,
-        notifyChild: boolean = true,
-        notifyParent: boolean = true
-    ) {
+    public setErrors(errors: ErrorMap<T, Error>, notifyChild: boolean = true, notifyParent: boolean = true) {
         let localKeys = Object.keys(this.errorMap);
         let newKeys = Object.keys(errors);
         let mostKeys = newKeys.length > localKeys.length ? newKeys : localKeys;
@@ -348,18 +298,11 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyChild Set the state on the child too?
      * @param notifyParent Set the state on the parent too?
      */
-    public setState(
-        state: State,
-        notifyChild: boolean = true,
-        notifyParent: boolean = true
-    ) {
+    public setState(state: State, notifyChild: boolean = true, notifyParent: boolean = true) {
         this._state = state;
 
         let c = Object.keys(this.values);
-        if (notifyChild)
-            c.forEach((e) =>
-                this.childMap[e]?.setState(state, notifyChild, notifyParent)
-            );
+        if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(state, notifyChild, notifyParent));
 
         c.forEach((e) => this.fireListeners(e as keyof T, false));
         if (notifyParent) this.updateParentState();
@@ -444,50 +387,22 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 }
 
-export class ChildFormState<
-    Parent,
-    ParentState,
-    ParentError,
-    Key extends keyof Parent
-> extends FormState<Parent[Key], ParentState, ParentError> {
+export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof Parent> extends FormState<Parent[Key], ParentState, ParentError> {
     public name: Key;
     public readonly parent: FormState<Parent, ParentState, ParentError>;
 
-    public constructor(
-        parent: FormState<Parent, ParentState, ParentError>,
-        name: Key
-    ) {
-        super(
-            parent.values[name] ?? ({} as any),
-            parent.defaultValues[name] ?? ({} as any),
-            parent.state
-        );
+    public constructor(parent: FormState<Parent, ParentState, ParentError>, name: Key) {
+        super(parent.values[name] ?? ({} as any), parent.defaultValues[name] ?? ({} as any), parent.state);
         this.parent = parent;
         this.name = name;
     }
 
     protected updateParentValues(isDefault: boolean) {
-        this.parent.setValueInternal(
-            this.name,
-            isDefault
-                ? memberCopy(this.defaultValues)
-                : memberCopy(this.values),
-            this.dirty,
-            true,
-            isDefault,
-            false,
-            true,
-            true
-        );
+        this.parent.setValueInternal(this.name, isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values), this.dirty, true, isDefault, false, true, true);
     }
 
     protected updateParentErrors() {
-        this.parent.setError(
-            this.name,
-            this.error ? (memberCopy(this.errorMap) as any) : undefined,
-            false,
-            true
-        );
+        this.parent.setError(this.name, this.error ? (memberCopy(this.errorMap) as any) : undefined, false, true);
     }
 
     protected updateParentState() {

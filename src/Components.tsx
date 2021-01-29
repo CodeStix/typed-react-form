@@ -1,11 +1,6 @@
 import React from "react";
 import { DirtyMap, ErrorMap, FormState } from "./form";
-import {
-    useArrayListener,
-    useListener,
-    useAnyListener,
-    useChildForm
-} from "./hooks";
+import { useArrayListener, useListener, useAnyListener, useChildForm } from "./hooks";
 
 /**
  * Wrapper around useArrayListener (which is a wrapper around useChildForm).
@@ -14,12 +9,7 @@ import {
  * @param parent The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function ArrayListener<
-    Parent,
-    ParentState,
-    ParentError,
-    Key extends keyof Parent
->(props: {
+export function ArrayListener<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
     parent: FormState<Parent, ParentState, ParentError>;
     name: Key;
     children: (props: {
@@ -68,11 +58,7 @@ export function Listener<T, State, Error, Key extends keyof T>(props: {
  * @param form The form to listen to.
  * @param onlyOnSetValues True if you only want to listen for changes that are set using setValues. (used for arrays)
  */
-export function AnyListener<T, State, Error>(props: {
-    form: FormState<T, State, Error>;
-    onlyOnSetValues?: boolean;
-    children: (props: FormState<T, State, Error>) => React.ReactNode;
-}) {
+export function AnyListener<T, State, Error>(props: { form: FormState<T, State, Error>; onlyOnSetValues?: boolean; children: (props: FormState<T, State, Error>) => React.ReactNode }) {
     const l = useAnyListener(props.form, props.onlyOnSetValues);
     return <React.Fragment>{props.children(l)}</React.Fragment>;
 }
@@ -84,17 +70,10 @@ export function AnyListener<T, State, Error>(props: {
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function ChildForm<
-    Parent,
-    ParentState,
-    ParentError,
-    Key extends keyof Parent
->(props: {
+export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
     parent: FormState<Parent, ParentState, ParentError>;
     name: Key;
-    children: (
-        props: FormState<Parent[Key], ParentState, ParentError>
-    ) => React.ReactNode;
+    children: (props: FormState<Parent[Key], ParentState, ParentError>) => React.ReactNode;
 }) {
     const arr = useChildForm(props.parent, props.name);
     return <React.Fragment>{props.children(arr)}</React.Fragment>;

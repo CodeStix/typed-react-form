@@ -1,13 +1,5 @@
 import React, { InputHTMLAttributes, useState } from "react";
-import {
-    AnyListener,
-    ArrayListener,
-    FormState,
-    useAnyListener,
-    useChildForm,
-    useForm,
-    useListener
-} from "typed-react-form";
+import { AnyListener, ArrayListener, FormState, useAnyListener, useChildForm, useForm, useListener } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 
 interface TodoList {
@@ -33,10 +25,7 @@ function Input<T>({
     form: FormState<T, { isSubmitting: boolean }>;
     name: keyof T;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form">) {
-    const { value, dirty, defaultValue, error, state } = useListener(
-        form,
-        name
-    );
+    const { value, dirty, defaultValue, error, state } = useListener(form, name);
 
     return (
         <VisualRender>
@@ -108,15 +97,9 @@ export default function App() {
         >
             <VisualRender>
                 <h1>
-                    Form created using{" "}
-                    <a href="https://github.com/CodeStix/typed-react-form">
-                        typed-react-form
-                    </a>
+                    Form created using <a href="https://github.com/CodeStix/typed-react-form">typed-react-form</a>
                 </h1>
-                <p>
-                    The red flash indicates which parts of the form are being
-                    rerendered.
-                </p>
+                <p>The red flash indicates which parts of the form are being rerendered.</p>
                 <hr />
                 <h2>Todo list</h2>
                 <p>Name</p>
@@ -133,13 +116,7 @@ export default function App() {
                         <VisualRender>
                             <ul style={{ padding: "0" }}>
                                 {form.values.map((e, i) => (
-                                    <TodoItem
-                                        onMoveTop={() => swap(i, 0)}
-                                        onRemove={() => remove(i)}
-                                        key={e.id}
-                                        parent={form}
-                                        index={i}
-                                    />
+                                    <TodoItem onMoveTop={() => swap(i, 0)} onRemove={() => remove(i)} key={e.id} parent={form} index={i} />
                                 ))}
                             </ul>
                             <button
@@ -162,18 +139,10 @@ export default function App() {
                     {({ state, dirty }) => (
                         <>
                             {/* Disable buttons when form is submitting or when nothing has changed, the AnyListener wrapper is required */}
-                            <button
-                                style={{ fontSize: "1.3em" }}
-                                disabled={state.isSubmitting || !dirty}
-                            >
+                            <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty}>
                                 Save
                             </button>
-                            <button
-                                style={{ fontSize: "1.3em" }}
-                                disabled={state.isSubmitting || !dirty}
-                                type="button"
-                                onClick={() => form.resetAll()}
-                            >
+                            <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty} type="button" onClick={() => form.resetAll()}>
                                 Reset
                             </button>
                         </>
@@ -187,12 +156,7 @@ export default function App() {
     );
 }
 
-function TodoItem(props: {
-    parent: FormState<Todo[], { isSubmitting: boolean }>;
-    index: number;
-    onMoveTop: () => void;
-    onRemove: () => void;
-}) {
+function TodoItem(props: { parent: FormState<Todo[], { isSubmitting: boolean }>; index: number; onMoveTop: () => void; onRemove: () => void }) {
     // Use a child form, each layer in the object is a seperate form: TodoList (useForm) -> Todo[] (useArrayForm) -> Todo (useChildForm)
     const form = useChildForm(props.parent, props.index);
 
@@ -227,12 +191,8 @@ function FormValues<T>(props: { form: FormState<T> }) {
             <div style={{ background: "#0001" }}>
                 <p>
                     {/* <em>{val.formId}</em> */}
-                    {form.dirty && (
-                        <strong style={{ color: "blue" }}>DIRTY</strong>
-                    )}
-                    {form.error && (
-                        <strong style={{ color: "red" }}>ERROR</strong>
-                    )}
+                    {form.dirty && <strong style={{ color: "blue" }}>DIRTY</strong>}
+                    {form.error && <strong style={{ color: "red" }}>ERROR</strong>}
                 </p>
                 <pre>{JSON.stringify(form.values, null, 2)}</pre>
                 <pre>{JSON.stringify(form.defaultValues)}</pre>
@@ -253,8 +213,7 @@ function validateTodoList(values: TodoList) {
         return prev;
     }, [] as any[]);
     return {
-        author:
-            values.author.length < 3 ? "Author name is too short." : undefined,
+        author: values.author.length < 3 ? "Author name is too short." : undefined,
         name: values.name.length < 3 ? "Title is too short." : undefined,
         todos: todoErrors.length > 0 ? todoErrors : undefined
     };
