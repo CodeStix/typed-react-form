@@ -23,25 +23,30 @@ const form = useForm(
     {
         firstName: "John",
         lastName: "Tester",
-        info: { email: "johntester@example.com" }
+        info: { email: "johntester@example.com", favoriteFood: "pasta" }
     },
     { isSubmitting: false }
 );
 return (
-    <form>
+    <form
+        onSubmit={(ev) => {
+            ev.preventDefault();
+            // Fetch...
+            form.setDefaultValues(form.values);
+        }}
+    >
         <Input form={form} name="firstName" />
         <Input form={form} name="lastName" />
-        <form>
-            <Input form={form} name="firstName" />
-            <Input form={form} name="lastName" />
-            <ChildForm parent={form} name="info">
-                {(form) => (
-                    <>
-                        <Input form={form} name="email" />
-                    </>
-                )}
-            </ChildForm>
-        </form>
+        <ChildForm parent={form} name="info">
+            {(form) => (
+                <>
+                    <Input form={form} name="email" />
+                    <Input form={form} name="favoriteFood" />
+                </>
+            )}
+        </ChildForm>
+        <button>Submit</button>
+        <AnyListener form={form}>{({ values }) => <pre>{JSON.stringify(values, null, 2)}</pre>}</AnyListener>
     </form>
 );
 ```
