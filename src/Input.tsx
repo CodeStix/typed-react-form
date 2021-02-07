@@ -22,8 +22,19 @@ function defaultSerializer(inputType: string | undefined, value: string) {
     switch (inputType) {
         case "number":
             return value ? parseFloat(value) : null;
+        case "date":
+            return value ? new Date(value) : null;
         default:
             return value as any;
+    }
+}
+
+function defaultDeserializer(inputType: string | undefined, value: any): string {
+    switch (inputType) {
+        case "date":
+            return value?.toISOString().split("T")[0] ?? "";
+        default:
+            return value ?? "";
     }
 }
 
@@ -57,7 +68,7 @@ export function Input<T, State extends DefaultState, Error, Key extends keyof T>
             }}
             className={cl.join(" ")}
             disabled={(disableOnSubmitting ?? true) && state.isSubmitting}
-            value={deserializer ? deserializer(value) : (value as any) || ""}
+            value={deserializer ? deserializer(value) : defaultDeserializer(rest.type, value)}
             onChange={(ev) => setValue(serializer ? serializer(ev.target.value) : defaultSerializer(rest.type, ev.target.value))}
             {...rest}
         />

@@ -3,6 +3,8 @@ import { AnyListener, ArrayListener, FormState, Input, useAnyListener, useChildF
 import { VisualRender } from "./VisualRender";
 
 interface TodoList {
+    id: number;
+    date: Date;
     name: string;
     author: string;
     todos: Todo[];
@@ -60,6 +62,8 @@ function OldInput<T>({
 export default function App() {
     const [values, setValues] = useState<TodoList>({
         author: "codestix",
+        date: new Date(),
+        id: 1,
         name: "My todo list",
         todos: Array(3)
             .fill(0)
@@ -110,7 +114,11 @@ export default function App() {
                 <OldInput form={form} name="name" />
                 <p>Author</p>
                 <OldInput form={form} name="author" />
-                <Input form={form} name="name" dirtyStyle={{ color: "gray" }} errorStyle={{ color: "red" }} />
+                <p>Id</p>
+                <Input form={form} name="id" />
+                <p>Date</p>
+                {/* <Input type="date" form={form} name="date" serializer={(val) => new Date(val)} deserializer={(e) => e.toISOString().split("T")[0]} /> */}
+                <Input type="date" form={form} name="date" />
                 <p>Todo's</p>
 
                 {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
@@ -185,7 +193,6 @@ function TodoItem(props: { parent: FormState<Todo[], { isSubmitting: boolean }>;
             }}
         >
             <VisualRender>
-                <Input type="number" form={form} name="id" />
                 <OldInput form={form} name="message" />
                 <button type="button" onClick={props.onMoveTop}>
                     Go to top
