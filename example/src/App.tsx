@@ -1,5 +1,5 @@
 import React, { InputHTMLAttributes, useState } from "react";
-import { AnyListener, ArrayListener, FormState, useAnyListener, useChildForm, useForm, useListener } from "typed-react-form";
+import { AnyListener, ArrayListener, FormState, Input, useAnyListener, useChildForm, useForm, useListener } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 
 interface TodoList {
@@ -17,7 +17,7 @@ interface Todo {
 /**
  * A custom input that can be reused everywhere when using useForm
  */
-function Input<T>({
+function OldInput<T>({
     form,
     name,
     ...rest
@@ -107,9 +107,10 @@ export default function App() {
                 <h2>Todo list</h2>
                 <p>Name</p>
                 {/* The name field is type checked, try to name it something else that does not exist on interface TodoList */}
-                <Input form={form} name="name" />
+                <OldInput form={form} name="name" />
                 <p>Author</p>
-                <Input form={form} name="author" />
+                <OldInput form={form} name="author" />
+                <Input form={form} name="name" dirtyStyle={{ color: "gray" }} errorStyle={{ color: "red" }} />
                 <p>Todo's</p>
 
                 {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
@@ -184,7 +185,8 @@ function TodoItem(props: { parent: FormState<Todo[], { isSubmitting: boolean }>;
             }}
         >
             <VisualRender>
-                <Input form={form} name="message" />
+                <Input type="number" form={form} name="id" />
+                <OldInput form={form} name="message" />
                 <button type="button" onClick={props.onMoveTop}>
                     Go to top
                 </button>
