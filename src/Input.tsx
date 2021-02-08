@@ -43,6 +43,68 @@ export type InputProps<T, State, Error, Key extends keyof T> = BaldInputProps & 
 //     }
 // }
 
+function defaultDeserializer(inputType: string | undefined, currentValue: any, inputValue: any): [string | undefined, boolean | undefined] {
+    let inValue = undefined;
+    let inChecked = undefined;
+    if (inputType === "number") {
+        inValue = (currentValue ?? "") + "";
+    } else if (inputType === "date") {
+        let d = new Date(currentValue as any);
+        inValue = d?.toISOString().split("T")[0] ?? "";
+    } else if (inputType === "radio") {
+        if (inputValue !== undefined) {
+            inChecked = currentValue === inputValue;
+            inValue = inputValue + "";
+        } else {
+            console.warn("Radio groups should have a value set");
+        }
+    } else if (inputType === "checkbox") {
+        if (inputValue !== undefined) {
+            inChecked = (Array.isArray(currentValue) ? currentValue : []).includes(inputValue as never);
+            inValue = inputValue + "";
+        } else {
+            inChecked = !!currentValue;
+        }
+    } else {
+        inValue = (currentValue ?? "") + "";
+    }
+    return [inValue, inChecked];
+}
+
+function defaultSerializer(inputType: string | undefined, newValue: string, newChecked: boolean, currentValue: any, inputValue: any, dateAsNumber: boolean): any {
+    if (inputType === "number") {
+        return parseFloat(newValue);
+    } else if (inputType === "date") {
+        if (newValue) {
+            let d = new Date(newValue);
+            return dateAsNumber ? d.getTime() : d;
+        } else {
+            return null;
+        }
+    } else if (inputType === "radio") {
+        if (inputValue !== undefined) {
+            // Enum field
+            if (newChecked) return inputValue;
+        } else {
+            console.warn("Radio groups should have a value set");
+        }
+    } else if (inputType === "checkbox") {
+        if (inputValue !== undefined) {
+            // Primitive array field
+            let arr = Array.isArray(currentValue) ? [...currentValue] : [];
+            if (newChecked) arr.push(inputValue);
+            else arr.splice(arr.indexOf(inputValue), 1);
+            return arr;
+        } else {
+            // Boolean field
+            return newChecked;
+        }
+    } else {
+        // String field
+        return newValue;
+    }
+}
+
 export function Input<T, State extends DefaultState, Error, Key extends keyof T>({
     form,
     name,
@@ -66,30 +128,7 @@ export function Input<T, State extends DefaultState, Error, Key extends keyof T>
     if (dirty) cl.push(dirtyClassName ?? "is-dirty");
     if (error) cl.push(errorClassName ?? "is-error");
 
-    let inChecked = undefined;
-    let inValue = undefined;
-    if (rest.type === "number") {
-        inValue = (value ?? "") + "";
-    } else if (rest.type === "date") {
-        let d = new Date(value as any);
-        inValue = d?.toISOString().split("T")[0] ?? "";
-    } else if (rest.type === "radio") {
-        if (inputValue !== undefined) {
-            inChecked = value === inputValue;
-            inValue = inputValue + "";
-        } else {
-            console.warn("Radio groups should have a value set");
-        }
-    } else if (rest.type === "checkbox") {
-        if (inputValue !== undefined) {
-            inChecked = (Array.isArray(value) ? value : []).includes(inputValue as never);
-            inValue = inputValue + "";
-        } else {
-            inChecked = !!value;
-        }
-    } else {
-        inValue = (value ?? "") + "";
-    }
+    let [inValue, inChecked] = defaultDeserializer(rest.type, value, inputValue);
 
     return (
         <input
@@ -103,40 +142,8 @@ export function Input<T, State extends DefaultState, Error, Key extends keyof T>
             value={inValue}
             checked={inChecked}
             onChange={(ev) => {
-                let v = ev.target.value;
-                let c = ev.target.checked;
-
-                if (rest.type === "number") {
-                    setValue(parseFloat(v) as any);
-                } else if (rest.type === "date") {
-                    if (v) {
-                        let d = new Date(v);
-                        setValue((dateAsNumber ? d.getTime() : d) as any);
-                    } else {
-                        setValue(null as any);
-                    }
-                } else if (rest.type === "radio") {
-                    if (inputValue !== undefined) {
-                        // Enum field
-                        if (c) setValue(inputValue as any);
-                    } else {
-                        console.warn("Radio groups should have a value set");
-                    }
-                } else if (rest.type === "checkbox") {
-                    if (inputValue !== undefined) {
-                        // Primitive array field
-                        let arr = Array.isArray(value) ? [...value] : [];
-                        if (c) arr.push(inputValue);
-                        else arr.splice(arr.indexOf(inputValue), 1);
-                        setValue(arr as any);
-                    } else {
-                        // Boolean field
-                        setValue(c as any);
-                    }
-                } else {
-                    // String field
-                    setValue(v as any);
-                }
+                let v = defaultSerializer(rest.type, ev.target.value, ev.target.checked, value, inputValue, dateAsNumber ?? false);
+                if (v !== undefined) setValue(v);
             }}
             name={name + ""}
             {...rest}
