@@ -34,6 +34,24 @@ export function memberCopy<T>(value: T): T {
     }
 }
 
+/**
+ * Compares 2 objects that only contain primitive fields (no object fields)
+ * @returns true when different, false when 'equal', undefined when an object field was found.
+ */
+export function comparePrimitiveObject<T>(a: T, b: T): boolean | undefined {
+    let ak = Object.keys(a),
+        bk = Object.keys(b);
+    let lk = ak.length > bk.length ? ak : bk;
+    for (let i = 0; i < lk.length; i++) {
+        let k = lk[i];
+        let av = a[k],
+            bv = b[k];
+        if ((typeof av === "object" && av !== null) || (typeof bv === "object" && bv !== null)) return undefined;
+        if (av !== bv) return true;
+    }
+    return false;
+}
+
 export class FormState<T, State = DefaultState, Error = DefaultError> {
     /**
      * The id of this form, for debugging purposes.
@@ -114,7 +132,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * Sets a value the advanced way.
      * @param key The field to set.
      * @param value The value to set in the field.
-     * @param dirty Is this field dirty? Leave undefined to not set any dirty value. (dirty value can always be overridden by child forms)
+     * @param dirty Is this field dirty? Leave undefined to not set any dirty value. (can always be overridden by child forms)
      * @param validate Should the form validate after value set? This does not override `validateOnChange`.
      * @param isDefault Is this the default value for the said field?
      * @param notifyChild Should this form notify any child form about the change?
@@ -124,12 +142,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     public setValueInternal<Key extends keyof T>(
         key: Key,
         value: T[Key] | undefined,
-        dirty: boolean | undefined,
-        validate: boolean,
-        isDefault: boolean,
-        notifyChild: boolean,
-        notifyParent: boolean,
-        fireAny: boolean
+        dirty: boolean,
+        validate: boolean = true,
+        isDefault: boolean = false,
+        notifyChild: boolean = true,
+        notifyParent: boolean = true,
+        fireAny: boolean = true
     ) {
         let valueMap = isDefault ? this.defaultValues : this.values;
         if (value === undefined) {
@@ -139,7 +157,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
             valueMap[key] = value;
         }
 
-        if (dirty !== undefined) this.dirtyMap[key] = dirty;
+        this.dirtyMap[key] = dirty;
 
         if (notifyChild && value !== undefined) {
             let child = this.childMap[key];
@@ -180,7 +198,16 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     ) {
         if (typeof value === "object") {
             // Do not compare objects, child form should mark dirty
-            this.setValueInternal(key, value, undefined, validate, isDefault, notifyChild, notifyParent, fireAny);
+            let dirty: boolean | undefined = false;
+            if (fireAny) {
+                // Compare value against defaultValues when !isDefault else compare agains values (is not switched!!)
+                dirty = comparePrimitiveObject(value, isDefault ? this.values[key] : this.defaultValues[key]);
+                if (dirty === undefined) {
+                    console.warn("Do not use setValue for object in object fields, use setValueInternal instead (dirty value can not be determined), ", key, value);
+                    dirty = true;
+                }
+            }
+            this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
         } else {
             // Calculate and compare value types, determine dirty?
             if ((isDefault && this.defaultValues[key] === value) || (!isDefault && this.values[key] === value)) return false;
