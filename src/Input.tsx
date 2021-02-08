@@ -2,46 +2,22 @@ import React from "react";
 import { InputHTMLAttributes } from "react";
 import { DefaultState, FormState } from "./form";
 import { useListener } from "./hooks";
-import {} from "./index";
 
 type BaldInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form" | "value">;
 
-export type InputProps<T, State, Error, Key extends keyof T> = BaldInputProps & {
+export type InputProps<T, State, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]> = BaldInputProps & {
     form: FormState<T, State, Error>;
     name: Key;
-    value?: T[Key] | T[Key][keyof T[Key]];
+    value?: Value;
     errorClassName?: string;
     errorStyle?: React.CSSProperties;
     dirtyClassName?: string;
     dirtyStyle?: React.CSSProperties;
     disableOnSubmitting?: boolean;
     dateAsNumber?: boolean;
-    deserializer?: (value: T[Key]) => string | boolean;
-    serializer?: (value: string) => T[Key];
+    deserializer?: (value: T[Key], inputValue: Value | undefined) => [string, boolean] | string | boolean;
+    serializer?: (newValue: string, newChecked: boolean, currentValue: T[Key], inputValue: Value | undefined) => T[Key];
 };
-
-// function defaultSerializer(inputType: string | undefined, inputValue: string, inputChecked: boolean) {
-//     switch (inputType) {
-//         case "number":
-//             return inputValue ? parseFloat(inputValue + "") : null;
-//         case "date":
-//             return inputValue ? new Date(inputValue + "") : null;
-//         case "checkbox":
-//         case "radio":
-//             return inputValue === "true";
-//         default:
-//             return inputValue as any;
-//     }
-// }
-
-// function defaultDeserializer(inputType: string | undefined, value: any): string | boolean {
-//     switch (inputType) {
-//         case "date":
-//             return value?.toISOString().split("T")[0] ?? "";
-//         default:
-//             return (value ?? "") + "";
-//     }
-// }
 
 function defaultDeserializer(inputType: string | undefined, currentValue: any, inputValue: any): [string | undefined, boolean | undefined] {
     let inValue = undefined;
@@ -49,8 +25,18 @@ function defaultDeserializer(inputType: string | undefined, currentValue: any, i
     if (inputType === "number") {
         inValue = (currentValue ?? "") + "";
     } else if (inputType === "date") {
-        let d = new Date(currentValue as any);
-        inValue = d?.toISOString().split("T")[0] ?? "";
+        let n = currentValue;
+        if (typeof n === "string") {
+            let ni = parseInt(currentValue);
+            if (!isNaN(ni)) n = ni;
+        }
+        let d = new Date(n as any);
+        if (d.getTime() === d.getTime()) {
+            // Trick to check if date is valid: NaN === NaN returns false
+            inValue = d?.toISOString().split("T")[0] ?? "";
+        } else {
+            inValue = "";
+        }
     } else if (inputType === "radio") {
         if (inputValue !== undefined) {
             inChecked = currentValue === inputValue;
@@ -105,7 +91,14 @@ function defaultSerializer(inputType: string | undefined, newValue: string, newC
     }
 }
 
-export function Input<T, State extends DefaultState, Error, Key extends keyof T>({
+function stringBoolean(value: string | boolean | [string, boolean]): [string | undefined, boolean | undefined] {
+    if (Array.isArray(value)) return value;
+    else if (typeof value === "string") return [value, undefined];
+    else if (typeof value === "boolean") return [undefined, value];
+    else throw new Error("Expected string | boolean | [string, boolean], got " + value);
+}
+
+export function Input<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
     form,
     name,
     deserializer,
@@ -120,7 +113,7 @@ export function Input<T, State extends DefaultState, Error, Key extends keyof T>
     dirtyStyle,
     value: inputValue,
     ...rest
-}: InputProps<T, State, Error, Key>) {
+}: InputProps<T, State, Error, Key, Value>) {
     const { value, error, dirty, state, setValue } = useListener(form, name);
 
     let cl = [];
@@ -128,7 +121,7 @@ export function Input<T, State extends DefaultState, Error, Key extends keyof T>
     if (dirty) cl.push(dirtyClassName ?? "is-dirty");
     if (error) cl.push(errorClassName ?? "is-error");
 
-    let [inValue, inChecked] = defaultDeserializer(rest.type, value, inputValue);
+    let [inValue, inChecked] = deserializer ? stringBoolean(deserializer(value, inputValue)) : defaultDeserializer(rest.type, value, inputValue);
 
     return (
         <input
@@ -142,7 +135,9 @@ export function Input<T, State extends DefaultState, Error, Key extends keyof T>
             value={inValue}
             checked={inChecked}
             onChange={(ev) => {
-                let v = defaultSerializer(rest.type, ev.target.value, ev.target.checked, value, inputValue, dateAsNumber ?? false);
+                let v = serializer
+                    ? serializer(ev.target.value, ev.target.checked, value, inputValue)
+                    : defaultSerializer(rest.type, ev.target.value, ev.target.checked, value, inputValue, dateAsNumber ?? false);
                 if (v !== undefined) setValue(v);
             }}
             name={name + ""}
