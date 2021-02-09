@@ -2,7 +2,7 @@ import React, { SelectHTMLAttributes } from "react";
 import { DefaultState, FormState } from "./form";
 import { useListener } from "./hooks";
 
-export type SelectProps<T, State, Error> = Omit<SelectHTMLAttributes<HTMLSelectElement>, "form" | "name"> & {
+export type FormSelectProps<T, State, Error> = Omit<SelectHTMLAttributes<HTMLSelectElement>, "form" | "name"> & {
     form: FormState<T, State, Error>;
     name: keyof T;
     errorClassName?: string;
@@ -12,7 +12,7 @@ export type SelectProps<T, State, Error> = Omit<SelectHTMLAttributes<HTMLSelectE
     disableOnSubmitting?: boolean;
 };
 
-export function Select<T, State extends DefaultState, Error>({
+export function FormSelect<T, State extends DefaultState, Error>({
     form,
     name,
     errorClassName,
@@ -24,7 +24,7 @@ export function Select<T, State extends DefaultState, Error>({
     className,
     style,
     ...rest
-}: SelectProps<T, State, Error>) {
+}: FormSelectProps<T, State, Error>) {
     const { value, setValue, state, dirty, error } = useListener(form, name);
 
     let cl = [];

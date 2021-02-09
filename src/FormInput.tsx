@@ -5,7 +5,7 @@ import { useListener } from "./hooks";
 
 type BaldInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form" | "value">;
 
-export type InputProps<T, State, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]> = BaldInputProps & {
+export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]> = BaldInputProps & {
     form: FormState<T, State, Error>;
     name: Key;
     value?: Value;
@@ -115,7 +115,7 @@ function stringBoolean(value: string | boolean | [string, boolean]): [string | u
     else throw new Error("Expected string | boolean | [string, boolean], got " + value);
 }
 
-export function Input<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
+export function FormInput<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
     form,
     name,
     deserializer,
@@ -130,7 +130,7 @@ export function Input<T, State extends DefaultState, Error, Key extends keyof T,
     dirtyStyle,
     value: inputValue,
     ...rest
-}: InputProps<T, State, Error, Key, Value>) {
+}: FormInputProps<T, State, Error, Key, Value>) {
     const { value, error, dirty, state, setValue } = useListener(form, name);
 
     let cl = [];
