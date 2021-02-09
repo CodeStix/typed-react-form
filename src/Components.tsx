@@ -1,5 +1,5 @@
 import React from "react";
-import { DirtyMap, ErrorMap, FormState } from "./form";
+import { ChildFormState, DirtyMap, ErrorMap, FormState } from "./form";
 import { useArrayListener, useListener, useAnyListener, useChildForm } from "./hooks";
 
 /**
@@ -13,7 +13,7 @@ export function ArrayListener<Parent, ParentState, ParentError, Key extends keyo
     parent: FormState<Parent, ParentState, ParentError>;
     name: Key;
     children: (props: {
-        form: FormState<Parent[Key], ParentState, ParentError>;
+        form: ChildFormState<Parent, ParentState, ParentError, Key>;
         remove: (index: number) => void;
         clear: () => void;
         move: (index: number, newIndex: number) => void;
@@ -73,7 +73,7 @@ export function AnyListener<T, State, Error>(props: { form: FormState<T, State, 
 export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
     parent: FormState<Parent, ParentState, ParentError>;
     name: Key;
-    children: (props: FormState<Parent[Key], ParentState, ParentError>) => React.ReactNode;
+    children: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
 }) {
     const arr = useChildForm(props.parent, props.name);
     return <React.Fragment>{props.children(arr)}</React.Fragment>;
