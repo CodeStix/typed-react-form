@@ -18,7 +18,7 @@ export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T
     dirtyStyle?: React.CSSProperties;
     disableOnSubmitting?: boolean;
     dateAsNumber?: boolean;
-    deserializer?: (value: T[Key], inputValue: Value | undefined) => [string, boolean] | string | boolean;
+    deserializer?: (value: T[Key], inputValue: Value | undefined) => string | undefined;
     serializer?: (newValue: string, newChecked: boolean, currentValue: T[Key], inputValue: Value | undefined) => T[Key];
 };
 
@@ -111,13 +111,6 @@ function defaultSerializer(inputType: string | undefined, newValue: string, newC
     }
 }
 
-function stringBoolean(value: string | boolean | [string, boolean]): [string | undefined, boolean | undefined] {
-    if (Array.isArray(value)) return value;
-    else if (typeof value === "string") return [value, undefined];
-    else if (typeof value === "boolean") return [undefined, value];
-    else throw new Error("Expected string | boolean | [string, boolean], got " + value);
-}
-
 export function FormInput<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
     form,
     name,
@@ -141,7 +134,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
     if (dirty) cl.push(dirtyClassName ?? DEFAULT_DIRTY_CLASS);
     if (error) cl.push(errorClassName ?? DEFAULT_ERROR_CLASS);
 
-    let [inValue, inChecked] = deserializer ? stringBoolean(deserializer(value, inputValue)) : defaultDeserializer(rest.type, value, inputValue);
+    let [inValue, inChecked] = deserializer ? [deserializer(value, inputValue), undefined] : defaultDeserializer(rest.type, value, inputValue);
 
     return (
         <input
