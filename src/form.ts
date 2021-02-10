@@ -200,13 +200,18 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
             // Do not compare objects, child form should mark dirty
             let dirty: boolean | undefined = false;
             if (fireAny) {
-                // Compare value against defaultValues when !isDefault else compare agains values (is not switched!!)
-                dirty = comparePrimitiveObject(value, isDefault ? this.values[key] : this.defaultValues[key]);
-                if (dirty === undefined) {
-                    console.warn("Do not use setValue for object in object fields, use setValueInternal instead (dirty value can not be determined), ", key, value);
-                    dirty = true;
+                // Compare value against defaultValues when !isDefault else compare against values (is not switched!!)
+                if (value instanceof Date) {
+                    dirty = value?.getTime() !== (isDefault ? this.values[key] : (this.defaultValues[key] as any))?.getTime();
+                } else {
+                    dirty = comparePrimitiveObject(value, isDefault ? this.values[key] : this.defaultValues[key]);
+                    if (dirty === undefined) {
+                        console.warn("Do not use setValue for object in object fields, use setValueInternal instead (dirty value can not be determined), ", key, value);
+                        dirty = true;
+                    }
                 }
             }
+            console.log("set", key, value instanceof Date);
             this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
         } else {
             // Calculate and compare value types, determine dirty?
