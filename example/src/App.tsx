@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener } from "typed-react-form";
+import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea } from "typed-react-form";
 import { CustomInput } from "./CustomInput";
 import { VisualRender } from "./VisualRender";
 
@@ -158,10 +158,14 @@ export default function App() {
                         Description <small>string</small>
                     </h3>
                     <p>
-                        Using <code>textarea</code>
+                        Using <code>FormTextArea</code>
+                    </p>
+                    <FormTextArea form={form} name="description" rows={5} cols={50} />
+                    <p>
+                        Using <code>Listener</code> around <code>textarea</code>
                     </p>
                     <Listener form={form} name="description">
-                        {({ value, setValue }) => <textarea rows={10} style={{ width: "100%" }} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>}
+                        {({ value, setValue }) => <textarea rows={5} cols={50} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>}
                     </Listener>
                     <h3>
                         Author <small>string</small>
