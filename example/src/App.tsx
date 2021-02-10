@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm } from "typed-react-form";
+import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 
 interface TodoList {
     id: number;
     name: string;
+    description: string;
     author: string;
     public: boolean;
     date: number;
@@ -24,6 +25,7 @@ export default function App() {
         author: "codestix",
         date: new Date().getTime(),
         dateObject: new Date(),
+        description: "this is a testing form",
         id: Math.ceil(Math.random() * 100000),
         public: true,
         tags: ["test"],
@@ -151,6 +153,12 @@ export default function App() {
                         <FormInput form={form} name="tags" type="checkbox" value="school" />
                         School
                     </label>
+                    <h3>
+                        Description <small>string</small>
+                    </h3>
+                    <Listener form={form} name="description">
+                        {({ value, setValue }) => <textarea rows={10} style={{ width: "100%" }} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>}
+                    </Listener>
                 </VisualRender>
                 <div style={{ position: "sticky", top: "0", height: "500px" }}>
                     <h2>Output</h2>
