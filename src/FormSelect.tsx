@@ -1,5 +1,6 @@
 import React, { SelectHTMLAttributes } from "react";
 import { DefaultState, FormState } from "./form";
+import { DEFAULT_DIRTY_CLASS, DEFAULT_ERROR_CLASS } from "./FormInput";
 import { useListener } from "./hooks";
 
 export type FormSelectProps<T, State, Error> = Omit<SelectHTMLAttributes<HTMLSelectElement>, "form" | "name"> & {
@@ -29,8 +30,8 @@ export function FormSelect<T, State extends DefaultState, Error>({
 
     let cl = [];
     if (className) cl.push(className);
-    if (dirty) cl.push(dirtyClassName ?? "is-dirty");
-    if (error) cl.push(errorClassName ?? "is-error");
+    if (dirty) cl.push(dirtyClassName ?? DEFAULT_DIRTY_CLASS);
+    if (error) cl.push(errorClassName ?? DEFAULT_ERROR_CLASS);
 
     return (
         <select
@@ -39,6 +40,7 @@ export function FormSelect<T, State extends DefaultState, Error>({
                 ...(dirty && dirtyStyle),
                 ...(error && errorStyle)
             }}
+            className={cl.join(" ")}
             disabled={(disableOnSubmitting ?? true) && state.isSubmitting}
             value={value as any}
             onChange={(ev) => {

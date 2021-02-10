@@ -5,6 +5,9 @@ import { useListener } from "./hooks";
 
 type BaldInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form" | "value">;
 
+export const DEFAULT_DIRTY_CLASS = "typed-form-dirty";
+export const DEFAULT_ERROR_CLASS = "typed-form-error";
+
 export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]> = BaldInputProps & {
     form: FormState<T, State, Error>;
     name: Key;
@@ -135,8 +138,8 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
 
     let cl = [];
     if (className) cl.push(className);
-    if (dirty) cl.push(dirtyClassName ?? "is-dirty");
-    if (error) cl.push(errorClassName ?? "is-error");
+    if (dirty) cl.push(dirtyClassName ?? DEFAULT_DIRTY_CLASS);
+    if (error) cl.push(errorClassName ?? DEFAULT_ERROR_CLASS);
 
     let [inValue, inChecked] = deserializer ? stringBoolean(deserializer(value, inputValue)) : defaultDeserializer(rest.type, value, inputValue);
 

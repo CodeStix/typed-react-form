@@ -26,3 +26,18 @@ code {
 .blink {
     animation: blink 1s;
 }
+
+small {
+    opacity: 0.9;
+    font-weight: normal;
+}
+
+.typed-form-dirty {
+    outline: 3px solid #0004;
+    transition: 50ms linear;
+}
+
+.typed-form-error {
+    outline: 3px solid #f009;
+    transition: 50ms linear;
+}

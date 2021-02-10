@@ -1,12 +1,14 @@
-import React, { InputHTMLAttributes, useState } from "react";
-import { AnyListener, ArrayListener, FormState, Input, useAnyListener, useChildForm, useForm, useListener } from "typed-react-form";
+import React, { useState } from "react";
+import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 
 interface TodoList {
     id: number;
-    date: Date;
     name: string;
     author: string;
+    public: boolean;
+    date: number;
+    tags: string[];
     todos: Todo[];
 }
 
@@ -16,54 +18,13 @@ interface Todo {
     priority: "low" | "normal" | "high";
 }
 
-/**
- * A custom input that can be reused everywhere when using useForm
- */
-function OldInput<T>({
-    form,
-    name,
-    ...rest
-}: {
-    form: FormState<T, { isSubmitting: boolean }>;
-    name: keyof T;
-} & Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form">) {
-    const { value, dirty, defaultValue, error, state } = useListener(form, name);
-
-    return (
-        <VisualRender>
-            <input
-                disabled={state.isSubmitting}
-                placeholder={defaultValue as any}
-                style={{
-                    background: dirty ? "#eee" : "#fff",
-                    padding: "0.3em",
-                    fontSize: "inherit",
-                    outline: error ? "4px solid #f306" : "none"
-                }}
-                value={value as any}
-                onChange={(ev) => form.setValue(name, ev.target.value as any)}
-                {...rest}
-            />
-            {error && (
-                <span
-                    style={{
-                        padding: "0.3em",
-                        fontWeight: "bold",
-                        color: "red"
-                    }}
-                >
-                    {error}
-                </span>
-            )}
-        </VisualRender>
-    );
-}
-
 export default function App() {
     const [values, setValues] = useState<TodoList>({
         author: "codestix",
-        date: new Date(),
-        id: 1,
+        date: new Date().getTime(),
+        id: Math.ceil(Math.random() * 100000),
+        public: true,
+        tags: ["test"],
         name: "My todo list",
         todos: Array(3)
             .fill(0)
@@ -75,7 +36,7 @@ export default function App() {
     });
 
     const form = useForm(
-        values, // <- Default values, can change
+        values, // <- Default values, may change
         { isSubmitting: false }, // <- Global form state, which can contain custom fields (e.g. loading)
         validateTodoList, // <- Validator
         true // <- Validate on change
@@ -95,73 +56,114 @@ export default function App() {
 
                 form.setState({ isSubmitting: false }); // Set the form state (updates every component listening for state updates)
 
-                setValues({ ...form.values }); // Set new default values, (form.setValues(..., true, true) is also possible instead of useState/useForm combo!)
+                setValues({ ...form.values }); // Set new default values, (form.setDefaultValues(...) is also possible instead of useState/useForm combo!)
             }}
             style={{ padding: "1em", margin: "1em" }}
         >
-            <VisualRender>
-                <h1>
-                    Form created using <a href="https://github.com/CodeStix/typed-react-form">typed-react-form</a>
-                </h1>
-                <p>
-                    The red flash indicates which parts of the form are being rerendered. Browse the source code <a href="https://github.com/CodeStix/typed-react-form/tree/master/example/src">here</a>
-                    .
-                </p>
-                <hr />
-                <h2>Todo list</h2>
-                <p>Name</p>
-                {/* The name field is type checked, try to name it something else that does not exist on interface TodoList */}
-                <OldInput form={form} name="name" />
-                <p>Author</p>
-                <OldInput form={form} name="author" />
-                <p>Id</p>
-                <Input form={form} name="id" />
-                <p>Date</p>
-                {/* <Input type="date" form={form} name="date" serializer={(val) => new Date(val)} deserializer={(e) => e.toISOString().split("T")[0]} /> */}
-                <Input type="date" form={form} name="date" />
-                <p>Todo's</p>
+            <h1>
+                Form created using <a href="https://github.com/CodeStix/typed-react-form">typed-react-form</a>
+            </h1>
+            <p>
+                The red flash indicates which parts of the form are being rerendered. Browse the source code <a href="https://github.com/CodeStix/typed-react-form/tree/master/example/src">here</a>.
+            </p>
+            <hr />
+            <div style={{ display: "grid", gridTemplateColumns: "50% 50%", gridTemplateRows: "100%", gap: "2em" }}>
+                <VisualRender>
+                    <h2>Todo list example form</h2>
+                    <h3>
+                        Id <small>number</small>
+                    </h3>
+                    <FormInput type="number" form={form} name="id" />
+                    <h3>
+                        Name <small>string</small>
+                    </h3>
+                    <FormInput form={form} name="name" />
+                    <FormError form={form} name="name" />
+                    <h3>
+                        Public? <small>boolean</small>
+                    </h3>
+                    <p>Using radio buttons</p>
+                    <FormInput type="radio" form={form} name="public" value={false} /> no
+                    <FormInput type="radio" form={form} name="public" value={true} /> yes
+                    <p>Using checkbox</p>
+                    <FormInput type="checkbox" form={form} name="public" />
+                    <h3>
+                        Todo's <small>array</small>
+                    </h3>
+                    {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
+                    <ArrayListener parent={form} name="todos">
+                        {(
+                            { form, swap, remove, append } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
+                        ) => (
+                            <VisualRender>
+                                <ul>
+                                    {form.values.map((e, i) => (
+                                        <TodoItem onMoveTop={() => swap(i, 0)} onRemove={() => remove(i)} key={e.id} parent={form} index={i} />
+                                    ))}
+                                </ul>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        append({
+                                            message: "",
+                                            priority: "normal",
+                                            id: new Date().getTime()
+                                        })
+                                    }
+                                >
+                                    Add item
+                                </button>
+                            </VisualRender>
+                        )}
+                    </ArrayListener>
+                    <h3>
+                        Date <small>timestamp number</small>
+                    </h3>
+                    <FormInput type="date" form={form} name="date" dateAsNumber />
+                    <FormInput type="number" form={form} name="date" deserializer={(val) => (isNaN(val) ? "" : val + "")} serializer={(val) => parseFloat(val)} />
+                    <h3>
+                        Tags <small>string array</small>
+                    </h3>
+                    <p>
+                        Using select with <code>multiple=true</code>
+                    </p>
+                    <FormSelect form={form} name="tags" multiple>
+                        <option value="test">Test</option>
+                        <option value="fun">Fun</option>
+                        <option value="school">School</option>
+                    </FormSelect>
+                    <p>Using checkboxes</p>
+                    <label>
+                        <FormInput form={form} name="tags" type="checkbox" value="test" />
+                        Test
+                    </label>
+                    <label>
+                        <FormInput form={form} name="tags" type="checkbox" value="fun" />
+                        Fun
+                    </label>
+                    <label>
+                        <FormInput form={form} name="tags" type="checkbox" value="school" />
+                        School
+                    </label>
+                </VisualRender>
+                <div style={{ position: "sticky", top: "0", height: "500px" }}>
+                    <h2>Output</h2>
+                    <FormValues form={form} />
 
-                {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
-                <ArrayListener parent={form} name="todos">
-                    {(
-                        { form, swap, remove, append } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
-                    ) => (
-                        <VisualRender>
-                            <ul style={{ padding: "0" }}>
-                                {form.values.map((e, i) => (
-                                    <TodoItem onMoveTop={() => swap(i, 0)} onRemove={() => remove(i)} key={e.id} parent={form} index={i} />
-                                ))}
-                            </ul>
-                            <button
-                                style={{ margin: "0 0 1em 0" }}
-                                type="button"
-                                onClick={() =>
-                                    append({
-                                        message: "",
-                                        priority: "normal",
-                                        id: new Date().getTime()
-                                    })
-                                }
-                            >
-                                Add item
-                            </button>
-                        </VisualRender>
-                    )}
-                </ArrayListener>
-                <div style={{ background: "#eee" }}>
+                    {/* Disable buttons when form is submitting or when nothing has changed, the AnyListener wrapper is required */}
                     <AnyListener form={form}>
                         {({ state, dirty }) => (
-                            <>
-                                {/* Disable buttons when form is submitting or when nothing has changed, the AnyListener wrapper is required */}
-                                <button style={{ fontSize: "1.3em", margin: "0.5em 0" }} disabled={state.isSubmitting || !dirty}>
+                            <div style={{ margin: "0.5em 0" }}>
+                                <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty}>
                                     Submit
                                 </button>
-                                <button style={{ fontSize: "1.3em", margin: "0.5em 0" }} disabled={state.isSubmitting || !dirty} type="button" onClick={() => form.resetAll()}>
+                                <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty} type="button" onClick={() => form.resetAll()}>
                                     Reset
                                 </button>
-                            </>
+                            </div>
                         )}
                     </AnyListener>
+
                     <div>
                         <button style={{ fontSize: "1.3em" }} type="button" onClick={() => form.validate()}>
                             Validate
@@ -172,10 +174,7 @@ export default function App() {
                         </label>
                     </div>
                 </div>
-
-                <h3>Output</h3>
-                <FormValues form={form} />
-            </VisualRender>
+            </div>
         </form>
     );
 }
@@ -187,13 +186,16 @@ function TodoItem(props: { parent: FormState<Todo[], { isSubmitting: boolean }>;
     return (
         <li
             style={{
-                padding: "1em",
-                margin: "1em",
-                border: "1px solid #0003"
+                padding: "0.5em"
             }}
         >
             <VisualRender>
-                <OldInput form={form} name="message" />
+                <FormInput form={form} name="message" />
+                <FormSelect form={form} name="priority">
+                    <option value="low">Low</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                </FormSelect>
                 <button type="button" onClick={props.onMoveTop}>
                     Go to top
                 </button>
@@ -210,19 +212,46 @@ function TodoItem(props: { parent: FormState<Todo[], { isSubmitting: boolean }>;
  */
 function FormValues<T>(props: { form: FormState<T> }) {
     const form = useAnyListener(props.form);
+    const [show, setShow] = useState({ values: true, defaultValues: false, errorMap: true, dirtyMap: true, state: false });
     return (
         <VisualRender>
-            <div style={{ background: "#0001" }}>
+            <div style={{ background: "#0001", overflow: "hidden", padding: "1em", borderRadius: "1em" }}>
                 <p>
-                    {/* <em>{val.formId}</em> */}
-                    {form.dirty && <strong style={{ color: "blue" }}>DIRTY</strong>}
-                    {form.error && <strong style={{ color: "red" }}>ERROR</strong>}
+                    <strong style={{ color: form.dirty ? "blue" : undefined }}>{form.dirty ? "Modified" : "Unmodified"}</strong>
                 </p>
-                <pre>{JSON.stringify(form.values, null, 2)}</pre>
-                {/* <pre>{JSON.stringify(form.defaultValues)}</pre> */}
-                <pre>{JSON.stringify(form.errorMap, null, 2)}</pre>
-                <pre>{JSON.stringify(form.dirtyMap, null, 2)}</pre>
-                {/* <pre>{JSON.stringify(form.state, null, 2)}</pre> */}
+                <p>
+                    <strong style={{ color: form.error ? "red" : undefined }}>{form.error ? "Has error" : "No errors"}</strong>
+                </p>
+
+                <div>
+                    <strong>Show: </strong>
+                    <label>
+                        <input type="checkbox" checked={show.values} onChange={(ev) => setShow({ ...show, values: ev.target.checked })} />
+                        <code>values</code>
+                    </label>
+                    <label>
+                        <input type="checkbox" checked={show.defaultValues} onChange={(ev) => setShow({ ...show, defaultValues: ev.target.checked })} />
+                        <code>defaultValues</code>
+                    </label>
+                    <label>
+                        <input type="checkbox" checked={show.errorMap} onChange={(ev) => setShow({ ...show, errorMap: ev.target.checked })} />
+                        <code>errorMap</code>
+                    </label>
+                    <label>
+                        <input type="checkbox" checked={show.dirtyMap} onChange={(ev) => setShow({ ...show, dirtyMap: ev.target.checked })} />
+                        <code>dirtyMap</code>
+                    </label>
+                    <label>
+                        <input type="checkbox" checked={show.state} onChange={(ev) => setShow({ ...show, state: ev.target.checked })} />
+                        <code>state</code>
+                    </label>
+                </div>
+
+                {show.values && <pre>values = {JSON.stringify(form.values, null, 2)}</pre>}
+                {show.defaultValues && <pre>defaultValues = {JSON.stringify(form.defaultValues, null, 2)}</pre>}
+                {show.errorMap && <pre>errorMap = {JSON.stringify(form.errorMap, null, 2)}</pre>}
+                {show.dirtyMap && <pre>dirtyMap = {JSON.stringify(form.dirtyMap, null, 2)}</pre>}
+                {show.state && <pre>state = {JSON.stringify(form.state, null, 2)}</pre>}
             </div>
         </VisualRender>
     );
