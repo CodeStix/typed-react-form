@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener } from "typed-react-form";
+import { CustomInput } from "./CustomInput";
 import { VisualRender } from "./VisualRender";
 
 interface TodoList {
@@ -156,9 +157,17 @@ export default function App() {
                     <h3>
                         Description <small>string</small>
                     </h3>
+                    <p>
+                        Using <code>textarea</code>
+                    </p>
                     <Listener form={form} name="description">
                         {({ value, setValue }) => <textarea rows={10} style={{ width: "100%" }} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>}
                     </Listener>
+                    <h3>
+                        Author <small>string</small>
+                    </h3>
+                    <p>Using custom input component</p>
+                    <CustomInput form={form} name="author" />
                 </VisualRender>
                 <div style={{ position: "sticky", top: "0", height: "500px" }}>
                     <h2>Output</h2>

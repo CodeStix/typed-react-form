@@ -23,8 +23,10 @@ export function CustomInput<T>({
                 style={{
                     background: dirty ? "#eee" : "#fff",
                     padding: "0.3em",
+                    border: "1px solid #0005",
+                    borderRadius: "0.5em",
                     fontSize: "inherit",
-                    outline: error ? "4px solid #f306" : "none"
+                    color: error ? "#e11" : "initial"
                 }}
                 value={value as any}
                 onChange={(ev) => form.setValue(name, ev.target.value as any)}
