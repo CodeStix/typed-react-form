@@ -8,6 +8,10 @@ type BaldInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form
 export const DEFAULT_DIRTY_CLASS = "typed-form-dirty";
 export const DEFAULT_ERROR_CLASS = "typed-form-error";
 
+export function getClassName(...args: any) {
+    return [...args].filter((e) => !!e).join(" ");
+}
+
 export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]> = BaldInputProps & {
     form: FormState<T, State, Error>;
     name: Key;
@@ -128,14 +132,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
     ...rest
 }: FormInputProps<T, State, Error, Key, Value>) {
     const { value, error, dirty, state, setValue } = useListener(form, name);
-
-    let cl = [];
-    if (className) cl.push(className);
-    if (dirty) cl.push(dirtyClassName ?? DEFAULT_DIRTY_CLASS);
-    if (error) cl.push(errorClassName ?? DEFAULT_ERROR_CLASS);
-
     let [inValue, inChecked] = deserializer ? [deserializer(value, inputValue), undefined] : defaultDeserializer(rest.type, value, inputValue);
-
     return (
         <input
             style={{
@@ -143,7 +140,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                 ...(dirty && dirtyStyle),
                 ...(error && errorStyle)
             }}
-            className={cl.join(" ")}
+            className={getClassName(className, dirty && (dirtyClassName ?? DEFAULT_DIRTY_CLASS), error && (errorClassName ?? DEFAULT_ERROR_CLASS))}
             disabled={(disableOnSubmitting ?? true) && state.isSubmitting}
             value={inValue}
             checked={inChecked}
