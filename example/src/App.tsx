@@ -8,6 +8,7 @@ interface TodoList {
     author: string;
     public: boolean;
     date: number;
+    dateObject: Date;
     tags: string[];
     todos: Todo[];
 }
@@ -22,6 +23,7 @@ export default function App() {
     const [values, setValues] = useState<TodoList>({
         author: "codestix",
         date: new Date().getTime(),
+        dateObject: new Date(),
         id: Math.ceil(Math.random() * 100000),
         public: true,
         tags: ["test"],
@@ -64,7 +66,8 @@ export default function App() {
                 Form created using <a href="https://github.com/CodeStix/typed-react-form">typed-react-form</a>
             </h1>
             <p>
-                The red flash indicates which parts of the form are being rerendered. Browse the source code <a href="https://github.com/CodeStix/typed-react-form/tree/master/example/src">here</a>.
+                The <strong>red flash</strong> indicates which parts of the form are being rerendered. The <strong>gray outline</strong> indicates that a field is dirty (modified).{" "}
+                <strong>Red outline</strong> indicates error.
             </p>
             <hr />
             <div style={{ display: "grid", gridTemplateColumns: "50% 50%", gridTemplateRows: "100%", gap: "2em" }}>
@@ -120,7 +123,10 @@ export default function App() {
                         Date <small>timestamp number</small>
                     </h3>
                     <FormInput type="date" form={form} name="date" dateAsNumber />
-                    <FormInput type="number" form={form} name="date" deserializer={(val) => (isNaN(val) ? "" : val + "")} serializer={(val) => parseFloat(val)} />
+                    <h3>
+                        Date <small>date object</small>
+                    </h3>
+                    <FormInput type="date" form={form} name="dateObject" />
                     <h3>
                         Tags <small>string array</small>
                     </h3>
