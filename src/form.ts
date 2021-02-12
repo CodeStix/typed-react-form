@@ -39,6 +39,8 @@ export function memberCopy<T>(value: T): T {
  * @returns true when different, false when 'equal', undefined when an object field was found.
  */
 export function comparePrimitiveObject<T>(a: T, b: T): boolean | undefined {
+    // Compare null and undefined
+    if (!a || !b) return a === b;
     let ak = Object.keys(a),
         bk = Object.keys(b);
     let lk = ak.length > bk.length ? ak : bk;
@@ -162,7 +164,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (notifyChild && value !== undefined) {
             let child = this.childMap[key];
             if (child) {
-                child.setValues(value, true, isDefault, true, false);
+                child.setValues(value!, true, isDefault, true, false);
                 this.dirtyMap[key] = child.dirty;
             }
         }
@@ -196,7 +198,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         notifyParent: boolean = true,
         fireAny: boolean = true
     ) {
-        if (typeof value === "object" && value !== null) {
+        if (typeof value === "object") {
             // Do not compare objects, child form should mark dirty
             let dirty: boolean | undefined = false;
             if (fireAny) {
@@ -281,13 +283,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyParent Should this form notify the parent form about this change?
      * @param fireAny
      */
-    public setError<Key extends keyof T>(
-        key: Key,
-        error: ErrorType<T[Key], Error> | undefined,
-        notifyChild: boolean = true,
-        notifyParent: boolean = true,
-        fireAny: boolean = true
-    ) {
+    public setError<Key extends keyof T>(key: Key, error: ErrorType<T[Key], Error> | undefined, notifyChild: boolean = true, notifyParent: boolean = true, fireAny: boolean = true) {
         if (this.errorMap[key] === error) return;
 
         if (!error) delete this.errorMap[key];
@@ -435,7 +431,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 }
 
-export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof Parent> extends FormState<Parent[Key], ParentState, ParentError> {
+export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof Parent> extends FormState<NonNullable<Parent[Key]>, ParentState, ParentError> {
     public name: Key;
     public readonly parent: FormState<Parent, ParentState, ParentError>;
 

@@ -1,19 +1,5 @@
 import React, { useState } from "react";
-import {
-    AnyListener,
-    ArrayListener,
-    FormError,
-    FormState,
-    FormInput,
-    FormSelect,
-    useAnyListener,
-    useChildForm,
-    useForm,
-    Listener,
-    FormTextArea,
-    ChildForm,
-    ChildFormState
-} from "typed-react-form";
+import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 
 interface User {
@@ -188,18 +174,19 @@ export default function App() {
                         Author <small>string</small>
                     </h3>
                     <p>Using custom input component</p>
-                    <ChildForm parent={form} name="author">
-                        {(form) => (
-                            <>
-                                <Listener form={form} name="">
-                                    {() => {}}
-                                </Listener>
-                                <FormInput form={form} name="" />
-                            </>
-                        )}
-                    </ChildForm>
                     <Listener form={form} name="author">
-                        {({ value }) => null}
+                        {({ value }) =>
+                            value && (
+                                <ChildForm parent={form} name="author">
+                                    {(form) => (
+                                        <>
+                                            <FormInput form={form} name="name" />
+                                            <FormInput form={form} name="birthDate" type="date" dateAsNumber />
+                                        </>
+                                    )}
+                                </ChildForm>
+                            )
+                        }
                     </Listener>
                     <FormInput form={form} name="author" type="checkbox" setUndefinedOnUncheck value={{ name: "new", birthDate: new Date().getTime() }} />
                 </VisualRender>

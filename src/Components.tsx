@@ -19,8 +19,8 @@ export function ArrayListener<Parent, ParentState, ParentError, Key extends keyo
         move: (index: number, newIndex: number) => void;
         swap: (index: number, newIndex: number) => void;
         append: (value: Parent[Key][keyof Parent[Key]]) => void;
-        values: Parent[Key];
-        setValues: (values: Parent[Key]) => void;
+        values: NonNullable<Parent[Key]>;
+        setValues: (values: NonNullable<Parent[Key]>) => void;
     }) => React.ReactNode;
 }) {
     const arr = useArrayListener(props.parent, props.name);
