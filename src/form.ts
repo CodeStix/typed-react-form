@@ -196,7 +196,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         notifyParent: boolean = true,
         fireAny: boolean = true
     ) {
-        if (typeof value === "object") {
+        if (typeof value === "object" && value !== null) {
             // Do not compare objects, child form should mark dirty
             let dirty: boolean | undefined = false;
             if (fireAny) {
@@ -211,7 +211,6 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                     }
                 }
             }
-            console.log("set", key, value instanceof Date);
             this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
         } else {
             // Calculate and compare value types, determine dirty?
@@ -282,7 +281,13 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyParent Should this form notify the parent form about this change?
      * @param fireAny
      */
-    public setError<Key extends keyof T>(key: Key, error: ErrorType<T[Key], Error> | undefined, notifyChild: boolean = true, notifyParent: boolean = true, fireAny: boolean = true) {
+    public setError<Key extends keyof T>(
+        key: Key,
+        error: ErrorType<T[Key], Error> | undefined,
+        notifyChild: boolean = true,
+        notifyParent: boolean = true,
+        fireAny: boolean = true
+    ) {
         if (this.errorMap[key] === error) return;
 
         if (!error) delete this.errorMap[key];
