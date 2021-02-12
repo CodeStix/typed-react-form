@@ -1,13 +1,31 @@
 import React, { useState } from "react";
-import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea } from "typed-react-form";
-import { CustomInput } from "./CustomInput";
+import {
+    AnyListener,
+    ArrayListener,
+    FormError,
+    FormState,
+    FormInput,
+    FormSelect,
+    useAnyListener,
+    useChildForm,
+    useForm,
+    Listener,
+    FormTextArea,
+    ChildForm,
+    ChildFormState
+} from "typed-react-form";
 import { VisualRender } from "./VisualRender";
+
+interface User {
+    name: string;
+    birthDate: number;
+}
 
 interface TodoList {
     id: number;
     name: string;
     description: string;
-    author: string;
+    author?: User;
     public: boolean;
     date: number;
     dateObject: Date;
@@ -23,7 +41,6 @@ interface Todo {
 
 export default function App() {
     const [values, setValues] = useState<TodoList>({
-        author: "codestix",
         date: new Date().getTime(),
         dateObject: new Date(),
         description: "this is a testing form",
@@ -171,7 +188,20 @@ export default function App() {
                         Author <small>string</small>
                     </h3>
                     <p>Using custom input component</p>
-                    <CustomInput form={form} name="author" />
+                    <ChildForm parent={form} name="author">
+                        {(form) => (
+                            <>
+                                <Listener form={form} name="">
+                                    {() => {}}
+                                </Listener>
+                                <FormInput form={form} name="" />
+                            </>
+                        )}
+                    </ChildForm>
+                    <Listener form={form} name="author">
+                        {({ value }) => null}
+                    </Listener>
+                    <FormInput form={form} name="author" type="checkbox" setUndefinedOnUncheck value={{ name: "new", birthDate: new Date().getTime() }} />
                 </VisualRender>
                 <div style={{ position: "sticky", top: "0", height: "500px" }}>
                     <h2>Output</h2>
@@ -206,7 +236,7 @@ export default function App() {
     );
 }
 
-function TodoItem(props: { parent: FormState<Todo[], { isSubmitting: boolean }>; index: number; onMoveTop: () => void; onRemove: () => void }) {
+function TodoItem(props: { parent: FormState<Todo[]>; index: number; onMoveTop: () => void; onRemove: () => void }) {
     // Use a child form, each layer in the object is a seperate form: TodoList (useForm) -> Todo[] (useArrayForm) -> Todo (useChildForm)
     const form = useChildForm(props.parent, props.index);
 
@@ -293,7 +323,7 @@ function validateTodoList(values: TodoList) {
         return prev;
     }, [] as any[]);
     return {
-        author: values.author.length < 3 ? "Author name is too short." : undefined,
+        // author: values.author.length < 3 ? "Author name is too short." : undefined,
         name: values.name.length < 3 ? "Title is too short." : undefined,
         todos: todoErrors.length > 0 ? todoErrors : undefined
     };
