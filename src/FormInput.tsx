@@ -22,11 +22,9 @@ export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T
     dirtyStyle?: React.CSSProperties;
     disableOnSubmitting?: boolean;
     dateAsNumber?: boolean;
-    deserializer?: (value: T[Key], inputValue: Value | undefined) => string | undefined;
-    serializer?: (newValue: string, newChecked: boolean, currentValue: T[Key], inputValue: Value | undefined) => T[Key];
 };
 
-function defaultDeserializer(inputType: string | undefined, currentValue: any, inputValue: any): [string | undefined, boolean | undefined] {
+function deserializer(inputType: string | undefined, currentValue: any, inputValue: any): [string | undefined, boolean | undefined] {
     let inValue = undefined;
     let inChecked = undefined;
     switch (inputType) {
@@ -75,7 +73,7 @@ function defaultDeserializer(inputType: string | undefined, currentValue: any, i
     return [inValue, inChecked];
 }
 
-function defaultSerializer(inputType: string | undefined, newValue: string, newChecked: boolean, currentValue: any, inputValue: any, dateAsNumber: boolean): any {
+function serializer(inputType: string | undefined, newValue: string, newChecked: boolean, currentValue: any, inputValue: any, dateAsNumber: boolean): any {
     switch (inputType) {
         case "number":
             return parseFloat(newValue);
@@ -118,8 +116,6 @@ function defaultSerializer(inputType: string | undefined, newValue: string, newC
 export function FormInput<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
     form,
     name,
-    deserializer,
-    serializer,
     style,
     className,
     disableOnSubmitting,
@@ -132,7 +128,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
     ...rest
 }: FormInputProps<T, State, Error, Key, Value>) {
     const { value, error, dirty, state, setValue } = useListener(form, name);
-    let [inValue, inChecked] = deserializer ? [deserializer(value, inputValue), undefined] : defaultDeserializer(rest.type, value, inputValue);
+    let [inValue, inChecked] = deserializer(rest.type, value, inputValue);
     return (
         <input
             style={{
@@ -145,9 +141,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
             value={inValue}
             checked={inChecked}
             onChange={(ev) => {
-                let v = serializer
-                    ? serializer(ev.target.value, ev.target.checked, value, inputValue)
-                    : defaultSerializer(rest.type, ev.target.value, ev.target.checked, value, inputValue, dateAsNumber ?? false);
+                let v = serializer(rest.type, ev.target.value, ev.target.checked, value, inputValue, dateAsNumber ?? false);
                 if (v !== undefined) setValue(v);
             }}
             name={name + ""}
