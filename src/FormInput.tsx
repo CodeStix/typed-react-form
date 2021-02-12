@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { InputHTMLAttributes } from "react";
 import { DefaultState, FormState } from "./form";
 import { useListener } from "./hooks";
@@ -128,7 +128,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
     ...rest
 }: FormInputProps<T, State, Error, Key, Value>) {
     const { value, error, dirty, state, setValue } = useListener(form, name);
-    let [inValue, inChecked] = deserializer(rest.type, value, inputValue);
+    let [inValue, inChecked] = useMemo(() => deserializer(rest.type, value, inputValue), [rest.type, value, inputValue]);
     return (
         <input
             style={{
