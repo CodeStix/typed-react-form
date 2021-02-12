@@ -24,7 +24,8 @@ export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T
     dirtyStyle?: React.CSSProperties;
     disableOnSubmitting?: boolean;
     dateAsNumber?: boolean;
-    checkMode?: FormInputCheckMode;
+    setNullOnUncheck?: boolean;
+    setUndefinedOnUncheck?: boolean;
 };
 
 export function FormInput<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
@@ -38,17 +39,14 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
     errorStyle,
     dirtyClassName,
     dirtyStyle,
-    checkMode,
+    setUndefinedOnUncheck,
+    setNullOnUncheck,
     value: inputValue,
     checked: inputChecked,
     ...rest
 }: FormInputProps<T, State, Error, Key, Value>) {
-    const { value: currentValue, error, dirty, state, setValue, defaultValue } = useListener(form, name);
+    const { value: currentValue, error, dirty, state, setValue } = useListener(form, name);
     let [inValue, inChecked] = useMemo(() => {
-        if (checkMode !== undefined && checkMode !== "normal") {
-            return [undefined, !!currentValue !== !!inputChecked];
-        }
-
         let inValue = undefined,
             inChecked = undefined;
         switch (rest.type) {
@@ -72,18 +70,14 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                 break;
             }
             case "radio": {
-                if (inputValue !== undefined) {
-                    inChecked = currentValue === inputValue;
-                    inValue = inputValue + "";
-                } else {
-                    console.warn("Radio groups should have a value set");
-                }
+                inChecked = currentValue === inputValue;
                 break;
             }
             case "checkbox": {
-                if (inputValue !== undefined) {
+                if (setNullOnUncheck || setUndefinedOnUncheck) {
+                    inChecked = !!currentValue;
+                } else if (inputValue !== undefined) {
                     inChecked = (Array.isArray(currentValue) ? currentValue : []).includes(inputValue as never);
-                    inValue = inputValue + "";
                 } else {
                     inChecked = !!currentValue;
                 }
@@ -96,6 +90,8 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
         }
         return [inValue, inChecked];
     }, [rest.type, currentValue, inputValue]);
+
+    if ((setNullOnUncheck || setUndefinedOnUncheck) && rest.type !== "checkbox") console.warn("setNullOnUncheck/setUndefinedOnUncheck only has an effect on checkboxes.");
 
     return (
         <input
@@ -111,15 +107,6 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
             onChange={(ev) => {
                 let newValue = ev.target.value;
                 let newChecked = ev.target.checked;
-
-                if (checkMode !== undefined && checkMode !== "normal") {
-                    if (rest.type !== "checkbox" && rest.type !== "radio") console.error("checkMode is only valid for radio and checkbox input types.");
-                    if (checkMode !== "setNull" && checkMode !== "setUndefined") return console.error(`Invalid checkMode ${checkMode} for field ${name}.`);
-                    let uncheckValue = checkMode === "setNull" ? null : undefined;
-                    setValue(newChecked !== !!inputChecked ? defaultValue : (uncheckValue as any));
-                    return;
-                }
-
                 switch (rest.type) {
                     case "number": {
                         setValue(parseFloat(newValue) as any);
@@ -135,20 +122,17 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                         return;
                     }
                     case "radio": {
-                        if (inputValue !== undefined) {
-                            // Enum field
-                            if (newChecked) {
-                                if (checkMode === "normal") {
-                                    setValue(inputValue as any);
-                                }
-                            }
-                        } else {
-                            console.warn("Radio input should have a value set when checkMode = normal");
+                        // Enum field
+                        if (newChecked) {
+                            setValue(inputValue as any);
                         }
                         return;
                     }
                     case "checkbox": {
-                        if (inputValue !== undefined) {
+                        if (setNullOnUncheck || setUndefinedOnUncheck) {
+                            if (inputValue === undefined) console.warn(`You should set a value when using setNullOnUncheck/setUndefinedOnUncheck on field ${name}`);
+                            setValue(newChecked ? inputValue : ((setNullOnUncheck ? null : undefined) as any));
+                        } else if (inputValue !== undefined) {
                             // Primitive array field
                             let arr = Array.isArray(currentValue) ? [...currentValue] : [];
                             if (newChecked) arr.push(inputValue);
@@ -167,7 +151,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                     }
                 }
             }}
-            name={name + ""}
+            name={name as string}
             {...rest}
         />
     );
