@@ -64,11 +64,13 @@ export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: F
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function useListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key) {
+export function useListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key, onlyOnSetValues = false) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        let id = form.listen(name, () => setRender((e) => e + 1));
+        let id = form.listen(name, (all) => {
+            if (!onlyOnSetValues || all) setRender((e) => e + 1);
+        });
         return () => form.ignore(name, id);
     }, [form, name]);
 

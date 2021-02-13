@@ -76,7 +76,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     public readonly values: T;
 
     /**
-     * The default values on this form. Use setValues(..., true) to set these.
+     * The default values on this form. Use setDefaultValues(...) to set these.
      */
     public readonly defaultValues: T;
 
@@ -161,10 +161,10 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
 
         this.dirtyMap[key] = dirty;
 
-        if (notifyChild && value !== undefined) {
+        if (notifyChild) {
             let child = this.childMap[key];
             if (child) {
-                child.setValues(value!, true, isDefault, true, false);
+                child.setValues(value ?? ({} as any), true, isDefault, true, false);
                 this.dirtyMap[key] = child.dirty;
             }
         }

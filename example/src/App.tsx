@@ -174,20 +174,14 @@ export default function App() {
                         Author <small>string</small>
                     </h3>
                     <p>Using custom input component</p>
-                    <Listener form={form} name="author">
-                        {({ value }) =>
-                            value && (
-                                <ChildForm parent={form} name="author">
-                                    {(form) => (
-                                        <>
-                                            <FormInput form={form} name="name" />
-                                            <FormInput form={form} name="birthDate" type="date" dateAsNumber />
-                                        </>
-                                    )}
-                                </ChildForm>
-                            )
-                        }
-                    </Listener>
+                    <ChildForm parent={form} name="author">
+                        {(form) => (
+                            <VisualRender>
+                                <FormInput form={form} name="name" />
+                                <FormInput form={form} name="birthDate" type="date" dateAsNumber />
+                            </VisualRender>
+                        )}
+                    </ChildForm>
                     <FormInput form={form} name="author" type="checkbox" setUndefinedOnUncheck value={{ name: "new", birthDate: new Date().getTime() }} />
                 </VisualRender>
                 <div style={{ position: "sticky", top: "0", height: "500px" }}>

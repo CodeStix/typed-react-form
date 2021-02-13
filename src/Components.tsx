@@ -75,6 +75,8 @@ export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Pa
     name: Key;
     children: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
 }) {
-    const arr = useChildForm(props.parent, props.name);
-    return <React.Fragment>{props.children(arr)}</React.Fragment>;
+    const childForm = useChildForm(props.parent, props.name);
+    let { values } = useAnyListener(childForm, true);
+    if (Object.keys(values).length === 0) return null;
+    return <React.Fragment>{props.children(childForm)}</React.Fragment>;
 }
