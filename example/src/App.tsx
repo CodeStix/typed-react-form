@@ -36,6 +36,23 @@ const CustomInput: StyledFix<typeof FormInput, { color2: string }> = styled(Form
     }
 `;
 
+export function MyTypedForm() {
+    const form = useForm({ name: "John", age: 19 }, { isSubmitting: false });
+    return (
+        <form
+            onSubmit={async (ev) => {
+                ev.preventDefault();
+                console.log(form.values);
+                form.setDefaultValues(form.values);
+            }}
+        >
+            <FormInput form={form} name="name" />
+            <FormInput type="number" form={form} name="age" />
+            <button>Submit</button>
+        </form>
+    );
+}
+
 export default function App() {
     const [values, setValues] = useState<TodoList>({
         date: new Date().getTime(),
