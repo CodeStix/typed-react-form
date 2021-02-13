@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm } from "typed-react-form";
+import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm, StyledFix } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
+import styled from "styled-components";
 
 interface User {
     name: string;
@@ -24,6 +25,16 @@ interface Todo {
     message: string;
     priority: "low" | "normal" | "high";
 }
+
+const CustomInput: StyledFix<typeof FormInput, { color2: string }> = styled(FormInput)<{ color2: string }>`
+    &.typed-form-dirty {
+        color: ${(e) => e.color2};
+    }
+    &.typed-form-error {
+        color: red;
+        font-weight: bold;
+    }
+`;
 
 export default function App() {
     const [values, setValues] = useState<TodoList>({
@@ -86,7 +97,7 @@ export default function App() {
                     <h3>
                         Name <small>string</small>
                     </h3>
-                    <FormInput form={form} name="name" />
+                    <CustomInput form={form} name="name" color2="yellow" />
                     <FormError form={form} name="name" />
                     <h3>
                         Public? <small>boolean</small>
