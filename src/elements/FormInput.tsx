@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { InputHTMLAttributes } from "react";
-import { DefaultState, FormState } from "./form";
-import { useListener } from "./hooks";
+import { DefaultState, FormState } from "../form";
+import { useListener } from "../hooks";
 
 type BaldInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form" | "value">;
 

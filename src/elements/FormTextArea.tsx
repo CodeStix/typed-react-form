@@ -1,9 +1,9 @@
-import React, { SelectHTMLAttributes } from "react";
-import { DefaultState, FormState } from "./form";
+import React, { TextareaHTMLAttributes } from "react";
+import { DefaultState, FormState } from "../form";
 import { DEFAULT_DIRTY_CLASS, DEFAULT_ERROR_CLASS, getClassName } from "./FormInput";
-import { useListener } from "./hooks";
+import { useListener } from "../hooks";
 
-export type FormSelectProps<T, State, Error> = Omit<SelectHTMLAttributes<HTMLSelectElement>, "form" | "name"> & {
+export type FormTextAreaProps<T, State, Error> = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "form" | "name"> & {
     form: FormState<T, State, Error>;
     name: keyof T;
     errorClassName?: string;
@@ -13,7 +13,7 @@ export type FormSelectProps<T, State, Error> = Omit<SelectHTMLAttributes<HTMLSel
     disableOnSubmitting?: boolean;
 };
 
-export function FormSelect<T, State extends DefaultState, Error>({
+export function FormTextArea<T, State extends DefaultState, Error>({
     form,
     name,
     errorClassName,
@@ -25,10 +25,10 @@ export function FormSelect<T, State extends DefaultState, Error>({
     className,
     style,
     ...rest
-}: FormSelectProps<T, State, Error>) {
+}: FormTextAreaProps<T, State, Error>) {
     const { value, setValue, state, dirty, error } = useListener(form, name);
     return (
-        <select
+        <textarea
             style={{
                 ...style,
                 ...(dirty && dirtyStyle),
@@ -37,13 +37,10 @@ export function FormSelect<T, State extends DefaultState, Error>({
             className={getClassName(className, dirty && (dirtyClassName ?? DEFAULT_DIRTY_CLASS), error && (errorClassName ?? DEFAULT_ERROR_CLASS))}
             disabled={(disableOnSubmitting ?? true) && state.isSubmitting}
             value={value as any}
-            onChange={(ev) => {
-                if (rest.multiple) setValue(Array.from(ev.target.selectedOptions).map((e) => e.value) as any);
-                else setValue(ev.target.value as any);
-            }}
+            onChange={(ev) => setValue(ev.target.value as any)}
             {...rest}
         >
             {children}
-        </select>
+        </textarea>
     );
 }

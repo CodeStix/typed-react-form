@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": "CodeStix/typed-react-form",
   "main": "dist/index.js",
-  "source": "src/index.tsx",
+  "source": "src/index.ts",
   "keywords": [
     "react",
     "form",

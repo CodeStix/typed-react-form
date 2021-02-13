@@ -1,6 +1,6 @@
 import React, { HTMLAttributes } from "react";
-import { FormState } from "./form";
-import { useListener } from "./hooks";
+import { FormState } from "../form";
+import { useListener } from "../hooks";
 
 export type FormErrorProps<T, Error, Key extends keyof T> = Omit<HTMLAttributes<HTMLParagraphElement>, "name" | "form"> & {
     form: FormState<T, any, Error>;
