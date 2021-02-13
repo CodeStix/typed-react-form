@@ -18,6 +18,8 @@ yarn add typed-react-form
 Check out the documentation [here](https://github.com/). The form below is fully typed.
 
 ```tsx
+import { AnyListener, FormInput, useForm, ChildForm } from "typed-react-form";
+
 const form = useForm(
     {
         firstName: "John",
@@ -26,6 +28,7 @@ const form = useForm(
     },
     { isSubmitting: false }
 );
+
 return (
     <form
         onSubmit={async (ev) => {
