@@ -74,8 +74,10 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                 break;
             }
             case "checkbox": {
-                if (setNullOnUncheck || setUndefinedOnUncheck) {
-                    inChecked = !!currentValue;
+                if (setNullOnUncheck) {
+                    inChecked = currentValue !== null;
+                } else if (setUndefinedOnUncheck) {
+                    inChecked = currentValue !== undefined;
                 } else if (inputValue !== undefined) {
                     inChecked = (Array.isArray(currentValue) ? currentValue : []).includes(inputValue as never);
                 } else {
