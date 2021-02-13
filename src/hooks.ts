@@ -40,10 +40,10 @@ export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: F
         parentForm.childMap[name] = c.current!;
         c.current!.name = name;
 
-        // Set new default values, without notifying parent and children
+        // Set new default values, without notifying children
         c.current!.setValues(parentForm.defaultValues[name] ?? ({} as any), true, true, false, false);
-        // Then, set new values, and notify parent and children
-        c.current!.setValues(parentForm.values[name] ?? ({} as any), true, false, true, true);
+        // Then, set new values and notify children
+        c.current!.setValues(parentForm.values[name] ?? ({} as any), true, false, true, false);
 
         return () => {
             // Could already be overriden (useEffect ordering)

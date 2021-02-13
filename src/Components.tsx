@@ -12,7 +12,7 @@ import { useArrayListener, useListener, useAnyListener, useChildForm } from "./h
 export function ArrayListener<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
     parent: FormState<Parent, ParentState, ParentError>;
     name: Key;
-    children: (props: {
+    render?: (props: {
         form: ChildFormState<Parent, ParentState, ParentError, Key>;
         remove: (index: number) => void;
         clear: () => void;
@@ -24,7 +24,7 @@ export function ArrayListener<Parent, ParentState, ParentError, Key extends keyo
     }) => React.ReactNode;
 }) {
     const arr = useArrayListener(props.parent, props.name);
-    return <React.Fragment>{props.children(arr)}</React.Fragment>;
+    return <React.Fragment>{props.render?.(arr) ?? arr.values + ""}</React.Fragment>;
 }
 
 /**
@@ -37,7 +37,7 @@ export function ArrayListener<Parent, ParentState, ParentError, Key extends keyo
 export function Listener<T, State, Error, Key extends keyof T>(props: {
     form: FormState<T, State, Error>;
     name: Key;
-    children: (props: {
+    render?: (props: {
         value: T[Key];
         defaultValue: T[Key];
         setValue: (value: T[Key]) => boolean;
@@ -48,7 +48,7 @@ export function Listener<T, State, Error, Key extends keyof T>(props: {
     }) => React.ReactNode;
 }) {
     const l = useListener(props.form, props.name);
-    return <React.Fragment>{props.children(l)}</React.Fragment>;
+    return <React.Fragment>{props.render?.(l) ?? l.value + ""}</React.Fragment>;
 }
 
 /**
@@ -58,9 +58,9 @@ export function Listener<T, State, Error, Key extends keyof T>(props: {
  * @param form The form to listen to.
  * @param onlyOnSetValues True if you only want to listen for changes that are set using setValues. (used for arrays)
  */
-export function AnyListener<T, State, Error>(props: { form: FormState<T, State, Error>; onlyOnSetValues?: boolean; children: (props: FormState<T, State, Error>) => React.ReactNode }) {
+export function AnyListener<T, State, Error>(props: { form: FormState<T, State, Error>; onlyOnSetValues?: boolean; render?: (props: FormState<T, State, Error>) => React.ReactNode }) {
     const l = useAnyListener(props.form, props.onlyOnSetValues);
-    return <React.Fragment>{props.children(l)}</React.Fragment>;
+    return <React.Fragment>{props.render?.(l) ?? l.values + ""}</React.Fragment>;
 }
 
 /**
@@ -73,10 +73,10 @@ export function AnyListener<T, State, Error>(props: { form: FormState<T, State, 
 export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
     parent: FormState<Parent, ParentState, ParentError>;
     name: Key;
-    children: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
+    render?: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
 }) {
     const childForm = useChildForm(props.parent, props.name);
     let { values } = useAnyListener(childForm, true);
     if (Object.keys(values).length === 0) return null;
-    return <React.Fragment>{props.children(childForm)}</React.Fragment>;
+    return <React.Fragment>{props.render?.(childForm)}</React.Fragment>;
 }

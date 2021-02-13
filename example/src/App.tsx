@@ -100,8 +100,10 @@ export default function App() {
                         Todo's <small>array</small>
                     </h3>
                     {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
-                    <ArrayListener parent={form} name="todos">
-                        {(
+                    <ArrayListener
+                        parent={form}
+                        name="todos"
+                        render={(
                             { form, swap, remove, append } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
                         ) => (
                             <VisualRender>
@@ -124,7 +126,7 @@ export default function App() {
                                 </button>
                             </VisualRender>
                         )}
-                    </ArrayListener>
+                    />
                     <h3>
                         Date <small>timestamp number</small>
                     </h3>
@@ -167,21 +169,21 @@ export default function App() {
                     <p>
                         Using <code>Listener</code> around <code>textarea</code>
                     </p>
-                    <Listener form={form} name="description">
-                        {({ value, setValue }) => <textarea rows={5} cols={50} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>}
-                    </Listener>
+                    <Listener form={form} name="description" render={({ value, setValue }) => <textarea rows={5} cols={50} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>} />
                     <h3>
                         Author <small>string</small>
                     </h3>
                     <p>Using custom input component</p>
-                    <ChildForm parent={form} name="author">
-                        {(form) => (
+                    <ChildForm
+                        parent={form}
+                        name="author"
+                        render={(form) => (
                             <VisualRender>
                                 <FormInput form={form} name="name" />
                                 <FormInput form={form} name="birthDate" type="date" dateAsNumber />
                             </VisualRender>
                         )}
-                    </ChildForm>
+                    />
                     <FormInput form={form} name="author" type="checkbox" setUndefinedOnUncheck value={{ name: "new", birthDate: new Date().getTime() }} />
                 </VisualRender>
                 <div style={{ position: "sticky", top: "0", height: "500px" }}>
@@ -189,8 +191,9 @@ export default function App() {
                     <FormValues form={form} />
 
                     {/* Disable buttons when form is submitting or when nothing has changed, the AnyListener wrapper is required */}
-                    <AnyListener form={form}>
-                        {({ state, dirty }) => (
+                    <AnyListener
+                        form={form}
+                        render={({ state, dirty }) => (
                             <div style={{ margin: "0.5em 0" }}>
                                 <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty}>
                                     Submit
@@ -200,7 +203,7 @@ export default function App() {
                                 </button>
                             </div>
                         )}
-                    </AnyListener>
+                    />
 
                     <div>
                         <button style={{ fontSize: "1.3em" }} type="button" onClick={() => form.validate()}>
