@@ -13,49 +13,10 @@ npm install --save typed-react-form
 yarn add typed-react-form
 ```
 
-## Simple usage
+## Documentation
+**You can find the documentation and information on how to get started [on the wiki page](https://github.com/CodeStix/typed-react-form/wiki).**
 
-Check out the documentation [here](https://github.com/). The form below is fully typed.
-
-```tsx
-import { AnyListener, FormInput, useForm, ChildForm } from "typed-react-form";
-
-const form = useForm(
-    {
-        firstName: "John",
-        lastName: "Tester",
-        info: { email: "johntester@example.com", favoriteFood: "pasta" }
-    },
-    { isSubmitting: false }
-);
-
-return (
-    <form
-        onSubmit={async (ev) => {
-            ev.preventDefault();
-            // Fetch...
-            form.setDefaultValues(form.values);
-        }}
-    >
-        <FormInput form={form} name="firstName" />
-        <FormInput form={form} name="lastName" />
-        <ChildForm
-            parent={form}
-            name="info"
-            render={(form) => (
-                <>
-                    <FormInput form={form} name="email" />
-                    <FormInput form={form} name="favoriteFood" />
-                </>
-            )}
-        />
-        <button>Submit</button>
-        <AnyListener form={form} render={({ values }) => <pre>{JSON.stringify(values, null, 2)}</pre>} />
-    </form>
-);
-```
-
-### Todo
+## Todo
 
 - Fix styled-components integration (without using the `FixStyled` helper type)
 - Validators support
