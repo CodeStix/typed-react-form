@@ -9,7 +9,12 @@ import { DefaultState, DefaultError, FormState, ChildFormState, Validator } from
  * @param validator The validator to use, optional.
  * @param validateOnChange Validate on change?
  */
-export function useForm<T, State = DefaultState, Error = DefaultError>(defaultValues: T, defaultState: State, validator?: Validator<T, Error>, validateOnChange = true) {
+export function useForm<T, State = DefaultState, Error = DefaultError>(
+    defaultValues: T,
+    defaultState: State = { isSubmitting: false } as any,
+    validator?: Validator<T, Error>,
+    validateOnChange = true
+) {
     let c = useRef<FormState<T, State, Error> | null>(null);
 
     if (!c.current) {
