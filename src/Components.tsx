@@ -1,15 +1,15 @@
 import React from "react";
 import { ChildFormState, DirtyMap, ErrorMap, FormState } from "./form";
-import { useArrayListener, useListener, useAnyListener, useChildForm } from "./hooks";
+import { useArrayForm, useListener, useAnyListener, useChildForm } from "./hooks";
 
 /**
- * Wrapper around useArrayListener (which is a wrapper around useChildForm).
+ * Wrapper around useArrayForm (which is a wrapper around useChildForm).
  * Exports useful functions to manipulate arrays.
  * This hook does cause a rerender, but only if the whole array changes.
  * @param parent The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function ArrayListener<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
+export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
     parent: FormState<Parent, ParentState, ParentError>;
     name: Key;
     render?: (props: {
@@ -23,7 +23,7 @@ export function ArrayListener<Parent, ParentState, ParentError, Key extends keyo
         setValues: (values: NonNullable<Parent[Key]>) => void;
     }) => React.ReactNode;
 }) {
-    const arr = useArrayListener(props.parent, props.name);
+    const arr = useArrayForm(props.parent, props.name);
     return <React.Fragment>{props.render?.(arr) ?? arr.values + ""}</React.Fragment>;
 }
 
@@ -65,7 +65,7 @@ export function AnyListener<T, State, Error>(props: { form: FormState<T, State, 
 
 /**
  * Wrapper around useChildForm
- * Creates a nested form for another root or nested form. You must use this for object and array (see useArrayListener) field.
+ * Creates a child form for another root or child form. You must use this for object and array (see useArrayForm) fields.
  * This hook doesn't cause a rerender.
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.

@@ -29,7 +29,7 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
 }
 
 /**
- * Creates a nested form for another root or nested form. You must use this for object and array (see useArrayListener) field.
+ * Creates a nested form for another root or nested form. You must use this for object and array (see useArrayForm) field.
  * This hook doesn't cause a rerender.
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
@@ -115,7 +115,7 @@ export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>
  * @param parent The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useArrayListener<Parent, ParentState, ParentError, Key extends keyof Parent>(parent: FormState<Parent, ParentState, ParentError>, name: Key) {
+export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof Parent>(parent: FormState<Parent, ParentState, ParentError>, name: Key) {
     const form = useChildForm<Parent, ParentState, ParentError, Key>(parent, name);
     useAnyListener(form, true);
 

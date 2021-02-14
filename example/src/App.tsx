@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AnyListener, ArrayListener, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm, StyledFix } from "typed-react-form";
+import { AnyListener, ArrayForm, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm, StyledFix } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 import styled from "styled-components";
 
@@ -131,7 +131,7 @@ export function App() {
                         Todo's <small>array</small>
                     </h3>
                     {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
-                    <ArrayListener
+                    <ArrayForm
                         parent={form}
                         name="todos"
                         render={(
