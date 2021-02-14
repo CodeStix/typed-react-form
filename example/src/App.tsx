@@ -36,12 +36,15 @@ const CustomInput: StyledFix<typeof FormInput, { color2: string }> = styled(Form
     }
 `;
 
-export function MyTypedForm() {
-    const form = useForm({ name: "John", age: 19 }, { isSubmitting: false });
+export default function MyTypedForm() {
+    const form = useForm({ name: "John", age: 19 });
     return (
         <form
             onSubmit={async (ev) => {
                 ev.preventDefault();
+                form.setState({ isSubmitting: true });
+                await new Promise((res) => setTimeout(res, 1000));
+                form.setState({ isSubmitting: false });
                 console.log(form.values);
                 form.setDefaultValues(form.values);
             }}
@@ -53,7 +56,7 @@ export function MyTypedForm() {
     );
 }
 
-export default function App() {
+export function App() {
     const [values, setValues] = useState<TodoList>({
         date: new Date().getTime(),
         dateObject: new Date(),
