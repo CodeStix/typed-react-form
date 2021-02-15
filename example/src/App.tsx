@@ -156,7 +156,7 @@ export function Form() {
                                 >
                                     Add item
                                 </button>
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={() => {
                                         setValues([
@@ -171,7 +171,7 @@ export function Form() {
                                     }}
                                 >
                                     Add 50 items
-                                </button>
+                                </button> */}
                             </VisualRender>
                         )}
                     />
