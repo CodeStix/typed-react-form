@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { AnyListener, ArrayForm, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm, StyledFix } from "typed-react-form";
+import { AnyListener, ArrayForm, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm, useListener } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
-import styled from "styled-components";
 
 interface User {
     name: string;
@@ -26,35 +25,54 @@ interface Todo {
     priority: "low" | "normal" | "high";
 }
 
-const CustomInput: StyledFix<typeof FormInput, { color2: string }> = styled(FormInput)<{ color2: string }>`
-    &.typed-form-dirty {
-        color: ${(e) => e.color2};
-    }
-    &.typed-form-error {
-        color: red;
-        font-weight: bold;
-    }
-`;
+function CustomInput<T>(props: { form: FormState<T>; name: keyof T; children?: React.ReactNode }) {
+    const { value, error, dirty, setValue, state, defaultValue } = useListener(props.form, props.name);
 
-export default function MyTypedForm() {
-    const form = useForm({ name: "John", age: 19 });
+    // You should probably implement some value transformations instead of using 'as any' (for number and date fields ...)
+    return (
+        <label style={{ display: "block" }}>
+            {props.children}
+            <input
+                style={{ border: error ? "1px solid red" : undefined, background: dirty ? "#eee" : undefined }}
+                disabled={state.isSubmitting}
+                placeholder={defaultValue as any}
+                value={value as any}
+                onChange={(ev) => setValue(ev.target.value as any)}
+            />
+            {error && <p style={{ color: "red" }}>{error}</p>}
+        </label>
+    );
+}
+
+function ExampleForm() {
+    const form = useForm(
+        {
+            firstName: "John",
+            lastName: "Pineapple"
+        },
+        { isSubmitting: false },
+        (values) => ({ firstName: values.firstName.length < 3 ? "Firstname must be longer!" : undefined }) // Example validator
+    );
     return (
         <form
+            style={{ margin: "1em" }}
+            onReset={() => form.resetAll()}
             onSubmit={async (ev) => {
                 ev.preventDefault();
+                if (form.error) return;
                 form.setState({ isSubmitting: true });
-                await new Promise((res) => setTimeout(res, 1000));
-                form.setState({ isSubmitting: false });
-                console.log(form.values);
-                form.setDefaultValues(form.values);
+                console.log("submit", form.values);
             }}
         >
-            <FormInput form={form} name="name" />
-            <FormInput type="number" form={form} name="age" />
+            <CustomInput form={form} name="firstName" />
+            <CustomInput form={form} name="lastName" />
             <button>Submit</button>
+            <button type="reset">Reset</button>
         </form>
     );
 }
+
+export default ExampleForm;
 
 export function App() {
     const [values, setValues] = useState<TodoList>({
@@ -117,7 +135,6 @@ export function App() {
                     <h3>
                         Name <small>string</small>
                     </h3>
-                    <CustomInput form={form} name="name" color2="yellow" />
                     <FormError form={form} name="name" />
                     <h3>
                         Public? <small>boolean</small>
@@ -132,7 +149,7 @@ export function App() {
                     </h3>
                     {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
                     <ArrayForm
-                        parent={form}
+                        form={form}
                         name="todos"
                         render={(
                             { form, swap, remove, append } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
@@ -206,7 +223,7 @@ export function App() {
                     </h3>
                     <p>Using custom input component</p>
                     <ChildForm
-                        parent={form}
+                        form={form}
                         name="author"
                         render={(form) => (
                             <VisualRender>

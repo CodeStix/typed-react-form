@@ -112,11 +112,11 @@ export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>
 /**
  * This is a wrapper around useChildForm, with useful functions to manipulate arrays.
  * This hook does cause a rerender, but only if the whole array changes.
- * @param parent The parent form.
+ * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof Parent>(parent: FormState<Parent, ParentState, ParentError>, name: Key) {
-    const form = useChildForm<Parent, ParentState, ParentError, Key>(parent, name);
+export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof Parent>(parentForm: FormState<Parent, ParentState, ParentError>, name: Key) {
+    const form = useChildForm<Parent, ParentState, ParentError, Key>(parentForm, name);
     useAnyListener(form, true);
 
     function append(value: Parent[Key][keyof Parent[Key]]) {

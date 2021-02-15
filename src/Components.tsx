@@ -10,7 +10,7 @@ import { useArrayForm, useListener, useAnyListener, useChildForm } from "./hooks
  * @param name The parent's field to create a child form for.
  */
 export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
-    parent: FormState<Parent, ParentState, ParentError>;
+    form: FormState<Parent, ParentState, ParentError>;
     name: Key;
     render?: (props: {
         form: ChildFormState<Parent, ParentState, ParentError, Key>;
@@ -23,7 +23,7 @@ export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Pa
         setValues: (values: NonNullable<Parent[Key]>) => void;
     }) => React.ReactNode;
 }) {
-    const arr = useArrayForm(props.parent, props.name);
+    const arr = useArrayForm(props.form, props.name);
     return <React.Fragment>{props.render?.(arr) ?? arr.values + ""}</React.Fragment>;
 }
 
@@ -71,11 +71,11 @@ export function AnyListener<T, State, Error>(props: { form: FormState<T, State, 
  * @param name The parent's field to create a child form for.
  */
 export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
-    parent: FormState<Parent, ParentState, ParentError>; // Use the parent prop instead of the form prop when using ChildForm.
+    form: FormState<Parent, ParentState, ParentError>; // Use the parent prop instead of the form prop when using ChildForm.
     name: Key;
     render?: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
 }) {
-    const childForm = useChildForm(props.parent, props.name);
+    const childForm = useChildForm(props.form, props.name);
     let form = useAnyListener(childForm, true);
     if (form.empty) return null;
     return <React.Fragment>{props.render?.(childForm)}</React.Fragment>;
