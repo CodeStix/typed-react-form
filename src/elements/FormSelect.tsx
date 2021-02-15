@@ -11,6 +11,7 @@ export type FormSelectProps<T, State, Error> = Omit<SelectHTMLAttributes<HTMLSel
     dirtyClassName?: string;
     dirtyStyle?: React.CSSProperties;
     disableOnSubmitting?: boolean;
+    hideWhenNull?: boolean;
 };
 
 export function FormSelect<T, State extends DefaultState, Error>({
@@ -21,12 +22,14 @@ export function FormSelect<T, State extends DefaultState, Error>({
     dirtyClassName,
     dirtyStyle,
     disableOnSubmitting,
+    hideWhenNull,
     children,
     className,
     style,
     ...rest
 }: FormSelectProps<T, State, Error>) {
     const { value, setValue, state, dirty, error } = useListener(form, name);
+    if (hideWhenNull && (value === null || value === undefined)) return null;
     return (
         <select
             style={{

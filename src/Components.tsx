@@ -71,7 +71,7 @@ export function AnyListener<T, State, Error>(props: { form: FormState<T, State, 
  * @param name The parent's field to create a child form for.
  */
 export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Parent>(props: {
-    parent: FormState<Parent, ParentState, ParentError>;
+    parent: FormState<Parent, ParentState, ParentError>; // Use the parent prop instead of the form prop when using ChildForm.
     name: Key;
     render?: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
 }) {

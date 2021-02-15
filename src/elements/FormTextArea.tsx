@@ -11,6 +11,7 @@ export type FormTextAreaProps<T, State, Error> = Omit<TextareaHTMLAttributes<HTM
     dirtyClassName?: string;
     dirtyStyle?: React.CSSProperties;
     disableOnSubmitting?: boolean;
+    hideWhenNull?: boolean;
 };
 
 export function FormTextArea<T, State extends DefaultState, Error>({
@@ -23,10 +24,12 @@ export function FormTextArea<T, State extends DefaultState, Error>({
     disableOnSubmitting,
     children,
     className,
+    hideWhenNull,
     style,
     ...rest
 }: FormTextAreaProps<T, State, Error>) {
     const { value, setValue, state, dirty, error } = useListener(form, name);
+    if (hideWhenNull && (value === null || value === undefined)) return null;
     return (
         <textarea
             style={{

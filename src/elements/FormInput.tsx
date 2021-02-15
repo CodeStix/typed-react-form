@@ -26,6 +26,7 @@ export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T
     dateAsNumber?: boolean;
     setNullOnUncheck?: boolean;
     setUndefinedOnUncheck?: boolean;
+    hideWhenNull?: boolean;
 };
 
 export function FormInput<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
@@ -41,11 +42,13 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
     dirtyStyle,
     setUndefinedOnUncheck,
     setNullOnUncheck,
+    hideWhenNull,
     value: inputValue,
     checked: inputChecked,
     ...rest
 }: FormInputProps<T, State, Error, Key, Value>) {
     const { value: currentValue, error, dirty, state, setValue } = useListener(form, name);
+
     let [inValue, inChecked] = useMemo(() => {
         let inValue = undefined,
             inChecked = undefined;
@@ -92,6 +95,8 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
         }
         return [inValue, inChecked];
     }, [rest.type, currentValue, inputValue]);
+
+    if (hideWhenNull && (currentValue === null || currentValue === undefined)) return null;
 
     if ((setNullOnUncheck || setUndefinedOnUncheck) && rest.type !== "checkbox") console.warn("setNullOnUncheck/setUndefinedOnUncheck only has an effect on checkboxes.");
 
