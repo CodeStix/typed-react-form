@@ -13,14 +13,15 @@ npm install --save typed-react-form
 yarn add typed-react-form
 ```
 
-## Documentation
-**You can find the documentation and information on how to get started [on the wiki page](https://github.com/CodeStix/typed-react-form/wiki).**
+## [Documentation here](https://github.com/CodeStix/typed-react-form/wiki)
+
+**You can find documentation and information on how to get started [on the GitHub wiki page](https://github.com/CodeStix/typed-react-form/wiki).**
 
 ## Todo
 
 - Fix styled-components integration (without using the `FixStyled` helper type)
-- Validators support
 - Typed `<option>` elements
+- Split package in `typed-react-form-yup-validator`, `typed-react-form-elements`? Reduces size.
 
 ## License
 

@@ -206,7 +206,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         fireAny: boolean = true
     ) {
         if (typeof value === "object") {
-            // Do not compare objects, child form should mark dirty
+            // Do not compare objects, child form of this object field should mark dirty on its parent form (= this form)
             let dirty: boolean | undefined = false;
             if (fireAny) {
                 // Compare value against defaultValues when !isDefault else compare against values (is not switched!!)
@@ -272,7 +272,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 
     /**
-     * Force validation on this field. Required when `validateOnChange` is disabled.
+     * Force validation on this form. Required when `validateOnChange` is disabled.
      */
     public async validate() {
         if (!this.validator) {
@@ -330,30 +330,34 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
 
     /**
      * Reset this form's values to the default values.
+     * @param notifyChild Should this form notify the child form about this change?
+     * @param notifyParent Should this form notify the parent form about this change?
      */
-    public resetAll() {
-        this.setValues(this.defaultValues);
+    public resetAll(notifyChild: boolean = true, notifyParent: boolean = true) {
+        this.setValues(this.defaultValues, true, false, notifyChild, notifyParent);
     }
 
     /**
      * Reset a form's field to its default value.
      * @param key The field to reset.
+     * @param notifyChild Should this form notify the child form about this change?
+     * @param notifyParent Should this form notify the parent form about this change?
      */
-    public reset(key: keyof T) {
-        this.setValue(key, this.defaultValues[key]);
+    public reset(key: keyof T, notifyChild: boolean = true, notifyParent: boolean = true) {
+        this.setValue(key, this.defaultValues[key], true, false, notifyChild, notifyParent);
     }
 
     /**
      * Sets the state for this form, and also on child and parent forms by default.
-     * @param state The new form state.
+     * @param newState The new form state.
      * @param notifyChild Set the state on the child too?
      * @param notifyParent Set the state on the parent too?
      */
-    public setState(state: State, notifyChild: boolean = true, notifyParent: boolean = true) {
-        this._state = state;
+    public setState(newState: State, notifyChild: boolean = true, notifyParent: boolean = true) {
+        this._state = newState;
 
         let c = Object.keys(this.values);
-        if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(state, notifyChild, notifyParent));
+        if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(newState, notifyChild, notifyParent));
 
         c.forEach((e) => this.fireListeners(e as keyof T, false));
         if (notifyParent) this.updateParentState();
