@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { AnyListener, ArrayForm, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm, yupValidator } from "typed-react-form";
+import { AnyListener, ArrayForm, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
-import * as yup from "yup";
 
 interface ExampleFormData {
     id: number;
@@ -26,38 +25,7 @@ interface User {
     age: number;
 }
 
-interface LoginRequest {
-    email: string;
-    password: string;
-}
-
-const LoginRequestSchema = yup.object({
-    email: yup.string().required("Please enter an email").email("Please enter a valid email address."),
-    password: yup.string().required("Please enter a password").min(5, "Password must be longer")
-});
-
-function FormExample() {
-    const form = useForm<LoginRequest>({ email: "", password: "" }, { isSubmitting: false }, yupValidator(LoginRequestSchema)); // Use a yup validator
-    return (
-        <form
-            onSubmit={(ev) => {
-                ev.preventDefault();
-                console.log("submit", form.values);
-            }}
-        >
-            <FormInput form={form} name="email" type="email" />
-            <FormError form={form} name="email" />
-            <FormInput form={form} name="password" type="password" />
-            <FormError form={form} name="password" />
-            {/* Listen for any change on the form, and disable the submit button when there is an error */}
-            <AnyListener form={form} render={(form) => <button disabled={form.error}>Submit</button>} />
-        </form>
-    );
-}
-
-export default FormExample;
-
-export function App() {
+export default function App() {
     return (
         <div>
             <div style={{ padding: "2em", background: "#333", color: "white" }}>

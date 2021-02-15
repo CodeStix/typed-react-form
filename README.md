@@ -25,4 +25,4 @@ yarn add typed-react-form
 
 ## License
 
-MIT © [CodeStix](https://github.com/CodeStix)
+MIT © [Stijn Rogiest](https://github.com/CodeStix)
