@@ -76,7 +76,7 @@ export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Pa
     render?: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
 }) {
     const childForm = useChildForm(props.parent, props.name);
-    let { values } = useAnyListener(childForm, true);
-    if (Object.keys(values).length === 0) return null;
+    let form = useAnyListener(childForm, true);
+    if (form.empty) return null;
     return <React.Fragment>{props.render?.(childForm)}</React.Fragment>;
 }
