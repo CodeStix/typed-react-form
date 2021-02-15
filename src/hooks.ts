@@ -162,6 +162,6 @@ export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof
         append,
         form: form,
         values: form.values,
-        setValues: form.setValues
+        setValues: form.setValues.bind(form)
     };
 }

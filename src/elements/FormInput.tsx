@@ -57,6 +57,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                 inValue = (currentValue ?? "") + "";
                 break;
             }
+            case "datetime-local":
             case "date": {
                 let n = currentValue as any;
                 if (typeof n === "string") {
@@ -119,6 +120,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                         setValue(parseFloat(newValue) as any);
                         return;
                     }
+                    case "datetime-local":
                     case "date": {
                         if (newValue) {
                             let d = new Date(newValue);
@@ -137,6 +139,8 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                     }
                     case "checkbox": {
                         if (setNullOnUncheck || setUndefinedOnUncheck) {
+                            if (newChecked && inputValue === undefined && !defaultValue)
+                                console.warn("Toggling checkbox using setNullOnUncheck got checked but a value to set was not found, please provide the value prop");
                             setValue(newChecked ? (inputValue !== undefined ? inputValue : defaultValue) : ((setNullOnUncheck ? null : undefined) as any));
                         } else if (inputValue !== undefined) {
                             // Primitive array field
