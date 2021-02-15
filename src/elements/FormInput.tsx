@@ -47,7 +47,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
     checked: inputChecked,
     ...rest
 }: FormInputProps<T, State, Error, Key, Value>) {
-    const { value: currentValue, error, dirty, state, setValue } = useListener(form, name);
+    const { value: currentValue, error, dirty, state, setValue, defaultValue } = useListener(form, name);
 
     let [inValue, inChecked] = useMemo(() => {
         let inValue = undefined,
@@ -137,8 +137,7 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                     }
                     case "checkbox": {
                         if (setNullOnUncheck || setUndefinedOnUncheck) {
-                            if (inputValue === undefined) console.warn(`You should set a value when using setNullOnUncheck/setUndefinedOnUncheck on field ${name}`);
-                            setValue(newChecked ? inputValue : ((setNullOnUncheck ? null : undefined) as any));
+                            setValue(newChecked ? (inputValue !== undefined ? inputValue : defaultValue) : ((setNullOnUncheck ? null : undefined) as any));
                         } else if (inputValue !== undefined) {
                             // Primitive array field
                             let arr = Array.isArray(currentValue) ? [...currentValue] : [];
