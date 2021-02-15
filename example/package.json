@@ -22,7 +22,8 @@
     "react-scripts": "link:../node_modules/react-scripts",
     "styled-components": "^5.2.1",
     "typed-react-form": "link:..",
-    "typescript": "link:../node_modules/typescript"
+    "typescript": "link:../node_modules/typescript",
+    "yup": "^0.32.8"
   },
   "devDependencies": {
     "@babel/plugin-syntax-object-rest-spread": "^7.8.3",

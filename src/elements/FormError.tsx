@@ -9,6 +9,6 @@ export type FormErrorProps<T, Error, Key extends keyof T> = Omit<HTMLAttributes<
 
 export function FormError<T, Error, Key extends keyof T>({ form, name, ...rest }: FormErrorProps<T, Error, Key>) {
     const { error } = useListener(form, name);
-    if (!form.error) return null;
+    if (!error) return null;
     return <p {...rest}>{error + ""}</p>;
 }

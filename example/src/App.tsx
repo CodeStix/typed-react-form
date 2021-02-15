@@ -1,99 +1,106 @@
 import React, { useState } from "react";
-import { AnyListener, ArrayForm, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm, useListener } from "typed-react-form";
+import { AnyListener, ArrayForm, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm, yupValidator } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
+import * as yup from "yup";
 
-interface User {
-    name: string;
-    birthDate: number;
-}
-
-interface TodoList {
+interface ExampleFormData {
     id: number;
     name: string;
     description: string;
-    author?: User;
+    author: User | null;
     public: boolean;
     date: number;
     dateObject: Date;
+    language: "en" | "nl" | "fr";
     tags: string[];
     todos: Todo[];
 }
 
 interface Todo {
-    id: number;
     message: string;
     priority: "low" | "normal" | "high";
 }
 
-function CustomInput<T>(props: { form: FormState<T>; name: keyof T; children?: React.ReactNode }) {
-    const { value, error, dirty, setValue, state, defaultValue } = useListener(props.form, props.name);
-
-    // You should probably implement some value transformations instead of using 'as any' (for number and date fields ...)
-    return (
-        <label style={{ display: "block" }}>
-            {props.children}
-            <input
-                style={{ border: error ? "1px solid red" : undefined, background: dirty ? "#eee" : undefined }}
-                disabled={state.isSubmitting}
-                placeholder={defaultValue as any}
-                value={value as any}
-                onChange={(ev) => setValue(ev.target.value as any)}
-            />
-            {error && <p style={{ color: "red" }}>{error}</p>}
-        </label>
-    );
+interface User {
+    name: string;
+    age: number;
 }
 
-function ExampleForm() {
-    const form = useForm(
-        {
-            firstName: "John",
-            lastName: "Pineapple"
-        },
-        { isSubmitting: false },
-        (values) => ({ firstName: values.firstName.length < 3 ? "Firstname must be longer!" : undefined }) // Example validator
-    );
+interface LoginRequest {
+    email: string;
+    password: string;
+}
+
+const LoginRequestSchema = yup.object({
+    email: yup.string().required("Please enter an email").email("Please enter a valid email address."),
+    password: yup.string().required("Please enter a password").min(5, "Password must be longer")
+});
+
+function FormExample() {
+    const form = useForm<LoginRequest>({ email: "", password: "" }, { isSubmitting: false }, yupValidator(LoginRequestSchema)); // Use a yup validator
     return (
         <form
-            style={{ margin: "1em" }}
-            onReset={() => form.resetAll()}
-            onSubmit={async (ev) => {
+            onSubmit={(ev) => {
                 ev.preventDefault();
-                if (form.error) return;
-                form.setState({ isSubmitting: true });
                 console.log("submit", form.values);
             }}
         >
-            <CustomInput form={form} name="firstName" />
-            <CustomInput form={form} name="lastName" />
-            <button>Submit</button>
-            <button type="reset">Reset</button>
+            <FormInput form={form} name="email" type="email" />
+            <FormError form={form} name="email" />
+            <FormInput form={form} name="password" type="password" />
+            <FormError form={form} name="password" />
+            {/* Listen for any change on the form, and disable the submit button when there is an error */}
+            <AnyListener form={form} render={(form) => <button disabled={form.error}>Submit</button>} />
         </form>
     );
 }
 
-export default ExampleForm;
+export default FormExample;
 
 export function App() {
-    const [values, setValues] = useState<TodoList>({
-        date: new Date().getTime(),
-        dateObject: new Date(),
-        description: "this is a testing form",
-        id: Math.ceil(Math.random() * 100000),
-        public: true,
-        tags: ["test"],
-        name: "My todo list",
-        todos: Array(3)
-            .fill(0)
-            .map((_, i) => ({
-                message: "Fix this " + i,
-                priority: "normal",
-                id: i
-            }))
-    });
+    return (
+        <div>
+            <div style={{ padding: "2em", background: "#333", color: "white" }}>
+                <h1>
+                    Example form created using{" "}
+                    <a style={{ color: "#3793ee" }} href="https://github.com/CodeStix/typed-react-form">
+                        typed-react-form
+                    </a>
+                </h1>
+                <p>
+                    The <strong style={{ color: "red" }}>red flash</strong> indicates which parts of the form are being rerendered. The{" "}
+                    <strong style={{ outline: "3px solid gray" }}>gray outline</strong> indicates that a field is dirty (modified) and the{" "}
+                    <strong style={{ outline: "3px solid red" }}>red outline</strong> indicates an error.
+                </p>
+                <p>
+                    Every part of this form's{" "}
+                    <a style={{ color: "#3793ee" }} href="https://github.com/CodeStix/typed-react-form/blob/master/example/src/App.tsx">
+                        source code
+                    </a>{" "}
+                    is type-checked.
+                </p>
+            </div>
+            <Form />
+        </div>
+    );
+}
 
+const initialValues: ExampleFormData = {
+    id: Math.ceil(Math.random() * 100000),
+    name: "My todo list",
+    description: "this is a testing form",
+    author: null,
+    public: true,
+    date: new Date().getTime(),
+    dateObject: new Date(),
+    tags: ["test"],
+    language: "en",
+    todos: [{ message: "Fix this 0", priority: "normal" }]
+};
+
+export function Form() {
     const form = useForm(
-        values, // <- Default values, may change
+        initialValues, // <- Default values, may change
         { isSubmitting: false }, // <- Global form state, which can contain custom fields (e.g. loading)
         validateTodoList, // <- Validator
         true // <- Validate on change
@@ -112,30 +119,22 @@ export function App() {
                 await new Promise((res) => setTimeout(res, 1000)); // Fake fetch
 
                 form.setState({ isSubmitting: false }); // Set the form state (updates every component listening for state updates)
-
-                setValues({ ...form.values }); // Set new default values, (form.setDefaultValues(...) is also possible instead of useState/useForm combo!)
+                form.setDefaultValues(form.values); // Set new default values
             }}
-            style={{ padding: "1em", margin: "1em" }}
         >
-            <h1>
-                Form created using <a href="https://github.com/CodeStix/typed-react-form">typed-react-form</a>
-            </h1>
-            <p>
-                The <strong>red flash</strong> indicates which parts of the form are being rerendered. The <strong>gray outline</strong> indicates that a field is dirty (modified).{" "}
-                <strong>Red outline</strong> indicates error.
-            </p>
-            <hr />
-            <div style={{ display: "grid", gridTemplateColumns: "50% 50%", gridTemplateRows: "100%", gap: "2em" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "60% 40%", gridTemplateRows: "100%", gap: "2em", margin: "2em" }}>
                 <VisualRender>
-                    <h2>Todo list example form</h2>
                     <h3>
                         Id <small>number</small>
                     </h3>
                     <FormInput type="number" form={form} name="id" />
+                    <hr />
                     <h3>
                         Name <small>string</small>
                     </h3>
+                    <FormInput form={form} name="name" />
                     <FormError form={form} name="name" />
+                    <hr />
                     <h3>
                         Public? <small>boolean</small>
                     </h3>
@@ -144,20 +143,38 @@ export function App() {
                     <FormInput type="radio" form={form} name="public" value={true} /> yes
                     <p>Using checkbox</p>
                     <FormInput type="checkbox" form={form} name="public" />
+                    <hr />
                     <h3>
-                        Todo's <small>array</small>
+                        Language <small>enum</small>
+                    </h3>
+                    <p>Using select</p>
+                    <FormSelect form={form} name="language">
+                        <option value="en">English</option>
+                        <option value="nl">Dutch</option>
+                        <option value="fr">French</option>
+                    </FormSelect>
+                    <p>Using radio buttons</p>
+                    <FormInput type="radio" form={form} name="language" value="en" /> English
+                    <FormInput type="radio" form={form} name="language" value="nl" /> Dutch
+                    <FormInput type="radio" form={form} name="language" value="fr" /> French
+                    <hr />
+                    <h3>
+                        Todo's <small>dynamic array</small>
                     </h3>
                     {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
                     <ArrayForm
                         form={form}
                         name="todos"
                         render={(
-                            { form, swap, remove, append } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
+                            { form, swap, remove, append, setValues, values } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
                         ) => (
                             <VisualRender>
                                 <ul>
-                                    {form.values.map((e, i) => (
-                                        <TodoItem onMoveTop={() => swap(i, 0)} onRemove={() => remove(i)} key={e.id} parent={form} index={i} />
+                                    {form.values.map((
+                                        _,
+                                        i // You should use other key than index
+                                    ) => (
+                                        <TodoItem onMoveTop={() => swap(i, 0)} onRemove={() => remove(i)} key={i} parent={form} index={i} />
                                     ))}
                                 </ul>
                                 <button
@@ -165,24 +182,42 @@ export function App() {
                                     onClick={() =>
                                         append({
                                             message: "",
-                                            priority: "normal",
-                                            id: new Date().getTime()
+                                            priority: "normal"
                                         })
                                     }
                                 >
                                     Add item
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setValues([
+                                            ...values,
+                                            ...Array(50)
+                                                .fill(0)
+                                                .map((_, i) => ({
+                                                    message: "Fix this " + i,
+                                                    priority: "normal" as "normal" // Wut
+                                                }))
+                                        ]);
+                                    }}
+                                >
+                                    Add 50 items
+                                </button>
                             </VisualRender>
                         )}
                     />
+                    <hr />
                     <h3>
                         Date <small>timestamp number</small>
                     </h3>
                     <FormInput type="date" form={form} name="date" dateAsNumber />
+                    <hr />
                     <h3>
                         Date <small>date object</small>
                     </h3>
                     <FormInput type="date" form={form} name="dateObject" />
+                    <hr />
                     <h3>
                         Tags <small>string array</small>
                     </h3>
@@ -207,6 +242,7 @@ export function App() {
                         <FormInput form={form} name="tags" type="checkbox" value="school" />
                         School
                     </label>
+                    <hr />
                     <h3>
                         Description <small>string</small>
                     </h3>
@@ -218,21 +254,22 @@ export function App() {
                         Using <code>Listener</code> around <code>textarea</code>
                     </p>
                     <Listener form={form} name="description" render={({ value, setValue }) => <textarea rows={5} cols={50} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>} />
+                    <hr />
                     <h3>
                         Author <small>string</small>
                     </h3>
-                    <p>Using custom input component</p>
+                    <p>Togglable object field</p>
+                    <FormInput form={form} name="author" type="checkbox" setNullOnUncheck value={{ name: "", age: 0 }} />
                     <ChildForm
                         form={form}
                         name="author"
                         render={(form) => (
                             <VisualRender>
                                 <FormInput form={form} name="name" />
-                                <FormInput form={form} name="birthDate" type="date" dateAsNumber />
+                                <FormInput form={form} name="age" type="number" />
                             </VisualRender>
                         )}
                     />
-                    <FormInput form={form} name="author" type="checkbox" setUndefinedOnUncheck value={{ name: "new", birthDate: new Date().getTime() }} />
                 </VisualRender>
                 <div style={{ position: "sticky", top: "0", height: "500px" }}>
                     <h2>Output</h2>
@@ -347,7 +384,7 @@ function FormValues<T>(props: { form: FormState<T> }) {
 }
 
 // You should use a validation library (yup, class-validator) instead of this mess...
-function validateTodoList(values: TodoList) {
+function validateTodoList(values: ExampleFormData) {
     let todoErrors = values.todos.reduce((prev, val, index) => {
         if (val.message.length < 5) {
             prev[index] = { message: "Todo message should be longer!" };

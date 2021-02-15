@@ -1,6 +1,6 @@
 export type ListenerCallback = (setValuesWasUsed: boolean) => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
-export type Validator<T, Error> = (values: T) => ErrorMap<T, Error>;
+export type Validator<T, Error> = (values: T) => ErrorMap<T, Error> | Promise<ErrorMap<T, Error>>;
 
 export type ChildFormMap<T, State, Error> = {
     [Key in keyof T]?: ChildFormState<T, State, Error, Key>;
@@ -274,12 +274,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     /**
      * Force validation on this field. Required when `validateOnChange` is disabled.
      */
-    public validate() {
+    public async validate() {
         if (!this.validator) {
             console.warn("validate() was called on a form which does not have a validator set.");
             return;
         }
-        this.setErrors(this.validator(this.values));
+        this.setErrors(await this.validator(this.values));
     }
 
     /**
