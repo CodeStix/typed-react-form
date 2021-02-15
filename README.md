@@ -17,12 +17,6 @@ yarn add typed-react-form
 
 **You can find documentation and information on how to get started [on the GitHub wiki page](https://github.com/CodeStix/typed-react-form/wiki).**
 
-## Todo
-
-- Fix styled-components integration (without using the `FixStyled` helper type)
-- Typed `<option>` elements
-- Split package in `typed-react-form-yup-validator`, `typed-react-form-elements`? Reduces size.
-
 ## License
 
 MIT © [Stijn Rogiest](https://github.com/CodeStix)

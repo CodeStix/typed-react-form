@@ -134,7 +134,7 @@ export function Form() {
                         form={form}
                         name="todos"
                         render={(
-                            { form, swap, remove, append, setValues, values } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
+                            { form, swap, remove, append } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
                         ) => (
                             <VisualRender>
                                 <ul>
