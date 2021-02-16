@@ -1,17 +1,10 @@
 # Typed React form
 
-A React form state manager, focussed on flawless typescript integration and minimal rerenders. Supports nested objects/arrays.
+A React form state manager, focussed on flawless typescript integration and minimal rerenders. Supports nested objects/arrays. Also works with with vanilla javascript, but without enforced type checking.
 
 [![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form)
 
 ![vscode typescript](https://github.com/CodeStix/typed-react-form/raw/master/example/public/thumb.png)
-
-## Install
-
-```bash
-npm install --save typed-react-form
-yarn add typed-react-form
-```
 
 ## [Documentation here](https://github.com/CodeStix/typed-react-form/wiki)
 
