@@ -158,8 +158,6 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         notifyParent: boolean = true,
         fireAny: boolean = true
     ) {
-        console.log("setValueInternal", key, value, dirty, fireAny);
-
         let valueMap = isDefault ? this.defaultValues : this.values;
         if (value === undefined) {
             if (Array.isArray(valueMap)) valueMap.splice(key as number, 1);
@@ -222,13 +220,10 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
             this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
         } else {
             // Compare value and existing value/defaultValue which determines dirty, only compare when the actual value is defined, otherwise, set false
-            let dirty;
-            if (isDefault) dirty = value !== this.values[key];
-            else dirty = value !== this.defaultValues[key];
+            let dirty = isDefault ? value !== this.values[key] : value !== this.defaultValues[key];
 
             // Do not set if already set
             if (((isDefault && this.defaultValues[key] === value) || (!isDefault && this.values[key] === value)) && this.dirtyMap[key] === dirty) {
-                console.log("not setting field", key, value);
                 return;
             }
 
@@ -298,15 +293,16 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param fireAny
      */
     public setError<Key extends keyof T>(key: Key, error: ErrorType<T[Key], Error> | undefined, notifyChild: boolean = true, notifyParent: boolean = true, fireAny: boolean = true) {
-        if (this.errorMap[key] === error) return;
+        if (typeof error !== "object" && this.errorMap[key] === error) return false;
 
         if (!error) delete this.errorMap[key];
         else this.errorMap[key] = error;
 
-        if (notifyChild) this.childMap[key]?.setErrors((error ?? {}) as any);
+        if (notifyChild && this.childMap[key] && !this.childMap[key]!.setErrors((error ?? {}) as any, true, false)) return false;
         this.fireListeners(key, notifyChild, notifyParent);
         if (notifyParent) this.updateParentErrors(); // Will call setError on parent
         if (fireAny) this.fireAnyListeners(notifyChild, notifyParent);
+        return true;
     }
 
     /**
@@ -319,18 +315,23 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         let localKeys = Object.keys(this.errorMap);
         let newKeys = Object.keys(errors);
         let mostKeys = newKeys.length > localKeys.length ? newKeys : localKeys;
+        let changed = false;
         for (let i = 0; i < mostKeys.length; i++) {
             let key = mostKeys[i] as keyof T;
-            this.setError(
-                key,
-                errors[key] as any,
-                notifyChild,
-                false, // Will call updateParentErrors by itself after all values have been copied, see 3 lines down
-                false // Will call fireAnyListener by itself after all values have been copied, see 3 lines down
-            );
+            changed =
+                changed ||
+                this.setError(
+                    key,
+                    errors[key] as any,
+                    notifyChild,
+                    false, // Will call updateParentErrors by itself after all values have been copied, see 3 lines down
+                    false // Will call fireAnyListener by itself after all values have been copied, see 3 lines down
+                );
         }
+        if (!changed) return false;
         if (notifyParent) this.updateParentErrors();
         this.fireAnyListeners(notifyChild, notifyParent);
+        return true;
     }
 
     /**
