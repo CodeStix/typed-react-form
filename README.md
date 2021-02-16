@@ -1,4 +1,4 @@
-# Typed React form
+# Typed React form [![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form)
 
 ![vscode typescript](https://github.com/CodeStix/typed-react-form/raw/master/example/public/thumb.png)
 
@@ -12,9 +12,7 @@ A React form state manager, focussed on flawless typescript integration and mini
 
 **All of this while keeping type-checking!**
 
-[![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form)
-
-## [Documentation here](https://github.com/CodeStix/typed-react-form/wiki)
+## [Documentation](https://github.com/CodeStix/typed-react-form/wiki)
 
 **You can find documentation and information on how to get started [on the GitHub wiki page](https://github.com/CodeStix/typed-react-form/wiki).**
 
