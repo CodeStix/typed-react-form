@@ -210,12 +210,12 @@ export function Form() {
                                 </ul>
                                 <button
                                     type="button"
-                                    onClick={() =>
+                                    onClick={() => {
                                         append({
                                             message: "",
                                             priority: "normal"
-                                        })
-                                    }
+                                        });
+                                    }}
                                 >
                                     Add item
                                 </button>

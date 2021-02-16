@@ -24,6 +24,8 @@ export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Pa
     }) => React.ReactNode;
 }) {
     const arr = useArrayForm(props.form, props.name);
+    let { value } = useListener(props.form, props.name, true); // Listen for changes on parent, but only when the value did not come from the child form (otherwise this component would rerender each time something in its child changes)
+    if (!value) return null;
     return <React.Fragment>{props.render?.(arr) ?? arr.values + ""}</React.Fragment>;
 }
 
