@@ -5,6 +5,7 @@
   "author": "CodeStix",
   "license": "MIT",
   "repository": "CodeStix/typed-react-form",
+  "homepage": "https://github.com/CodeStix/typed-react-form/wiki",
   "main": "dist/index.js",
   "source": "src/index.ts",
   "keywords": [

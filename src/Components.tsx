@@ -18,7 +18,7 @@ export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Pa
         clear: () => void;
         move: (index: number, newIndex: number) => void;
         swap: (index: number, newIndex: number) => void;
-        append: (value: Parent[Key][keyof Parent[Key]]) => void;
+        append: (value: NonNullable<Parent[Key]>[keyof NonNullable<Parent[Key]>]) => void;
         values: NonNullable<Parent[Key]>;
         setValues: (values: NonNullable<Parent[Key]>) => void;
     }) => React.ReactNode;

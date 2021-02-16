@@ -119,7 +119,7 @@ export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof
     const form = useChildForm<Parent, ParentState, ParentError, Key>(parentForm, name);
     useAnyListener(form, true);
 
-    function append(value: Parent[Key][keyof Parent[Key]]) {
+    function append(value: NonNullable<Parent[Key]>[keyof NonNullable<Parent[Key]>]) {
         form.setValues([...(form.values as any), value] as any);
     }
 
