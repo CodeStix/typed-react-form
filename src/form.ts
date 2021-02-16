@@ -1,4 +1,4 @@
-export type ListenerCallback = (setValuesWasUsed: boolean) => void;
+export type ListenerCallback = (notifiedChild: boolean, notifiedParent: boolean) => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
 export type Validator<T, Error> = (values: T) => ErrorMap<T, Error> | Promise<ErrorMap<T, Error>>;
 
@@ -158,6 +158,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         notifyParent: boolean = true,
         fireAny: boolean = true
     ) {
+        console.log("setValueInternal", key, value, dirty, fireAny);
+
         let valueMap = isDefault ? this.defaultValues : this.values;
         if (value === undefined) {
             if (Array.isArray(valueMap)) valueMap.splice(key as number, 1);
@@ -170,18 +172,15 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
 
         if (notifyChild) {
             let child = this.childMap[key];
-            if (child) {
-                child.setValues(value ?? ({} as any), true, isDefault, true, false);
+            if (child && value !== undefined && value !== null) {
+                child.setValues(value!, true, isDefault, true, false);
                 this.dirtyMap[key] = child.dirty;
             }
         }
 
-        this.fireListeners(key, false);
-        if (fireAny) {
-            // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
-            if (notifyParent) this.updateParentValues(isDefault); // Will call setValueInternal on parent
-            this.fireAnyListeners(false);
-        }
+        this.fireListeners(key, notifyChild, notifyParent);
+        if (notifyParent) this.updateParentValues(isDefault); // Will call setValueInternal on parent
+        if (fireAny) this.fireAnyListeners(notifyChild, notifyParent); // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
 
         if (validate && this.validateOnChange && this.validator) this.validate();
     }
@@ -205,28 +204,36 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         notifyParent: boolean = true,
         fireAny: boolean = true
     ) {
-        if (typeof value === "object") {
-            // Do not compare objects, child form of this object field should mark dirty on its parent form (= this form)
+        // value can contain the default value or normal value. (Determined by isDefault)
+        if (typeof value === "object" && value !== null) {
             let dirty: boolean | undefined = false;
-            if (fireAny) {
-                // Compare value against defaultValues when !isDefault else compare against values (is not switched!!)
-                if (value instanceof Date) {
-                    dirty = value?.getTime() !== (isDefault ? this.values[key] : (this.defaultValues[key] as any))?.getTime();
-                } else {
-                    dirty = comparePrimitiveObject(value, isDefault ? this.values[key] : this.defaultValues[key]);
-                    if (dirty === undefined) {
-                        console.warn("Do not use setValue for object in object fields, use setValueInternal instead (dirty value can not be determined), ", key, value);
-                        dirty = true;
-                    }
+            if (value instanceof Date) {
+                // Compare date objects
+                dirty = value?.getTime() !== (isDefault ? this.values[key] : (this.defaultValues[key] as any))?.getTime();
+            } else if (fireAny) {
+                // Compare primitive objects (objects containing only primitive fields), but only is setValues was not used (dirty value will be determined by child forms)
+                dirty = comparePrimitiveObject(value, isDefault ? this.values[key] : this.defaultValues[key]); // Is switched intentionally
+                if (dirty === undefined) {
+                    console.warn("Do not use setValue for object in object fields, use setValueInternal instead (dirty value can not be determined), ", key, value);
+                    dirty = true;
                 }
             }
+
             this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
         } else {
-            // Calculate and compare value types, determine dirty?
-            if ((isDefault && this.defaultValues[key] === value) || (!isDefault && this.values[key] === value)) return false;
-            this.setValueInternal(key, value, isDefault ? value !== this.values[key] : value !== this.defaultValues[key], validate, isDefault, notifyChild, notifyParent, fireAny);
+            // Compare value and existing value/defaultValue which determines dirty, only compare when the actual value is defined, otherwise, set false
+            let dirty;
+            if (isDefault) dirty = value !== this.values[key];
+            else dirty = value !== this.defaultValues[key];
+
+            // Do not set if already set
+            if (((isDefault && this.defaultValues[key] === value) || (!isDefault && this.values[key] === value)) && this.dirtyMap[key] === dirty) {
+                console.log("not setting field", key, value);
+                return;
+            }
+
+            this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
         }
-        return true;
     }
 
     /**
@@ -250,12 +257,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 false, // Will validate after all values are copied
                 isDefault,
                 notifyChild,
-                notifyParent,
-                false // Will call fireAnyListener after all values are copied, see 3 lines down
+                false, // Will call updateParentValues by itself after all values are copied, see 3 lines down
+                false // Will call fireAnyListener by itself after all values are copied, see 3 lines down
             );
         }
         if (notifyParent) this.updateParentValues(isDefault);
-        this.fireAnyListeners(true);
+        this.fireAnyListeners(notifyChild, notifyParent);
 
         if (validate && this.validateOnChange && this.validator) this.validate();
     }
@@ -297,11 +304,9 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         else this.errorMap[key] = error;
 
         if (notifyChild) this.childMap[key]?.setErrors((error ?? {}) as any);
-        this.fireListeners(key, false);
-        if (fireAny) {
-            if (notifyParent) this.updateParentErrors(); // Will call setError on parent
-            this.fireAnyListeners(false);
-        }
+        this.fireListeners(key, notifyChild, notifyParent);
+        if (notifyParent) this.updateParentErrors(); // Will call setError on parent
+        if (fireAny) this.fireAnyListeners(notifyChild, notifyParent);
     }
 
     /**
@@ -320,12 +325,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 key,
                 errors[key] as any,
                 notifyChild,
-                notifyParent,
-                false // Will call fireAnyListener by itself, see 3 lines down
+                false, // Will call updateParentErrors by itself after all values have been copied, see 3 lines down
+                false // Will call fireAnyListener by itself after all values have been copied, see 3 lines down
             );
         }
         if (notifyParent) this.updateParentErrors();
-        this.fireAnyListeners(false);
+        this.fireAnyListeners(notifyChild, notifyParent);
     }
 
     /**
@@ -359,9 +364,9 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         let c = Object.keys(this.values);
         if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(newState, notifyChild, notifyParent));
 
-        c.forEach((e) => this.fireListeners(e as keyof T, false));
+        c.forEach((e) => this.fireListeners(e as keyof T, notifyChild, notifyParent));
         if (notifyParent) this.updateParentState();
-        this.fireAnyListeners(false);
+        this.fireAnyListeners(notifyChild, notifyParent);
     }
 
     /**
@@ -416,17 +421,17 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         delete this.anyListeners[id];
     }
 
-    protected fireListeners(key: keyof T, setValuesWasUsed: boolean) {
+    protected fireListeners(key: keyof T, notifiedChild: boolean, notifiedParent: boolean) {
         let a = this.listeners[key];
         if (a) {
             let l = Object.keys(a!);
-            l.forEach((e) => a![e]!(setValuesWasUsed));
+            l.forEach((e) => a![e]!(notifiedChild, notifiedParent));
         }
     }
 
-    protected fireAnyListeners(setValuesWasUsed: boolean) {
+    protected fireAnyListeners(notifiedChild: boolean, notifiedParent: boolean) {
         let al = Object.keys(this.anyListeners);
-        al.forEach((e) => this.anyListeners[e]!(setValuesWasUsed));
+        al.forEach((e) => this.anyListeners[e]!(notifiedChild, notifiedParent));
     }
 
     protected updateParentValues(_isDefault: boolean) {
@@ -453,7 +458,7 @@ export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof 
     }
 
     protected updateParentValues(isDefault: boolean) {
-        this.parent.setValueInternal(this.name, isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values), this.dirty, true, isDefault, false, true, true);
+        this.parent.setValueInternal(this.name, isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values), this.dirty, true, isDefault, false, true);
     }
 
     protected updateParentErrors() {

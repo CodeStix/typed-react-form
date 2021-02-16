@@ -25,6 +25,69 @@ interface User {
     age: number;
 }
 
+// function Test() {
+//     const [values, setValues] = useState({ name: "Onderzoek", age: 18, author: { name: "Stijn", email: "reddusted@gmail.com" }, test: undefined });
+//     const form = useForm(values);
+
+//     return (
+//         <form
+//             onSubmit={(ev) => {
+//                 ev.preventDefault();
+//                 console.log("submit", form.values);
+//                 setValues({ ...form.values, test: { name: "yikes" } as any });
+//             }}
+//             onReset={() => {
+//                 form.resetAll();
+//             }}
+//         >
+//             <p>Name</p>
+//             <FormInput form={form} name="name" />
+//             <p>Age</p>
+//             <FormInput form={form} type="number" name="age" />
+//             <p>Author</p>
+//             <FormInput form={form} type="checkbox" name="author" setNullOnUncheck value={{ name: "", email: "" }} />
+//             <ChildForm
+//                 form={form}
+//                 name="author"
+//                 render={(form) => (
+//                     <>
+//                         <p>Name</p>
+//                         <FormInput form={form} type="text" name="name" />
+//                         <p>Email</p>
+//                         <FormInput form={form} type="text" name="email" />
+//                     </>
+//                 )}
+//             />
+//             <Listener
+//                 form={form}
+//                 name="author"
+//                 onlyOnSetValue
+//                 render={(form) => (
+//                     <VisualRender>
+//                         <code>render? {JSON.stringify(form.value, null, 2)}</code>
+//                     </VisualRender>
+//                 )}
+//             />
+//             <AnyListener
+//                 form={form}
+//                 render={(form) => (
+//                     <VisualRender>
+//                         <pre>{JSON.stringify(form.values)}</pre>
+//                         <pre>{JSON.stringify(form.defaultValues)}</pre>
+//                         <pre>{JSON.stringify(form.dirtyMap)}</pre>
+//                         <button disabled={!form.dirty || form.error}>Submit</button>
+//                         <button disabled={!form.dirty || form.error} type="reset">
+//                             Reset
+//                         </button>
+//                     </VisualRender>
+//                 )}
+//             />
+//         </form>
+//     );
+// }
+
+// export default Test;
+
 export default function App() {
     return (
         <div>

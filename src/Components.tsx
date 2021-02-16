@@ -37,17 +37,18 @@ export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Pa
 export function Listener<T, State, Error, Key extends keyof T>(props: {
     form: FormState<T, State, Error>;
     name: Key;
+    onlyOnSetValue?: boolean;
     render?: (props: {
         value: T[Key];
         defaultValue: T[Key];
-        setValue: (value: T[Key]) => boolean;
+        setValue: (value: T[Key]) => void;
         dirty: DirtyMap<T>[Key];
         error: ErrorMap<T, Error>[Key];
         state: State;
         form: FormState<T, State, Error>;
     }) => React.ReactNode;
 }) {
-    const l = useListener(props.form, props.name);
+    const l = useListener(props.form, props.name, props.onlyOnSetValue);
     return <React.Fragment>{props.render?.(l) ?? l.value + ""}</React.Fragment>;
 }
 
@@ -76,7 +77,7 @@ export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Pa
     render?: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
 }) {
     const childForm = useChildForm(props.form, props.name);
-    let form = useAnyListener(childForm, true);
-    if (form.empty) return null;
+    let { value } = useListener(props.form, props.name, true); // Listen for changes on parent, but only when the value did not come from the child form (otherwise this component would rerender each time something in its child changes)
+    if (!value) return null;
     return <React.Fragment>{props.render?.(childForm)}</React.Fragment>;
 }
