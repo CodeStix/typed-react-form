@@ -1,5 +1,7 @@
 # Typed React form
 
+![vscode typescript](https://github.com/CodeStix/typed-react-form/raw/master/example/public/thumb.png)
+
 A React form state manager, focussed on flawless typescript integration and minimal rerenders. Features:
 
 - [Date, number, text inputs, checkboxes, radio buttons, textareas, selects](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
@@ -11,8 +13,6 @@ A React form state manager, focussed on flawless typescript integration and mini
 **All of this while keeping type-checking!**
 
 [![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form)
-
-![vscode typescript](https://github.com/CodeStix/typed-react-form/raw/master/example/public/thumb.png)
 
 ## [Documentation here](https://github.com/CodeStix/typed-react-form/wiki)
 
