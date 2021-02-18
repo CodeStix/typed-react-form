@@ -245,10 +245,10 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 
     /**
-     * Set all values on this form.
+     * Set all values OR default values on this form.
      * @param values The new values to set on this form.
      * @param validate Validate? Does not override `validateOnChange`.
-     * @param isDefault Are these values the default values for this form?
+     * @param isDefault Are these values the default values for this form? This function only updates values or defaultValues, not both! To set both, use `form.setDefaultValues()`.
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
@@ -276,14 +276,15 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 
     /**
-     * Set default values for this form. (Convenience wrapper around `setValues()`)
+     * Set both values and default values for this form. If you only want to set default values, use `setValues(...,...,true)`.
      * @param values The new default values to set on this form.
      * @param validate Validate?
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
     public setDefaultValues(values: T, validate: boolean = true, notifyChild: boolean = true, notifyParent: boolean = true) {
-        this.setValues(values, validate, true, notifyChild, notifyParent);
+        this.setValues(values, false, true, notifyChild, notifyParent);
+        this.setValues(values, validate, false, notifyChild, notifyParent);
     }
 
     /**

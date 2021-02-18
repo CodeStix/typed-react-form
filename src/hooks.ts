@@ -23,7 +23,7 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
     }
 
     useEffect(() => {
-        c.current!.setValues(defaultValues, c.current!.validateOnMount, true);
+        c.current!.setDefaultValues(defaultValues, c.current!.validateOnMount, true, false);
     }, [defaultValues]);
 
     return c.current;
@@ -46,9 +46,9 @@ export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: F
         parentForm.childMap[name] = c.current!;
         c.current!.name = name;
 
-        // Set new default values, without notifying children
-        c.current!.setValues(parentForm.defaultValues[name] ?? ({} as any), false, true, false, false);
-        // Then, set new values and notify children
+        // First, set new default values, without validating
+        c.current!.setValues(parentForm.defaultValues[name] ?? ({} as any), false, true, true, false);
+        // Then, set new values and validate if needed
         c.current!.setValues(parentForm.values[name] ?? ({} as any), c.current!.validateOnMount, false, true, false);
 
         return () => {

@@ -76,7 +76,7 @@ const initialValues: ExampleFormData = {
     dateObject: new Date(),
     tags: ["test"],
     language: "en",
-    todos: [{ message: "This is todo", priority: "normal" }]
+    todos: [{ message: "This is a todo", priority: "normal" }]
 };
 
 export function Form() {
