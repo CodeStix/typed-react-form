@@ -3,3 +3,4 @@
 -   Split package in `typed-react-form-yup-validator`, `typed-react-form-elements`? Reduces size.
 -   Nested validators in child forms to improve validation performance
 -   Typed FormInput type prop
+-   Also set values when useForm state changes (instead of only defaultValues)

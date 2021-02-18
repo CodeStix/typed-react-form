@@ -287,14 +287,32 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 
     /**
-     * Force validation on this form. Required when `validateOnChange` is disabled.
+     * Force validation on this form. Required when `validateOnChange` is disabled. **This function works with both asynchronous and synchronous validators.**
      */
     public async validate() {
         if (!this.validator) {
             console.warn("validate() was called on a form which does not have a validator set.");
-            return;
+            return false;
         }
-        this.setErrors(await this.validator(this.values));
+        let r = this.validator(this.values);
+        if (r instanceof Promise) r = await r;
+        this.setErrors(r);
+        return this.error;
+    }
+
+    /**
+     * Force validation on this form. Required when `validateOnChange` is disabled. **This only works if you have a synchronous validator set (not async).**
+     */
+    public validateSync() {
+        if (!this.validator) {
+            console.warn("validate() was called on a form which does not have a validator set.");
+            return false;
+        }
+        let r = this.validator(this.values);
+        if (r instanceof Promise)
+            throw new Error("validateSync() was called on a form with an asynchronous validator set, please use `await form.validate()` instead.");
+        this.setErrors(r);
+        return this.error;
     }
 
     /**
