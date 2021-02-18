@@ -69,6 +69,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * Should the form validate on each value change?
      */
     public validateOnChange: boolean;
+    public validateOnMount: boolean;
 
     /**
      * The values on this form. Use setValues() to set these.
@@ -101,11 +102,19 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     private counter = 0;
     private static formCounter = 0;
 
-    public constructor(values: T, defaultValues: T, defaultState: State, validator?: Validator<T, Error>, validateOnChange = true) {
+    public constructor(
+        values: T,
+        defaultValues: T,
+        defaultState: State,
+        validator: Validator<T, Error> | undefined,
+        validateOnMount: boolean,
+        validateOnChange: boolean
+    ) {
         this.values = memberCopy(values);
         this.defaultValues = memberCopy(defaultValues);
         this._state = memberCopy(defaultState);
         this.validator = validator;
+        this.validateOnMount = validateOnMount;
         this.validateOnChange = validateOnChange;
     }
 
@@ -308,8 +317,11 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (!error) delete this.errorMap[key];
         else this.errorMap[key] = error;
 
-        if (typeof error === "object" && notifyChild && this.childMap[key] && !this.childMap[key]!.setErrors((error ?? {}) as any, true, false))
-            return false;
+        if (notifyChild && this.childMap[key]) {
+            let changed = !this.childMap[key]!.setErrors((typeof error === "object" ? error ?? {} : {}) as any, true, false);
+            // Only return if the object changed, when a string error was given, this should not return
+            if (changed && typeof error === "object") return false;
+        }
 
         this.fireListeners(key);
         if (notifyParent) this.updateParentErrors(); // Will call setError on parent
@@ -469,7 +481,14 @@ export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof 
     public readonly parent: FormState<Parent, ParentState, ParentError>;
 
     public constructor(parent: FormState<Parent, ParentState, ParentError>, name: Key) {
-        super(parent.values[name] ?? ({} as any), parent.defaultValues[name] ?? ({} as any), parent.state);
+        super(
+            parent.values[name] ?? ({} as any),
+            parent.defaultValues[name] ?? ({} as any),
+            parent.state,
+            undefined,
+            parent.validateOnMount,
+            parent.validateOnChange
+        );
         this.parent = parent;
         this.name = name;
     }

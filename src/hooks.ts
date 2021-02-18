@@ -13,16 +13,17 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
     defaultValues: T,
     defaultState: State = { isSubmitting: false } as any,
     validator?: Validator<T, Error>,
+    validateOnMount = false,
     validateOnChange = true
 ) {
     let c = useRef<FormState<T, State, Error> | null>(null);
 
     if (!c.current) {
-        c.current = new FormState(defaultValues, defaultValues, defaultState, validator, validateOnChange);
+        c.current = new FormState(defaultValues, defaultValues, defaultState, validator, validateOnMount, validateOnChange);
     }
 
     useEffect(() => {
-        c.current!.setValues(defaultValues, true, true);
+        c.current!.setValues(defaultValues, c.current!.validateOnMount, true);
     }, [defaultValues]);
 
     return c.current;
@@ -46,9 +47,9 @@ export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: F
         c.current!.name = name;
 
         // Set new default values, without notifying children
-        c.current!.setValues(parentForm.defaultValues[name] ?? ({} as any), true, true, false, false);
+        c.current!.setValues(parentForm.defaultValues[name] ?? ({} as any), false, true, false, false);
         // Then, set new values and notify children
-        c.current!.setValues(parentForm.values[name] ?? ({} as any), true, false, true, false);
+        c.current!.setValues(parentForm.values[name] ?? ({} as any), c.current!.validateOnMount, false, true, false);
 
         return () => {
             // Could already be overriden (useEffect ordering)

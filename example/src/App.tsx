@@ -139,7 +139,7 @@ const initialValues: ExampleFormData = {
     dateObject: new Date(),
     tags: ["test"],
     language: "en",
-    todos: [{ message: "Fix this 0", priority: "normal" }]
+    todos: [{ message: "", priority: "normal" }]
 };
 
 export function Form() {
@@ -147,6 +147,7 @@ export function Form() {
         initialValues, // <- Default values, may change
         { isSubmitting: false }, // <- Global form state, which can contain custom fields (e.g. loading)
         validateTodoList, // <- Validator
+        false, // <- Validate on mount
         true // <- Validate on change
     );
 
