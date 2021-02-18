@@ -74,7 +74,10 @@ export function Listener<T, State, Error, Key extends keyof T>(props: {
  * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <AnyListener /> instead.
  * @param form The form to listen to.
  */
-export function AnyListener<T, State, Error>(props: { form: FormState<T, State, Error>; render?: (props: FormState<T, State, Error>) => React.ReactNode }) {
+export function AnyListener<T, State, Error>(props: {
+    form: FormState<T, State, Error>;
+    render?: (props: FormState<T, State, Error>) => React.ReactNode;
+}) {
     const l = useAnyListener(props.form);
     return <React.Fragment>{props.render?.(l) ?? l.values + ""}</React.Fragment>;
 }

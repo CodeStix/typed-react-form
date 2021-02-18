@@ -212,7 +212,11 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 // Compare primitive objects (objects containing only primitive fields), but only is setValues was not used (dirty value will be determined by child forms)
                 dirty = comparePrimitiveObject(value, isDefault ? this.values[key] : this.defaultValues[key]); // Is switched intentionally
                 if (dirty === undefined) {
-                    console.warn("Do not use setValue for object in object fields, use setValueInternal instead (dirty value can not be determined), ", key, value);
+                    console.warn(
+                        "Do not use setValue for object in object fields, use setValueInternal instead (dirty value can not be determined), ",
+                        key,
+                        value
+                    );
                     dirty = true;
                 }
             }
@@ -292,13 +296,20 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyParent Should this form notify the parent form about this change?
      * @param setValuesWasUsed
      */
-    public setError<Key extends keyof T>(key: Key, error: ErrorType<T[Key], Error> | undefined, notifyChild: boolean = true, notifyParent: boolean = true, fireAny: boolean = true) {
+    public setError<Key extends keyof T>(
+        key: Key,
+        error: ErrorType<T[Key], Error> | undefined,
+        notifyChild: boolean = true,
+        notifyParent: boolean = true,
+        fireAny: boolean = true
+    ) {
         if (typeof error !== "object" && this.errorMap[key] === error) return false;
 
         if (!error) delete this.errorMap[key];
         else this.errorMap[key] = error;
 
-        if (typeof error === "object" && notifyChild && this.childMap[key] && !this.childMap[key]!.setErrors((error ?? {}) as any, true, false)) return false;
+        if (typeof error === "object" && notifyChild && this.childMap[key] && !this.childMap[key]!.setErrors((error ?? {}) as any, true, false))
+            return false;
 
         this.fireListeners(key);
         if (notifyParent) this.updateParentErrors(); // Will call setError on parent
@@ -449,7 +460,11 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 }
 
-export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof Parent> extends FormState<NonNullable<Parent[Key]>, ParentState, ParentError> {
+export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof Parent> extends FormState<
+    NonNullable<Parent[Key]>,
+    ParentState,
+    ParentError
+> {
     public name: Key;
     public readonly parent: FormState<Parent, ParentState, ParentError>;
 
@@ -460,7 +475,16 @@ export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof 
     }
 
     protected updateParentValues(isDefault: boolean) {
-        this.parent.setValueInternal(this.name, isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values), this.dirty, true, isDefault, false, true, true);
+        this.parent.setValueInternal(
+            this.name,
+            isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values),
+            this.dirty,
+            true,
+            isDefault,
+            false,
+            true,
+            true
+        );
     }
 
     protected updateParentErrors() {

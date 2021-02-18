@@ -99,7 +99,8 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
 
     if (hideWhenNull && (currentValue === null || currentValue === undefined)) return null;
 
-    if ((setNullOnUncheck || setUndefinedOnUncheck) && rest.type !== "checkbox") console.warn("setNullOnUncheck/setUndefinedOnUncheck only has an effect on checkboxes.");
+    if ((setNullOnUncheck || setUndefinedOnUncheck) && rest.type !== "checkbox")
+        console.warn("setNullOnUncheck/setUndefinedOnUncheck only has an effect on checkboxes.");
 
     return (
         <input
@@ -140,8 +141,12 @@ export function FormInput<T, State extends DefaultState, Error, Key extends keyo
                     case "checkbox": {
                         if (setNullOnUncheck || setUndefinedOnUncheck) {
                             if (newChecked && inputValue === undefined && !defaultValue)
-                                console.warn("Toggling checkbox using setNullOnUncheck got checked but a value to set was not found, please provide the value prop");
-                            setValue(newChecked ? (inputValue !== undefined ? inputValue : defaultValue) : ((setNullOnUncheck ? null : undefined) as any));
+                                console.warn(
+                                    "Toggling checkbox using setNullOnUncheck got checked but a value to set was not found, please provide the value prop"
+                                );
+                            setValue(
+                                newChecked ? (inputValue !== undefined ? inputValue : defaultValue) : ((setNullOnUncheck ? null : undefined) as any)
+                            );
                         } else if (inputValue !== undefined) {
                             // Primitive array field
                             let arr = Array.isArray(currentValue) ? [...currentValue] : [];

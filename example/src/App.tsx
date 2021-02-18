@@ -1,5 +1,18 @@
 import React, { useState } from "react";
-import { AnyListener, ArrayForm, FormError, FormState, FormInput, FormSelect, useAnyListener, useChildForm, useForm, Listener, FormTextArea, ChildForm } from "typed-react-form";
+import {
+    AnyListener,
+    ArrayForm,
+    FormError,
+    FormState,
+    FormInput,
+    FormSelect,
+    useAnyListener,
+    useChildForm,
+    useForm,
+    Listener,
+    FormTextArea,
+    ChildForm
+} from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 
 interface ExampleFormData {
@@ -288,7 +301,13 @@ export function Form() {
                     <p>
                         Using <code>Listener</code> around <code>textarea</code>
                     </p>
-                    <Listener form={form} name="description" render={({ value, setValue }) => <textarea rows={5} cols={50} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>} />
+                    <Listener
+                        form={form}
+                        name="description"
+                        render={({ value, setValue }) => (
+                            <textarea rows={5} cols={50} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>
+                        )}
+                    />
                     <hr />
                     <h3>
                         Author <small>string</small>
@@ -318,7 +337,12 @@ export function Form() {
                                 <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty}>
                                     Submit
                                 </button>
-                                <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty} type="button" onClick={() => form.resetAll()}>
+                                <button
+                                    style={{ fontSize: "1.3em" }}
+                                    disabled={state.isSubmitting || !dirty}
+                                    type="button"
+                                    onClick={() => form.resetAll()}
+                                >
                                     Reset
                                 </button>
                             </div>
@@ -331,7 +355,11 @@ export function Form() {
                         </button>
                         <label>
                             <code>validateOnChange</code>
-                            <input type="checkbox" defaultChecked={form.validateOnChange} onChange={(e) => (form.validateOnChange = e.target.checked)} />
+                            <input
+                                type="checkbox"
+                                defaultChecked={form.validateOnChange}
+                                onChange={(e) => (form.validateOnChange = e.target.checked)}
+                            />
                         </label>
                     </div>
                 </div>
@@ -391,7 +419,11 @@ function FormValues<T>(props: { form: FormState<T> }) {
                         <code>values</code>
                     </label>
                     <label>
-                        <input type="checkbox" checked={show.defaultValues} onChange={(ev) => setShow({ ...show, defaultValues: ev.target.checked })} />
+                        <input
+                            type="checkbox"
+                            checked={show.defaultValues}
+                            onChange={(ev) => setShow({ ...show, defaultValues: ev.target.checked })}
+                        />
                         <code>defaultValues</code>
                     </label>
                     <label>
