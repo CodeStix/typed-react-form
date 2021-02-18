@@ -69,12 +69,12 @@ export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: F
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function useListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key, onlyOnSetValues = false) {
+export function useListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        let id = form.listen(name, (setValuesWasUsed) => {
-            if (!onlyOnSetValues || setValuesWasUsed) setRender((e) => e + 1);
+        let id = form.listen(name, () => {
+            setRender((e) => e + 1);
         });
         return () => form.ignore(name, id);
     }, [form, name]);
@@ -94,14 +94,13 @@ export function useListener<T, State, Error, Key extends keyof T>(form: FormStat
  * Listens for any change on this form. Behaves like useState.
  * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <AnyListener /> instead.
  * @param form The form to listen to.
- * @param onlyOnSetValues True if you only want to listen for changes that are set using setValues. (used for arrays)
  */
-export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>, onlyOnSetValues = false) {
+export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        let id = form.listenAny((setValuesWasUsed) => {
-            if (!onlyOnSetValues || setValuesWasUsed) setRender((e) => e + 1);
+        let id = form.listenAny(() => {
+            setRender((e) => e + 1);
         });
         return () => form.ignoreAny(id);
     }, [form]);

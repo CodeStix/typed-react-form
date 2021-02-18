@@ -54,7 +54,6 @@ export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Pa
 export function Listener<T, State, Error, Key extends keyof T>(props: {
     form: FormState<T, State, Error>;
     name: Key;
-    onlyOnSetValues?: boolean;
     render?: (props: {
         value: T[Key];
         defaultValue: T[Key];
@@ -65,7 +64,7 @@ export function Listener<T, State, Error, Key extends keyof T>(props: {
         form: FormState<T, State, Error>;
     }) => React.ReactNode;
 }) {
-    const l = useListener(props.form, props.name, props.onlyOnSetValues);
+    const l = useListener(props.form, props.name);
     return <React.Fragment>{props.render?.(l) ?? l.value + ""}</React.Fragment>;
 }
 
@@ -74,10 +73,9 @@ export function Listener<T, State, Error, Key extends keyof T>(props: {
  * Listens for any change on this form. Behaves like useState.
  * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <AnyListener /> instead.
  * @param form The form to listen to.
- * @param onlyOnSetValues True if you only want to listen for changes that are set using setValues. (used for arrays)
  */
-export function AnyListener<T, State, Error>(props: { form: FormState<T, State, Error>; onlyOnSetValues?: boolean; render?: (props: FormState<T, State, Error>) => React.ReactNode }) {
-    const l = useAnyListener(props.form, props.onlyOnSetValues);
+export function AnyListener<T, State, Error>(props: { form: FormState<T, State, Error>; render?: (props: FormState<T, State, Error>) => React.ReactNode }) {
+    const l = useAnyListener(props.form);
     return <React.Fragment>{props.render?.(l) ?? l.values + ""}</React.Fragment>;
 }
 

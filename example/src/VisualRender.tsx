@@ -12,5 +12,9 @@ export function VisualRender(props: { children: React.ReactNode }) {
         }, 100);
     }
 
-    return <div ref={ref}>{props.children}</div>;
+    return (
+        <div className="blink" ref={ref}>
+            {props.children}
+        </div>
+    );
 }
