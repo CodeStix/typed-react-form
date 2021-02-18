@@ -69,12 +69,12 @@ export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: F
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function useListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key, onlyWhenParentSet = false) {
+export function useListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key, onlyOnSetValues = false) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        let id = form.listen(name, (notifiedChild, _notifiedParent) => {
-            if (!onlyWhenParentSet || notifiedChild) setRender((e) => e + 1);
+        let id = form.listen(name, (setValuesWasUsed) => {
+            if (!onlyOnSetValues || setValuesWasUsed) setRender((e) => e + 1);
         });
         return () => form.ignore(name, id);
     }, [form, name]);
@@ -94,14 +94,14 @@ export function useListener<T, State, Error, Key extends keyof T>(form: FormStat
  * Listens for any change on this form. Behaves like useState.
  * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <AnyListener /> instead.
  * @param form The form to listen to.
- * @param onlyWhenParentSet True if you only want to listen for changes that are set using setValues. (used for arrays)
+ * @param onlyOnSetValues True if you only want to listen for changes that are set using setValues. (used for arrays)
  */
-export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>, onlyWhenParentSet = false) {
+export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>, onlyOnSetValues = false) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
-        let id = form.listenAny((notifiedChild, _notifiedParent) => {
-            if (!onlyWhenParentSet || notifiedChild) setRender((e) => e + 1);
+        let id = form.listenAny((setValuesWasUsed) => {
+            if (!onlyOnSetValues || setValuesWasUsed) setRender((e) => e + 1);
         });
         return () => form.ignoreAny(id);
     }, [form]);
@@ -146,13 +146,27 @@ function swap(this: FormState<any, any, any>, index: number, newIndex: number) {
 
 /**
  * This is a wrapper around useChildForm, with useful functions to manipulate arrays.
- * This hook does cause a rerender, but only if the whole array changes.
+ * This hook does cause a rerender, but only if the array size changes.
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
 export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof Parent>(parentForm: FormState<Parent, ParentState, ParentError>, name: Key) {
     const form = useChildForm<Parent, ParentState, ParentError, Key>(parentForm, name);
-    useAnyListener(parentForm, true);
+    const oldLength = useRef(-1);
+    const [, setRender] = useState(0);
+
+    // Only rerender when array size changed
+    useEffect(() => {
+        let id = parentForm.listen(name, () => {
+            let val = parentForm.values[name] as any;
+            if (val.length !== oldLength.current) {
+                setRender((i) => i + 1);
+                oldLength.current = val.length;
+            }
+        });
+        return () => parentForm.ignore(name, id);
+    }, []);
+
     return {
         remove: remove.bind(form),
         move: move.bind(form),

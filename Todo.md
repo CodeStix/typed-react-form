@@ -5,3 +5,4 @@
 -   validateOnMount prop
 -   Typed FormInput type prop
 -   Rename `onlyOnSetValues`, which it currently not what it means
+-   Error on object fiedl

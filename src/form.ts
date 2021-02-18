@@ -1,4 +1,4 @@
-export type ListenerCallback = (notifiedChild: boolean, notifiedParent: boolean) => void;
+export type ListenerCallback = (setValuesWasUsed: boolean) => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
 export type Validator<T, Error> = (values: T) => ErrorMap<T, Error> | Promise<ErrorMap<T, Error>>;
 
@@ -146,7 +146,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param isDefault Is this the default value for the said field?
      * @param notifyChild Should this form notify any child form about the change?
      * @param notifyParent Should this form notify any parent form about the change?
-     * @param fireAny Fire all `anyListeners` after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
+     * @param setValuesWasUsed Fire all `anyListeners` after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
      */
     public setValueInternal<Key extends keyof T>(
         key: Key,
@@ -156,7 +156,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         isDefault: boolean = false,
         notifyChild: boolean = true,
         notifyParent: boolean = true,
-        fireAny: boolean = true
+        fireAny: boolean = true,
+        setValuesWasUsed: boolean = false
     ) {
         let valueMap = isDefault ? this.defaultValues : this.values;
         if (value === undefined) {
@@ -176,9 +177,9 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
             }
         }
 
-        this.fireListeners(key, notifyChild, notifyParent);
-        if (notifyParent) this.updateParentValues(isDefault); // Will call setValueInternal on parent
-        if (fireAny) this.fireAnyListeners(notifyChild, notifyParent); // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
+        this.fireListeners(key, setValuesWasUsed);
+        if (notifyParent) this.updateParentValues(isDefault, setValuesWasUsed); // Will call setValueInternal on parent
+        if (fireAny) this.fireAnyListeners(setValuesWasUsed); // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
 
         if (validate && this.validateOnChange && this.validator) this.validate();
     }
@@ -191,7 +192,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param isDefault Is this the default value?
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
-     * @param fireAny Fire all `anyListeners` after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
+     * @param setValuesWasUsed Fire all `anyListeners` after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
      */
     public setValue<Key extends keyof T>(
         key: Key,
@@ -200,7 +201,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         isDefault: boolean = false,
         notifyChild: boolean = true,
         notifyParent: boolean = true,
-        fireAny: boolean = true
+        fireAny: boolean = true,
+        setValuesWasUsed: boolean = false
     ) {
         // value can contain the default value or normal value. (Determined by isDefault)
         if (typeof value === "object" && value !== null) {
@@ -208,7 +210,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
             if (value instanceof Date) {
                 // Compare date objects
                 dirty = value?.getTime() !== (isDefault ? this.values[key] : (this.defaultValues[key] as any))?.getTime();
-            } else if (fireAny) {
+            } else if (!setValuesWasUsed) {
                 // Compare primitive objects (objects containing only primitive fields), but only is setValues was not used (dirty value will be determined by child forms)
                 dirty = comparePrimitiveObject(value, isDefault ? this.values[key] : this.defaultValues[key]); // Is switched intentionally
                 if (dirty === undefined) {
@@ -217,9 +219,9 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 }
             }
 
-            this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
+            this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny, setValuesWasUsed);
         } else {
-            // Compare value and existing value/defaultValue which determines dirty, only compare when the actual value is defined, otherwise, set false
+            // Compare value and existing value/defaultValue which determines dirty
             let dirty = isDefault ? value !== this.values[key] : value !== this.defaultValues[key];
 
             // Do not set if already set
@@ -227,7 +229,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 return;
             }
 
-            this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
+            this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny, setValuesWasUsed);
         }
     }
 
@@ -253,11 +255,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 isDefault,
                 notifyChild,
                 false, // Will call updateParentValues by itself after all values are copied, see 3 lines down
-                false // Will call fireAnyListener by itself after all values are copied, see 3 lines down
+                false, // Will call fireAnyListener by itself after all values are copied, see 3 lines down
+                true
             );
         }
-        if (notifyParent) this.updateParentValues(isDefault);
-        this.fireAnyListeners(notifyChild, notifyParent);
+        if (notifyParent) this.updateParentValues(isDefault, true);
+        this.fireAnyListeners(true);
 
         if (validate && this.validateOnChange && this.validator) this.validate();
     }
@@ -290,18 +293,18 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param error The error.
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
-     * @param fireAny
+     * @param setValuesWasUsed
      */
-    public setError<Key extends keyof T>(key: Key, error: ErrorType<T[Key], Error> | undefined, notifyChild: boolean = true, notifyParent: boolean = true, fireAny: boolean = true) {
+    public setError<Key extends keyof T>(key: Key, error: ErrorType<T[Key], Error> | undefined, notifyChild: boolean = true, notifyParent: boolean = true, setValuesWasUsed: boolean = false) {
         if (typeof error !== "object" && this.errorMap[key] === error) return false;
 
         if (!error) delete this.errorMap[key];
         else this.errorMap[key] = error;
 
         if (notifyChild && this.childMap[key] && !this.childMap[key]!.setErrors((error ?? {}) as any, true, false)) return false;
-        this.fireListeners(key, notifyChild, notifyParent);
+        this.fireListeners(key, setValuesWasUsed);
         if (notifyParent) this.updateParentErrors(); // Will call setError on parent
-        if (fireAny) this.fireAnyListeners(notifyChild, notifyParent);
+        if (!setValuesWasUsed) this.fireAnyListeners(setValuesWasUsed); // When setValuesWasUsed, it will call fireAnyListener itself when all values were set
         return true;
     }
 
@@ -325,12 +328,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                     errors[key] as any,
                     notifyChild,
                     false, // Will call updateParentErrors by itself after all values have been copied, see 3 lines down
-                    false // Will call fireAnyListener by itself after all values have been copied, see 3 lines down
+                    true // Will call fireAnyListener by itself after all values have been copied, see 3 lines down
                 );
         }
         if (!changed) return false;
         if (notifyParent) this.updateParentErrors();
-        this.fireAnyListeners(notifyChild, notifyParent);
+        this.fireAnyListeners(true);
         return true;
     }
 
@@ -365,9 +368,9 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         let c = Object.keys(this.values);
         if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(newState, notifyChild, notifyParent));
 
-        c.forEach((e) => this.fireListeners(e as keyof T, notifyChild, notifyParent));
+        c.forEach((e) => this.fireListeners(e as keyof T, true));
         if (notifyParent) this.updateParentState();
-        this.fireAnyListeners(notifyChild, notifyParent);
+        this.fireAnyListeners(true);
     }
 
     /**
@@ -422,20 +425,20 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         delete this.anyListeners[id];
     }
 
-    protected fireListeners(key: keyof T, notifiedChild: boolean, notifiedParent: boolean) {
+    protected fireListeners(key: keyof T, setValuesWasUsed: boolean) {
         let a = this.listeners[key];
         if (a) {
             let l = Object.keys(a!);
-            l.forEach((e) => a![e]!(notifiedChild, notifiedParent));
+            l.forEach((e) => a![e]!(setValuesWasUsed));
         }
     }
 
-    protected fireAnyListeners(notifiedChild: boolean, notifiedParent: boolean) {
+    protected fireAnyListeners(setValuesWasUsed: boolean) {
         let al = Object.keys(this.anyListeners);
-        al.forEach((e) => this.anyListeners[e]!(notifiedChild, notifiedParent));
+        al.forEach((e) => this.anyListeners[e]!(setValuesWasUsed));
     }
 
-    protected updateParentValues(_isDefault: boolean) {
+    protected updateParentValues(_isDefault: boolean, _setValuesWasUsed: boolean) {
         // Not implemented for root form, as it does not have a parent
     }
 
@@ -458,8 +461,9 @@ export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof 
         this.name = name;
     }
 
-    protected updateParentValues(isDefault: boolean) {
-        this.parent.setValueInternal(this.name, isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values), this.dirty, true, isDefault, false, true);
+    protected updateParentValues(isDefault: boolean, setValuesWasUsed: boolean) {
+        console.log("update parent form", this.formId);
+        this.parent.setValueInternal(this.name, isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values), this.dirty, true, isDefault, false, true, true, setValuesWasUsed);
     }
 
     protected updateParentErrors() {

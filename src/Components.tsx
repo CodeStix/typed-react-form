@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChildFormState, DirtyMap, ErrorMap, FormState } from "./form";
 import { useArrayForm, useListener, useAnyListener, useChildForm } from "./hooks";
 
@@ -23,10 +23,25 @@ export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Pa
         setValues: (values: NonNullable<Parent[Key]>) => void;
     }) => React.ReactNode;
 }) {
-    const arr = useArrayForm(props.form, props.name);
-    let { value } = useListener(props.form, props.name, true); // Listen for changes on parent, but only when the value did not come from the child form (otherwise this component would rerender each time something in its child changes)
-    if (!value) return null;
-    return <React.Fragment>{props.render?.(arr) ?? arr.values + ""}</React.Fragment>;
+    const childForm = useArrayForm(props.form, props.name);
+    const oldThruthly = useRef(!!props.form.values[props.name]);
+    const [, setRender] = useState(0);
+
+    // Rerender when array became null/not null (thruthly/falsely)
+    useEffect(() => {
+        let id = props.form.listen(props.name, () => {
+            let thruthly = !!props.form.values[props.name];
+            if (thruthly !== oldThruthly.current) {
+                setRender((i) => i + 1);
+                oldThruthly.current = thruthly;
+            }
+        });
+        return () => props.form.ignore(props.name, id);
+    }, []);
+
+    // Do not render anything if the parent field is falsly
+    if (!props.form.values[props.name]) return null;
+    return <React.Fragment>{props.render?.(childForm) ?? childForm.values + ""}</React.Fragment>;
 }
 
 /**
@@ -39,7 +54,7 @@ export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Pa
 export function Listener<T, State, Error, Key extends keyof T>(props: {
     form: FormState<T, State, Error>;
     name: Key;
-    onlyOnSetValue?: boolean;
+    onlyOnSetValues?: boolean;
     render?: (props: {
         value: T[Key];
         defaultValue: T[Key];
@@ -50,7 +65,7 @@ export function Listener<T, State, Error, Key extends keyof T>(props: {
         form: FormState<T, State, Error>;
     }) => React.ReactNode;
 }) {
-    const l = useListener(props.form, props.name, props.onlyOnSetValue);
+    const l = useListener(props.form, props.name, props.onlyOnSetValues);
     return <React.Fragment>{props.render?.(l) ?? l.value + ""}</React.Fragment>;
 }
 
@@ -79,7 +94,22 @@ export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Pa
     render?: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
 }) {
     const childForm = useChildForm(props.form, props.name);
-    let { value } = useListener(props.form, props.name, true); // Listen for changes on parent, but only when the value did not come from the child form (otherwise this component would rerender each time something in its child changes)
-    if (!value) return null;
+    const oldThruthly = useRef(!!props.form.values[props.name]);
+    const [, setRender] = useState(0);
+
+    // Only rerender when object became null/not null (thruthly/falsely)
+    useEffect(() => {
+        let id = props.form.listen(props.name, () => {
+            let thruthly = !!props.form.values[props.name];
+            if (thruthly !== oldThruthly.current) {
+                setRender((i) => i + 1);
+                oldThruthly.current = thruthly;
+            }
+        });
+        return () => props.form.ignore(props.name, id);
+    }, []);
+
+    // Do not render anything if the parent field is falsly
+    if (!props.form.values[props.name]) return null;
     return <React.Fragment>{props.render?.(childForm)}</React.Fragment>;
 }
