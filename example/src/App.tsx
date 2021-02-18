@@ -193,6 +193,7 @@ export function Form() {
                         Todo's <small>dynamic array</small>
                     </h3>
                     {/* Use ArrayForm (wrapper around useArrayForm) to create dynamic forms */}
+                    <FormError form={form} name="todos" />
                     <ArrayForm
                         form={form}
                         name="todos"
@@ -238,6 +239,9 @@ export function Form() {
                             </VisualRender>
                         )}
                     />
+                    <button type="button" onClick={() => form.setError("todos", "Not epic")}>
+                        Yikes
+                    </button>
                     <hr />
                     <h3>
                         Date <small>timestamp number</small>

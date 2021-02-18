@@ -15,7 +15,7 @@ type ObjectOrArray = {
     [key: number]: any;
 };
 
-export type ErrorType<T, Error> = T extends ObjectOrArray ? ErrorMap<T, Error> : Error;
+export type ErrorType<T, Error> = T extends ObjectOrArray ? ErrorMap<T, Error> | Error : Error;
 
 export type ErrorMap<T, Error> = {
     [Key in keyof T]?: ErrorType<T[Key], Error>;
@@ -298,7 +298,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (!error) delete this.errorMap[key];
         else this.errorMap[key] = error;
 
-        if (notifyChild && this.childMap[key] && !this.childMap[key]!.setErrors((error ?? {}) as any, true, false)) return false;
+        if (typeof error === "object" && notifyChild && this.childMap[key] && !this.childMap[key]!.setErrors((error ?? {}) as any, true, false)) return false;
+
         this.fireListeners(key);
         if (notifyParent) this.updateParentErrors(); // Will call setError on parent
         if (fireAny) this.fireAnyListeners(); // When setValuesWasUsed, it will call fireAnyListener itself when all values were set
