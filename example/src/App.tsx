@@ -139,7 +139,7 @@ const initialValues: ExampleFormData = {
     dateObject: new Date(),
     tags: ["test"],
     language: "en",
-    todos: [{ message: "", priority: "normal" }]
+    todos: [{ message: "This is todo", priority: "normal" }]
 };
 
 export function Form() {
@@ -212,7 +212,7 @@ export function Form() {
                         form={form}
                         name="todos"
                         render={(
-                            { form, swap, remove, append } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
+                            { form, swap, remove, append, values, setValues } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
                         ) => (
                             <VisualRender>
                                 <ul>
@@ -234,7 +234,7 @@ export function Form() {
                                 >
                                     Add item
                                 </button>
-                                {/* <button
+                                <button
                                     type="button"
                                     onClick={() => {
                                         setValues([
@@ -249,12 +249,12 @@ export function Form() {
                                     }}
                                 >
                                     Add 50 items
-                                </button> */}
+                                </button>
                             </VisualRender>
                         )}
                     />
-                    <button type="button" onClick={() => form.setError("todos", "Not epic")}>
-                        Yikes
+                    <button type="button" onClick={() => form.setError("todos", "There is something wrong with the array")}>
+                        Set array error
                     </button>
                     <hr />
                     <h3>
