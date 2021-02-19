@@ -2,7 +2,7 @@
 
 ![vscode typescript](https://github.com/CodeStix/typed-react-form/raw/master/example/public/thumb.png)
 
-A fast React form state manager, focussed on flawless typescript integration and minimal rerenders. Features:
+A fast, completely type-checked React form state manager, focussed on typescript integration and minimal rerenders. Featuring:
 
 - [Date, number, text inputs, checkboxes, radio buttons, textareas, selects](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
 - [Object fields](https://github.com/CodeStix/typed-react-form/wiki/Object-fields)
