@@ -289,6 +289,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
 
     /**
      * Force validation on this form. Required when `validateOnChange` is disabled. **This function works with both asynchronous and synchronous validators.**
+     * @returns true if the form is valid.
      */
     public async validate() {
         if (!this.validator) {
@@ -298,11 +299,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         let r = this.validator(this.values);
         if (r instanceof Promise) r = await r;
         this.setErrors(r);
-        return this.error;
+        return !this.error;
     }
 
     /**
      * Force validation on this form. Required when `validateOnChange` is disabled. **This only works if you have a synchronous validator set (not async).**
+     * @returns true if the form is valid.
      */
     public validateSync() {
         if (!this.validator) {
@@ -313,7 +315,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (r instanceof Promise)
             throw new Error("validateSync() was called on a form with an asynchronous validator set, please use `await form.validate()` instead.");
         this.setErrors(r);
-        return this.error;
+        return !this.error;
     }
 
     /**
