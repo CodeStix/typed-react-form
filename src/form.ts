@@ -140,13 +140,6 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 
     /**
-     * Is this form null/undefined or {}?
-     */
-    public get empty() {
-        return Object.keys(this.values).length === 0;
-    }
-
-    /**
      * Sets a value the advanced way.
      * @param key The field to set.
      * @param value The value to set in the field.
