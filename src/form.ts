@@ -144,7 +144,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param key The field to set.
      * @param value The value to set in the field.
      * @param dirty Is this field dirty? Leave undefined to not set any dirty value. (can always be overridden by child forms)
-     * @param validate Should the form validate after value set? This does not override `validateOnChange`.
+     * @param validate Should the form validate after value set? Overrides `validateOnChange`.
      * @param isDefault Is this the default value for the said field?
      * @param notifyChild Should this form notify any child form about the change?
      * @param notifyParent Should this form notify any parent form about the change?
@@ -179,8 +179,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         }
 
         this.fireListeners(key);
-        if (notifyParent) this.updateParentValues(isDefault, validate); // Will call setValueInternal on parent
         if (fireAny) this.fireAnyListeners(); // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
+        if (notifyParent) this.updateParentValues(isDefault, validate); // Will call setValueInternal on parent
 
         if (validate ?? (this.validateOnChange && this.validator)) this.validate();
     }
@@ -240,13 +240,12 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     /**
      * Set all values OR default values on this form.
      * @param values The new values to set on this form.
-     * @param validate Validate? Does not override `validateOnChange`.
+     * @param validate Validate? Overrides `validateOnChange`.
      * @param isDefault Are these values the default values for this form? This function only updates values or defaultValues, not both! To set both, use `form.setDefaultValues()`.
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
     public setValues(values: T, validate?: boolean, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
-        // Copy the values to the local form object
         let newKeys = Object.keys(isDefault ? this.defaultValues : this.values);
         let localKeys = Object.keys(values);
         let mostKeys = newKeys.length > localKeys.length ? newKeys : localKeys;
@@ -262,8 +261,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 false // Will call fireAnyListener by itself after all values are copied, see 3 lines down
             );
         }
-        if (notifyParent) this.updateParentValues(isDefault, validate);
         this.fireAnyListeners();
+        if (notifyParent) this.updateParentValues(isDefault, validate);
 
         if (validate ?? (this.validateOnChange && this.validator)) this.validate();
     }
@@ -271,7 +270,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     /**
      * Set both values and default values for this form. If you only want to set default values, use `setValues(...,...,true)`.
      * @param values The new default values to set on this form.
-     * @param validate Validate?
+     * @param validate Validate? Overrides `validateOnChange`.
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
@@ -336,8 +335,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         }
 
         this.fireListeners(key);
-        if (notifyParent) this.updateParentErrors(); // Will call setError on parent
         if (fireAny) this.fireAnyListeners(); // When setValuesWasUsed, it will call fireAnyListener itself when all values were set
+        if (notifyParent) this.updateParentErrors(); // Will call setError on parent
         return true;
     }
 
@@ -365,8 +364,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 );
         }
         if (!changed) return false;
-        if (notifyParent) this.updateParentErrors();
         this.fireAnyListeners();
+        if (notifyParent) this.updateParentErrors();
         return true;
     }
 
@@ -402,8 +401,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(newState, notifyChild, notifyParent));
 
         c.forEach((e) => this.fireListeners(e as keyof T));
-        if (notifyParent) this.updateParentState();
         this.fireAnyListeners();
+        if (notifyParent) this.updateParentState();
     }
 
     /**

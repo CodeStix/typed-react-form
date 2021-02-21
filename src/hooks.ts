@@ -55,16 +55,15 @@ export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: F
         c.current!.name = name;
 
         // First, set new default values, without validating
-        c.current!.setValues(parentForm.defaultValues[name] ?? ({} as any), false, true, true, false);
+        c.current!.setValues(parentForm.defaultValues[name] ?? ({} as any), false, true, true, true);
         // Then, set new values and validate if needed
-        c.current!.setValues(parentForm.values[name] ?? ({} as any), c.current!.validateOnMount, false, true, false);
+        c.current!.setValues(parentForm.values[name] ?? ({} as any), c.current!.validateOnMount, false, true, true);
 
         return () => {
-            // Could already be overriden (useEffect ordering)
+            // Only clear value/error if the set form in the childMap is not already overriden
             if (parentForm.childMap[name] === c.current!) {
-                delete parentForm.childMap[name];
-                delete parentForm.errorMap[name];
-                delete parentForm.dirtyMap[name];
+                parentForm.setError(name, undefined);
+                parentForm.setValueInternal(name, undefined, false, false);
             }
         };
     }, [parentForm, name]);
@@ -179,13 +178,13 @@ export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof
     }
 
     return {
-        remove: remove,
-        move: move,
-        swap: swap,
-        clear: clear,
-        append: append,
+        remove: remove.bind(form),
+        move: move.bind(form),
+        swap: swap.bind(form),
+        clear: clear.bind(form),
+        append: append.bind(form),
         form: form,
         values: form.values,
-        setValues: form.setValues
+        setValues: form.setValues.bind(form)
     };
 }
