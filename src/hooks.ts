@@ -5,21 +5,29 @@ import { DefaultState, DefaultError, FormState, ChildFormState, Validator } from
  * Creates a new root form.
  * This hook doesn't cause a rerender.
  * @param defaultValues The default values for this form.
- * @param defaultState The default state for this form. Form state contains custom global states, example: isSubmitting, isLoading ...
  * @param validator The validator to use, optional.
- * @param validateOnChange Validate on change?
+ * @param validateOnChange Validate on change? Optional, default is false.
+ * @param validateOnChange Validate on mount? Optional, default is false.
+ * @param defaultState The default state for this form. Form state contains custom global states, example: isSubmitting, isLoading ... Optional, default is `{ isSubmitting: false }`.
  */
 export function useForm<T, State = DefaultState, Error = DefaultError>(
     defaultValues: T,
-    defaultState: State = { isSubmitting: false } as any,
     validator?: Validator<T, Error>,
+    validateOnChange = false,
     validateOnMount = false,
-    validateOnChange = true
+    defaultState?: State
 ) {
     let c = useRef<FormState<T, State, Error> | null>(null);
 
     if (!c.current) {
-        c.current = new FormState(defaultValues, defaultValues, defaultState, validator, validateOnMount, validateOnChange);
+        c.current = new FormState(
+            defaultValues,
+            defaultValues,
+            defaultState ?? ({ isSubmitting: false } as any),
+            validator,
+            validateOnMount,
+            validateOnChange
+        );
     }
 
     useEffect(() => {

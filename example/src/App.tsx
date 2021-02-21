@@ -88,10 +88,9 @@ const TodoListSchema = yup.object({
 export function Form() {
     const form = useForm(
         initialValues, // <- Default values, may change
-        { isSubmitting: false }, // <- Global form state, which can contain custom fields (e.g. loading)
-        yupValidator(TodoListSchema), // <- Validato
-        false, // <- Validate on mount
-        true // <- Validate on change
+        yupValidator(TodoListSchema), // <- Validator (optional)
+        false, // <- Validate on change (optional)
+        false // <- Validate on mount (optional)
     );
 
     return (
