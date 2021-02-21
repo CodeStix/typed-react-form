@@ -286,7 +286,6 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      */
     public async validate() {
         if (!this.validator) {
-            console.warn("validate() was called on a form which does not have a validator set.");
             return false;
         }
         let r = this.validator(this.values);
@@ -301,7 +300,6 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      */
     public validateSync() {
         if (!this.validator) {
-            console.warn("validate() was called on a form which does not have a validator set.");
             return false;
         }
         let r = this.validator(this.values);
