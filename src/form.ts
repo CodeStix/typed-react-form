@@ -154,7 +154,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         key: Key,
         value: T[Key] | undefined,
         dirty: boolean,
-        validate: boolean = true,
+        validate?: boolean,
         isDefault: boolean = false,
         notifyChild: boolean = true,
         notifyParent: boolean = true,
@@ -182,7 +182,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (notifyParent) this.updateParentValues(isDefault); // Will call setValueInternal on parent
         if (fireAny) this.fireAnyListeners(); // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
 
-        if (validate && this.validateOnChange && this.validator) this.validate();
+        if (validate ?? (this.validateOnChange && this.validator)) this.validate();
     }
 
     /**
@@ -198,7 +198,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     public setValue<Key extends keyof T>(
         key: Key,
         value: T[Key] | undefined,
-        validate: boolean = true,
+        validate?: boolean,
         isDefault: boolean = false,
         notifyChild: boolean = true,
         notifyParent: boolean = true,
@@ -245,7 +245,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
-    public setValues(values: T, validate: boolean = true, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
+    public setValues(values: T, validate?: boolean, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
         // Copy the values to the local form object
         let newKeys = Object.keys(isDefault ? this.defaultValues : this.values);
         let localKeys = Object.keys(values);
@@ -265,7 +265,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (notifyParent) this.updateParentValues(isDefault);
         this.fireAnyListeners();
 
-        if (validate && this.validateOnChange && this.validator) this.validate();
+        if (validate ?? (this.validateOnChange && this.validator)) this.validate();
     }
 
     /**
@@ -377,8 +377,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
-    public resetAll(notifyChild: boolean = true, notifyParent: boolean = true) {
-        this.setValues(this.defaultValues, true, false, notifyChild, notifyParent);
+    public resetAll(validate?: boolean, notifyChild: boolean = true, notifyParent: boolean = true) {
+        this.setValues(this.defaultValues, validate ?? true, false, notifyChild, notifyParent);
     }
 
     /**
@@ -387,8 +387,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
-    public reset(key: keyof T, notifyChild: boolean = true, notifyParent: boolean = true) {
-        this.setValue(key, this.defaultValues[key], true, false, notifyChild, notifyParent);
+    public reset(key: keyof T, validate?: boolean, notifyChild: boolean = true, notifyParent: boolean = true) {
+        this.setValue(key, this.defaultValues[key], validate ?? true, false, notifyChild, notifyParent);
     }
 
     /**
