@@ -74,8 +74,8 @@ const initialValues: ExampleFormData = {
     description: "this is a testing form",
     author: null,
     public: true,
-    date: new Date().getTime(),
-    dateObject: new Date(),
+    date: new Date("1990-01-12T00:00:00.000Z").getTime(),
+    dateObject: new Date("1990-01-12T00:00:00.000Z"),
     tags: ["test"],
     language: "en",
     todos: [{ message: "This is a todo", priority: "normal" }]
@@ -126,10 +126,16 @@ export function Form() {
                         Public? <small>boolean</small>
                     </h3>
                     <p>Using radio buttons</p>
-                    <FormInput type="radio" form={form} name="public" value={false} /> no
-                    <FormInput type="radio" form={form} name="public" value={true} /> yes
+                    <label>
+                        <FormInput type="radio" form={form} name="public" value={false} /> no
+                    </label>
+                    <label>
+                        <FormInput type="radio" form={form} name="public" value={true} /> yes
+                    </label>
                     <p>Using checkbox</p>
-                    <FormInput type="checkbox" form={form} name="public" />
+                    <label>
+                        <FormInput type="checkbox" form={form} name="public" /> yes/no
+                    </label>
                     <hr />
                     <h3>
                         Language <small>enum</small>
@@ -141,9 +147,15 @@ export function Form() {
                         <option value="fr">French</option>
                     </FormSelect>
                     <p>Using radio buttons</p>
-                    <FormInput type="radio" form={form} name="language" value="en" /> English
-                    <FormInput type="radio" form={form} name="language" value="nl" /> Dutch
-                    <FormInput type="radio" form={form} name="language" value="fr" /> French
+                    <label>
+                        <FormInput type="radio" form={form} name="language" value="en" /> English
+                    </label>
+                    <label>
+                        <FormInput type="radio" form={form} name="language" value="nl" /> Dutch
+                    </label>
+                    <label>
+                        <FormInput type="radio" form={form} name="language" value="fr" /> French
+                    </label>
                     <hr />
                     <h3>
                         Todo's <small>dynamic array</small>
@@ -208,6 +220,11 @@ export function Form() {
                         Date <small>date object</small>
                     </h3>
                     <FormInput type="date" form={form} name="dateObject" />
+                    <Listener
+                        form={form}
+                        name="dateObject"
+                        render={({ value }) => <p>Your age is {new Date().getFullYear() - value.getFullYear()}</p>}
+                    />
                     <hr />
                     <h3>
                         Tags <small>string array</small>
@@ -234,6 +251,26 @@ export function Form() {
                         School
                     </label>
                     <hr />
+                    <h3>Togglable object field</h3>
+                    <label>
+                        <FormInput form={form} name="author" type="checkbox" setNullOnUncheck value={{ name: "", age: 0 }} />
+                        Enable author
+                    </label>
+                    <ChildForm
+                        form={form}
+                        name="author"
+                        render={(form) => (
+                            <VisualRender>
+                                <div style={{ background: "#0001", padding: "1em" }}>
+                                    <p>Name</p>
+                                    <FormInput form={form} name="name" />
+                                    <p>Age</p>
+                                    <FormInput form={form} name="age" type="number" />
+                                </div>
+                            </VisualRender>
+                        )}
+                    />
+                    <hr />
                     <h3>
                         Description <small>string</small>
                     </h3>
@@ -249,22 +286,6 @@ export function Form() {
                         name="description"
                         render={({ value, setValue }) => (
                             <textarea rows={5} cols={50} value={value} onChange={(ev) => setValue(ev.target.value)}></textarea>
-                        )}
-                    />
-                    <hr />
-                    <h3>
-                        Author <small>string</small>
-                    </h3>
-                    <p>Togglable object field</p>
-                    <FormInput form={form} name="author" type="checkbox" setNullOnUncheck value={{ name: "", age: 0 }} />
-                    <ChildForm
-                        form={form}
-                        name="author"
-                        render={(form) => (
-                            <VisualRender>
-                                <FormInput form={form} name="name" />
-                                <FormInput form={form} name="age" type="number" />
-                            </VisualRender>
                         )}
                     />
                 </VisualRender>
