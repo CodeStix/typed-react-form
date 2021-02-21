@@ -82,7 +82,12 @@ const initialValues: ExampleFormData = {
 };
 
 const TodoListSchema = yup.object({
-    name: yup.string().required("Enter a name").min(5, "Enter a longer name")
+    name: yup.string().required("Enter a name").min(5, "Enter a longer name"),
+    todos: yup.array().of(
+        yup.object({
+            message: yup.string().required("Enter a todo")
+        })
+    )
 });
 
 export function Form() {
@@ -169,6 +174,7 @@ export function Form() {
                             { form, swap, remove, append, values, setValues } // <- Make sure to use the newly passed form (otherwise type checking will not work!)
                         ) => (
                             <VisualRender>
+                                <pre>{form.values.length}</pre>
                                 <ul>
                                     {form.values.map((
                                         _,

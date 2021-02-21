@@ -249,7 +249,8 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         let newKeys = Object.keys(isDefault ? this.defaultValues : this.values);
         let localKeys = Object.keys(values);
         let mostKeys = newKeys.length > localKeys.length ? newKeys : localKeys;
-        for (let i = 0; i < mostKeys.length; i++) {
+        // Traverse backwards, so when removing array items, the whole array gets shifted in the right direction
+        for (let i = mostKeys.length - 1; i >= 0; i--) {
             let key = mostKeys[i] as keyof T;
             this.setValue(
                 key,
