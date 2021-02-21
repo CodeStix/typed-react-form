@@ -117,41 +117,6 @@ export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>
     return form;
 }
 
-function append<T, Key extends keyof T>(this: FormState<T, any, any>, value: NonNullable<T[Key]>[keyof NonNullable<T[Key]>]) {
-    this.setValues([...(this.values as any), value] as any);
-}
-
-function remove(this: FormState<any, any, any>, index: number) {
-    let newValues = [...this.values];
-    newValues.splice(index, 1);
-    this.setValues(newValues);
-}
-
-function clear(this: FormState<any, any, any>) {
-    this.setValues([]);
-}
-
-function move(this: FormState<any, any, any>, from: number, to: number) {
-    if (to === from) return;
-    let newArr = [...this.values];
-    var target = newArr[from];
-    var increment = to < from ? -1 : 1;
-    for (var k = from; k !== to; k += increment) {
-        newArr[k] = newArr[k + increment];
-    }
-    newArr[to] = target;
-    this.setValues(newArr);
-}
-
-function swap(this: FormState<any, any, any>, index: number, newIndex: number) {
-    if (index === newIndex) {
-        return;
-    }
-    let values = [...this.values];
-    [values[index], values[newIndex]] = [values[newIndex], values[index]];
-    this.setValues(values);
-}
-
 /**
  * This is a wrapper around useChildForm, with useful functions to manipulate arrays.
  * This hook does cause a rerender, but only if the array size changes.
@@ -178,14 +143,49 @@ export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof
         return () => parentForm.ignore(name, id);
     }, []);
 
+    function append(value: NonNullable<Parent[Key]>[any]) {
+        form.setValues([...(form.values as any), value] as any);
+    }
+
+    function remove(index: number) {
+        let newValues = [...(form.values as any)];
+        newValues.splice(index, 1);
+        form.setValues(newValues as any);
+    }
+
+    function clear() {
+        form.setValues([] as any);
+    }
+
+    function move(from: number, to: number) {
+        if (to === from) return;
+        let newArr = [...(form.values as any)];
+        var target = newArr[from];
+        var increment = to < from ? -1 : 1;
+        for (var k = from; k !== to; k += increment) {
+            newArr[k] = newArr[k + increment];
+        }
+        newArr[to] = target;
+        form.setValues(newArr as any);
+    }
+
+    function swap(index: number, newIndex: number) {
+        if (index === newIndex) {
+            return;
+        }
+        let values = [...(form.values as any)];
+        [values[index], values[newIndex]] = [values[newIndex], values[index]];
+        form.setValues(values as any);
+    }
+
     return {
-        remove: remove.bind(form),
-        move: move.bind(form),
-        swap: swap.bind(form),
-        clear: clear.bind(form),
-        append: append.bind(form),
+        remove: remove,
+        move: move,
+        swap: swap,
+        clear: clear,
+        append: append,
         form: form,
         values: form.values,
-        setValues: form.setValues.bind(form)
+        setValues: form.setValues
     };
 }
