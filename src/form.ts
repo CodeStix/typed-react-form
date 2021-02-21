@@ -173,13 +173,13 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         if (notifyChild) {
             let child = this.childMap[key];
             if (child && value !== undefined && value !== null) {
-                child.setValues(value!, true, isDefault, true, false);
+                child.setValues(value!, validate, isDefault, true, false);
                 this.dirtyMap[key] = child.dirty;
             }
         }
 
         this.fireListeners(key);
-        if (notifyParent) this.updateParentValues(isDefault); // Will call setValueInternal on parent
+        if (notifyParent) this.updateParentValues(isDefault, validate); // Will call setValueInternal on parent
         if (fireAny) this.fireAnyListeners(); // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
 
         if (validate ?? (this.validateOnChange && this.validator)) this.validate();
@@ -262,7 +262,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
                 false // Will call fireAnyListener by itself after all values are copied, see 3 lines down
             );
         }
-        if (notifyParent) this.updateParentValues(isDefault);
+        if (notifyParent) this.updateParentValues(isDefault, validate);
         this.fireAnyListeners();
 
         if (validate ?? (this.validateOnChange && this.validator)) this.validate();
@@ -473,7 +473,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
         al.forEach((e) => this.anyListeners[e]!());
     }
 
-    protected updateParentValues(_isDefault: boolean) {
+    protected updateParentValues(_isDefault: boolean, _validate: boolean | undefined) {
         // Not implemented for root form, as it does not have a parent
     }
 
@@ -507,12 +507,12 @@ export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof 
         this.name = name;
     }
 
-    protected updateParentValues(isDefault: boolean) {
+    protected updateParentValues(isDefault: boolean, validate: boolean | undefined) {
         this.parent.setValueInternal(
             this.name,
             isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values),
             this.dirty,
-            true,
+            validate,
             isDefault,
             false,
             true,
