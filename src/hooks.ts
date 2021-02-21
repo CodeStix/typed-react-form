@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { DefaultState, DefaultError, FormState, ChildFormState, Validator } from "./form";
 
 /**
@@ -142,21 +142,21 @@ export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof
         return () => parentForm.ignore(name, id);
     }, []);
 
-    function append(value: NonNullable<Parent[Key]>[any]) {
+    const append = useCallback((value: NonNullable<Parent[Key]>[any]) => {
         form.setValues([...(form.values as any), value] as any);
-    }
+    }, []);
 
-    function remove(index: number) {
+    const remove = useCallback((index: number) => {
         let newValues = [...(form.values as any)];
         newValues.splice(index, 1);
         form.setValues(newValues as any);
-    }
+    }, []);
 
-    function clear() {
+    const clear = useCallback(() => {
         form.setValues([] as any);
-    }
+    }, []);
 
-    function move(from: number, to: number) {
+    const move = useCallback((from: number, to: number) => {
         if (to === from) return;
         let newArr = [...(form.values as any)];
         var target = newArr[from];
@@ -166,23 +166,23 @@ export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof
         }
         newArr[to] = target;
         form.setValues(newArr as any);
-    }
+    }, []);
 
-    function swap(index: number, newIndex: number) {
+    const swap = useCallback((index: number, newIndex: number) => {
         if (index === newIndex) {
             return;
         }
         let values = [...(form.values as any)];
         [values[index], values[newIndex]] = [values[newIndex], values[index]];
         form.setValues(values as any);
-    }
+    }, []);
 
     return {
-        remove: remove.bind(form),
-        move: move.bind(form),
-        swap: swap.bind(form),
-        clear: clear.bind(form),
-        append: append.bind(form),
+        remove: remove,
+        move: move,
+        swap: swap,
+        clear: clear,
+        append: append,
         form: form,
         values: form.values,
         setValues: form.setValues.bind(form)

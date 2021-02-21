@@ -174,7 +174,7 @@ export function Form() {
                                         _,
                                         i // You should use other key than index
                                     ) => (
-                                        <TodoItem onMoveTop={() => swap(i, 0)} onRemove={() => remove(i)} key={i} parent={form} index={i} />
+                                        <TodoItem swap={swap} remove={remove} key={i} parent={form} index={i} />
                                     ))}
                                 </ul>
                                 <button
@@ -332,7 +332,13 @@ export function Form() {
     );
 }
 
-function TodoItem(props: { parent: FormState<Todo[]>; index: number; onMoveTop: () => void; onRemove: () => void }) {
+function TodoItem(props: {
+    key: number;
+    parent: FormState<Todo[]>;
+    index: number;
+    swap: (a: number, b: number) => void;
+    remove: (a: number) => void;
+}) {
     // Use a child form, each layer in the object is a seperate form: TodoList (useForm) -> Todo[] (useArrayForm) -> Todo (useChildForm)
     const form = useChildForm(props.parent, props.index);
 
@@ -349,10 +355,10 @@ function TodoItem(props: { parent: FormState<Todo[]>; index: number; onMoveTop: 
                     <option value="normal">Normal</option>
                     <option value="high">High</option>
                 </FormSelect>
-                <button type="button" onClick={props.onMoveTop}>
+                <button type="button" onClick={() => props.swap(props.index, 0)}>
                     Go to top
                 </button>
-                <button type="button" onClick={props.onRemove}>
+                <button type="button" onClick={() => props.remove(props.index)}>
                     Remove
                 </button>
             </VisualRender>
