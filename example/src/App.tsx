@@ -11,9 +11,11 @@ import {
     useForm,
     Listener,
     FormTextArea,
-    ChildForm
+    ChildForm,
+    yupValidator
 } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
+import * as yup from "yup";
 
 interface ExampleFormData {
     id: number;
@@ -79,11 +81,15 @@ const initialValues: ExampleFormData = {
     todos: [{ message: "This is a todo", priority: "normal" }]
 };
 
+const TodoListSchema = yup.object({
+    name: yup.string().required("Enter a name").min(5, "Enter a longer name")
+});
+
 export function Form() {
     const form = useForm(
         initialValues, // <- Default values, may change
         { isSubmitting: false }, // <- Global form state, which can contain custom fields (e.g. loading)
-        validateTodoList, // <- Validator
+        yupValidator(TodoListSchema), // <- Validato
         false, // <- Validate on mount
         true // <- Validate on change
     );
@@ -389,16 +395,16 @@ function FormValues<T>(props: { form: FormState<T> }) {
 }
 
 // You should use a validation library (yup, class-validator) instead of this mess...
-function validateTodoList(values: ExampleFormData) {
-    let todoErrors = values.todos.reduce((prev, val, index) => {
-        if (val.message.length < 5) {
-            prev[index] = { message: "Todo message should be longer!" };
-        }
-        return prev;
-    }, [] as any[]);
-    return {
-        // author: values.author.length < 3 ? "Author name is too short." : undefined,
-        name: values.name.length < 3 ? "Title is too short." : undefined,
-        todos: todoErrors.length > 0 ? todoErrors : undefined
-    };
-}
+// function validateTodoList(values: ExampleFormData) {
+//     let todoErrors = values.todos.reduce((prev, val, index) => {
+//         if (val.message.length < 5) {
+//             prev[index] = { message: "Todo message should be longer!" };
+//         }
+//         return prev;
+//     }, [] as any[]);
+//     return {
+//         // author: values.author.length < 3 ? "Author name is too short." : undefined,
+//         name: values.name.length < 3 ? "Title is too short." : undefined,
+//         todos: todoErrors.length > 0 ? todoErrors : undefined
+//     };
+// }

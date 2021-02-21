@@ -14,17 +14,17 @@ interface YupValidationOptions {
     context?: any;
 }
 
-export function yupValidator<T, Error>(
+export function yupValidator<T, Error = string>(
     yupSchema: any,
     options?: YupValidationOptions,
-    messageTransformer: (message: string) => Error = (e) => e as any
+    messageTransformer?: (message: string) => Error
 ): Validator<T, Error> {
     return async (values: T) => {
         try {
             await yupSchema.validate(values, options);
             return {};
         } catch (ex) {
-            return yupErrorToErrorMap(ex, messageTransformer);
+            return yupErrorToErrorMap(ex, messageTransformer ?? ((e) => e as any));
         }
     };
 }
