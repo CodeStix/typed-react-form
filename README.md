@@ -16,6 +16,8 @@ A fast, completely type-checked React form state manager, focussed on typescript
 
 **You can find documentation and information on how to get started [on the GitHub wiki page](https://github.com/CodeStix/typed-react-form/wiki).**
 
+**You can see an example form working in action [here](https://codestix.github.io/typed-react-form/)**
+
 ## Javascript/typescript React
 
 This library is optimized (and built from the group up) for React with typescript, but it also works with with vanilla React, without enforced type checking.
