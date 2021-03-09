@@ -12,6 +12,12 @@ A fast, completely type-checked React form state manager, focussed on typescript
 
 **All of this while keeping type-checking!**
 
+## Install
+
+```  
+npm install typed-react-form
+```
+
 ## [Documentation](https://github.com/CodeStix/typed-react-form/wiki)
 
 **You can find documentation and information on how to get started [on the GitHub wiki page](https://github.com/CodeStix/typed-react-form/wiki).**
