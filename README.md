@@ -1,4 +1,4 @@
-# Typed React form [![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form) [![NPM Size](https://img.shields.io/bundlephobia/minzip/typed-react-form)](https://www.npmjs.com/package/typed-react-form)
+# Typed React form [![NPM](https://img.shields.io/npm/v/typed-react-form.svg)](https://www.npmjs.com/package/typed-react-form) [![NPM Size](https://img.shields.io/bundlephobia/minzip/typed-react-form)](https://bundlephobia.com/result?p=typed-react-form)
 
 ![vscode typescript](https://github.com/CodeStix/typed-react-form/raw/master/example/public/thumb.png)
 
