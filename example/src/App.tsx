@@ -235,7 +235,7 @@ export function Form() {
                                     onClick={() => {
                                         setValues([
                                             ...values,
-                                            ...Array(50)
+                                            ...Array(10)
                                                 .fill(0)
                                                 .map((_, i) => ({
                                                     message: "Fix this " + i,
@@ -244,7 +244,7 @@ export function Form() {
                                         ]);
                                     }}
                                 >
-                                    Add 50 items
+                                    Add 10 items
                                 </button>
                             </VisualRender>
                         )}
