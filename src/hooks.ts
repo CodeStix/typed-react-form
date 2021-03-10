@@ -7,7 +7,7 @@ import { DefaultState, DefaultError, FormState, ChildFormState, Validator } from
  * @param defaultValues The default values for this form.
  * @param validator The validator to use, optional.
  * @param validateOnChange Validate on change? Optional, default is false.
- * @param validateOnChange Validate on mount? Optional, default is false.
+ * @param validateOnMount Validate on mount? Optional, default is false.
  * @param defaultState The default state for this form. Form state contains custom global states, example: isSubmitting, isLoading ... Optional, default is `{ isSubmitting: false }`.
  */
 export function useForm<T, State = DefaultState, Error = DefaultError>(
@@ -186,4 +186,27 @@ export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof
         values: form.values,
         setValues: form.setValues.bind(form)
     };
+}
+
+/**
+ * Listen for truthy changes (if a value becomes truthy or falsy) on a form's field. Behaves like useState.
+ * @param form The form to listen on.
+ * @param name The form's field to listen to.
+ */
+export function useTruthyListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key) {
+    const oldTruthy = useRef(!!form.values[name]);
+    const [, setRender] = useState(0);
+
+    useEffect(() => {
+        let id = form.listen(name, () => {
+            let thruthly = !!form.values[name];
+            if (thruthly !== oldTruthy.current) {
+                setRender((i) => i + 1);
+                oldTruthy.current = thruthly;
+            }
+        });
+        return () => form.ignore(name, id);
+    }, []);
+
+    return !form.values[name];
 }

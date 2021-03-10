@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChildFormState, DirtyMap, ErrorMap, FormState } from "./form";
-import { useArrayForm, useListener, useAnyListener, useChildForm } from "./hooks";
+import { useArrayForm, useListener, useAnyListener, useChildForm, useTruthyListener } from "./hooks";
 
 /**
  * Wrapper around useArrayForm (which is a wrapper around useChildForm).
  * Exports useful functions to manipulate arrays.
- * This hook does cause a rerender, but only if the whole array changes.
+ * This hook does cause a rerender, but only if the whole array becomes null/undefined.
  * @param parent The parent form.
  * @param name The parent's field to create a child form for.
  */
@@ -24,20 +24,9 @@ export function ArrayForm<Parent, ParentState, ParentError, Key extends keyof Pa
     }) => React.ReactNode;
 }) {
     const childForm = useArrayForm(props.form, props.name);
-    const oldThruthly = useRef(!!props.form.values[props.name]);
-    const [, setRender] = useState(0);
 
-    // Rerender when array became null/not null (thruthly/falsely)
-    useEffect(() => {
-        let id = props.form.listen(props.name, () => {
-            let thruthly = !!props.form.values[props.name];
-            if (thruthly !== oldThruthly.current) {
-                setRender((i) => i + 1);
-                oldThruthly.current = thruthly;
-            }
-        });
-        return () => props.form.ignore(props.name, id);
-    }, []);
+    // Causes a rerender when the array becomes null/not null
+    useTruthyListener(props.form, props.name);
 
     // Do not render anything if the parent field is falsly
     if (!props.form.values[props.name]) return null;
@@ -85,7 +74,7 @@ export function AnyListener<T, State, Error>(props: {
 /**
  * Wrapper around useChildForm
  * Creates a child form for another root or child form. You must use this for object and array (see useArrayForm) fields.
- * This hook doesn't cause a rerender.
+ * This hook does cause a rerender, but only if the object field becomes null/undefined.
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
@@ -95,20 +84,8 @@ export function ChildForm<Parent, ParentState, ParentError, Key extends keyof Pa
     render?: (props: ChildFormState<Parent, ParentState, ParentError, Key>) => React.ReactNode;
 }) {
     const childForm = useChildForm(props.form, props.name);
-    const oldThruthly = useRef(!!props.form.values[props.name]);
-    const [, setRender] = useState(0);
-
-    // Only rerender when object became null/not null (thruthly/falsely)
-    useEffect(() => {
-        let id = props.form.listen(props.name, () => {
-            let thruthly = !!props.form.values[props.name];
-            if (thruthly !== oldThruthly.current) {
-                setRender((i) => i + 1);
-                oldThruthly.current = thruthly;
-            }
-        });
-        return () => props.form.ignore(props.name, id);
-    }, []);
+    // Causes a rerender when the object value becomes null/undefined
+    useTruthyListener(props.form, props.name);
 
     // Do not render anything if the parent field is falsly
     if (!props.form.values[props.name]) return null;
