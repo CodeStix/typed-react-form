@@ -12,7 +12,9 @@ import {
     Listener,
     FormTextArea,
     ChildForm,
-    yupValidator
+    yupValidator,
+    useArrayForm,
+    memberCopy
 } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 import * as yup from "yup";
@@ -89,6 +91,40 @@ const TodoListSchema = yup.object({
         })
     )
 });
+
+export function ArrayTest() {
+    const [values, setValues] = useState({ name: "a list", items: ["asdf"] });
+    const form = useForm(values);
+    const arrayForm = useArrayForm(form, "items");
+
+    return (
+        <form
+            onSubmit={(ev) => {
+                ev.preventDefault();
+                console.log(form.values);
+                setValues(memberCopy(form.values));
+            }}
+        >
+            <p>Name</p>
+            <FormInput form={form} name="name" />
+            <p>Items</p>
+            <ul>
+                {arrayForm.values.map((_, i) => (
+                    <li>
+                        <FormInput key={i} form={arrayForm.form} name={i} />
+                        <button type="button" onClick={() => arrayForm.remove(i)}>
+                            Remove
+                        </button>
+                    </li>
+                ))}
+            </ul>
+            <button type="button" onClick={() => arrayForm.append("")}>
+                Add item
+            </button>
+            <button>Submit</button>
+        </form>
+    );
+}
 
 export function Form() {
     const form = useForm(
