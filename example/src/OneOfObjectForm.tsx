@@ -12,19 +12,21 @@ interface Bread {
 }
 
 interface FormData {
-    object: Apple | Bread;
+    breadOrApple: Apple | Bread;
 }
 
 export default function OneOfObjectArrayForm() {
     const form = useForm<FormData>({
-        object: { type: "apple", color: "#ff0000" } // or { type: "bread", size: 200 }
+        breadOrApple: { type: "apple", color: "#ff0000" } // or { type: "bread", size: 200 }
     });
     return (
         <form
             style={{ margin: "0.5em" }}
             onReset={() => form.resetAll()}
             onSubmit={async (ev) => {
+                // Prevent the submit button from reloading the page
                 ev.preventDefault();
+                // Disable inputs and fake submit...
                 form.setState({ isSubmitting: true });
                 await new Promise((res) => setTimeout(res, 500));
                 form.setState({ isSubmitting: false });
@@ -32,7 +34,10 @@ export default function OneOfObjectArrayForm() {
                 form.setDefaultValues(form.values);
             }}
         >
+            {/* Our custom form component */}
             <AppleOrBreadForm parent={form} />
+
+            {/* Shows a live representation of the form values */}
             <AnyListener
                 form={form}
                 render={({ values, dirty }) => (
@@ -43,6 +48,7 @@ export default function OneOfObjectArrayForm() {
                     </pre>
                 )}
             />
+
             <button>Submit!</button>
             <button type="reset">Reset</button>
         </form>
@@ -50,7 +56,8 @@ export default function OneOfObjectArrayForm() {
 }
 
 function AppleOrBreadForm(props: { parent: FormState<FormData> }) {
-    const form = useChildForm(props.parent, "object");
+    // Create a new form based on the 'breadOrApple' field
+    const form = useChildForm(props.parent, "breadOrApple");
     return (
         <div style={{ background: "#0001", padding: "1em", margin: "1em" }}>
             <label>Object type: </label>
@@ -60,6 +67,7 @@ function AppleOrBreadForm(props: { parent: FormState<FormData> }) {
                 name="type"
                 render={({ value }) => (
                     <>
+                        {/* A select input that sets new form values when a new object type (apple or bread) was chosen */}
                         <select
                             value={value}
                             onChange={(ev) => {

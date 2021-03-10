@@ -29,7 +29,9 @@ export default function OneOfObjectArrayForm() {
             style={{ margin: "0.5em" }}
             onReset={() => form.resetAll()}
             onSubmit={async (ev) => {
+                // Prevent the submit button from reloading the page
                 ev.preventDefault();
+                // Disable inputs and fake submit...
                 form.setState({ isSubmitting: true });
                 await new Promise((res) => setTimeout(res, 500));
                 form.setState({ isSubmitting: false });
@@ -44,8 +46,9 @@ export default function OneOfObjectArrayForm() {
                     <>
                         <ul>
                             {values.map((_, i) => (
+                                // Use index as key
                                 <li key={i}>
-                                    {/* Make sure to use the form from ArrayForm! */}
+                                    {/* Make sure to use the form given by ArrayForm! */}
                                     <BreadOrAppleForm parent={form} index={i} remove={() => remove(i)} />
                                 </li>
                             ))}
