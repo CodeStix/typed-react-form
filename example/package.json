@@ -19,6 +19,7 @@
     "@types/react-dom": "link:../node_modules/@types/react-dom",
     "react": "link:../node_modules/react",
     "react-dom": "link:../node_modules/react-dom",
+    "react-router-dom": "^5.2.0",
     "react-scripts": "link:../node_modules/react-scripts",
     "styled-components": "^5.2.1",
     "typed-react-form": "link:..",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@babel/plugin-syntax-object-rest-spread": "^7.8.3",
+    "@types/react-router-dom": "^5.1.7",
     "@types/styled-components": "^5.1.7"
   },
   "eslintConfig": {
