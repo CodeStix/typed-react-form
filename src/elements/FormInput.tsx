@@ -3,7 +3,7 @@ import { InputHTMLAttributes } from "react";
 import { DefaultState, FormState } from "../form";
 import { useListener } from "../hooks";
 
-type BaldInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form" | "value">;
+type BaldInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form" | "value" | "type">;
 
 export const DEFAULT_DIRTY_CLASS = "typed-form-dirty";
 export const DEFAULT_ERROR_CLASS = "typed-form-error";
@@ -14,9 +14,28 @@ export function getClassName(...args: any) {
 
 export type FormInputCheckMode = "normal" | "setNull" | "setUndefined";
 
+export type FormInputType =
+    | "number"
+    | "text"
+    | "password"
+    | "date"
+    | "datetime-local"
+    | "radio"
+    | "checkbox"
+    | "color"
+    | "email"
+    | "text"
+    | "month"
+    | "url"
+    | "week"
+    | "time"
+    | "tel"
+    | "range";
+
 export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]> = BaldInputProps & {
     form: FormState<T, State, Error>;
     name: Key;
+    type?: FormInputType;
     value?: Value;
     errorClassName?: string;
     errorStyle?: React.CSSProperties;
@@ -29,6 +48,11 @@ export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T
     hideWhenNull?: boolean;
 };
 
+/**
+ * The builtin form input. You must always specify **form** and **name**. Use the **type** prop to specify what type of field it represents.
+ *
+ * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
+ */
 export function FormInput<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
     form,
     name,
