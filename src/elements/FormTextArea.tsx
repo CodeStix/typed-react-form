@@ -14,6 +14,13 @@ export type FormTextAreaProps<T, State, Error> = Omit<TextareaHTMLAttributes<HTM
     hideWhenNull?: boolean;
 };
 
+/**
+ * The builtin form textarea. You must always specify **form** and **name**.
+ *
+ * **FormSelect**, **FormInput** and **FormError** are also available.
+ *
+ * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
+ */
 export function FormTextArea<T, State extends DefaultState, Error>({
     form,
     name,

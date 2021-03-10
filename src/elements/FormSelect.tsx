@@ -14,6 +14,13 @@ export type FormSelectProps<T, State, Error> = Omit<SelectHTMLAttributes<HTMLSel
     hideWhenNull?: boolean;
 };
 
+/**
+ * The builtin form select. You must always specify **form** and **name**. Use the normal `<option>` element to specify its possible values.
+ *
+ * **FormInput**, **FormTextArea** and **FormError** are also available.
+ *
+ * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
+ */
 export function FormSelect<T, State extends DefaultState, Error>({
     form,
     name,

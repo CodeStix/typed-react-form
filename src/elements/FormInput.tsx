@@ -51,6 +51,8 @@ export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T
 /**
  * The builtin form input. You must always specify **form** and **name**. Use the **type** prop to specify what type of field it represents.
  *
+ * **FormSelect**, **FormTextArea** and **FormError** are also available.
+ *
  * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
  */
 export function FormInput<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
