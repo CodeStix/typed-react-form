@@ -246,12 +246,14 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
      * @param notifyParent Should this form notify the parent form about this change?
      */
     public setValues(values: T, validate?: boolean, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
-        let newKeys = Object.keys(isDefault ? this.defaultValues : this.values);
-        let localKeys = Object.keys(values);
-        let mostKeys = newKeys.length > localKeys.length ? newKeys : localKeys;
+        let keys = Object.keys(isDefault ? this.defaultValues : this.values);
+        let newKeys = Object.keys(values);
+        for (let i = 0; i < newKeys.length; i++) {
+            if (!keys.includes(newKeys[i])) keys.push(newKeys[i]);
+        }
         // Traverse backwards, so when removing array items, the whole array gets shifted in the right direction
-        for (let i = mostKeys.length - 1; i >= 0; i--) {
-            let key = mostKeys[i] as keyof T;
+        for (let i = keys.length - 1; i >= 0; i--) {
+            let key = keys[i] as keyof T;
             this.setValue(
                 key,
                 values[key],
