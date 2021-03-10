@@ -34,6 +34,8 @@ export default function OneOfObjectArrayForm() {
                 form.setDefaultValues(form.values);
             }}
         >
+            <a href="https://github.com/CodeStix/typed-react-form/blob/master/example/src/OneOfObjectForm.tsx">View source code</a>
+
             {/* Our custom form component */}
             <AppleOrBreadForm parent={form} />
 

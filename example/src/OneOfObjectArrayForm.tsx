@@ -39,6 +39,7 @@ export default function OneOfObjectArrayForm() {
                 form.setDefaultValues(form.values);
             }}
         >
+            <a href="https://github.com/CodeStix/typed-react-form/blob/master/example/src/OneOfObjectArrayForm.tsx">View source code</a>
             <ArrayForm
                 form={form}
                 name="objects"
