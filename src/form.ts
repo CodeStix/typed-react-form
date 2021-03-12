@@ -353,15 +353,16 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         let changed = false;
         for (let i = keys.length; i >= 0; i--) {
             let key = keys[i] as keyof T;
-            changed =
-                changed ||
+            if (
                 this.setError(
                     key,
                     errors[key] as any,
                     notifyChild,
                     false, // Will call updateParentErrors by itself after all values have been copied, see 3 lines down
                     false // Will call fireAnyListener by itself after all values have been copied, see 3 lines down
-                );
+                )
+            )
+                changed = true;
         }
         if (!changed) return false;
         this.fireAnyListeners();

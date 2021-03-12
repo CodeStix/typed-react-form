@@ -85,6 +85,7 @@ const initialValues: ExampleFormData = {
 
 const TodoListSchema = yup.object({
     name: yup.string().required("Enter a name").min(5, "Enter a longer name"),
+    language: yup.string().oneOf(["en", "nl"], "Must be english or dutch"),
     todos: yup.array().of(
         yup.object({
             message: yup.string().required("Enter a todo")
@@ -187,6 +188,7 @@ export function Form() {
                         <option value="nl">Dutch</option>
                         <option value="fr">French</option>
                     </FormSelect>
+                    <FormError form={form} name="language" />
                     <p>Using radio buttons</p>
                     <label>
                         <FormInput type="radio" form={form} name="language" value="en" /> English
