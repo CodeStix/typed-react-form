@@ -1,6 +1,6 @@
 {
   "name": "typed-react-form",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "A React form state manager, focussed on flawless typescript integration and minimal rerenders.",
   "author": "CodeStix",
   "license": "MIT",
