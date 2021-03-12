@@ -61,7 +61,7 @@ export function Listener<T, Key extends keyof T, State = DefaultState, Error ext
  * Wrapper around useAnyListener.
  * Listens for any change on this form. Behaves like useState.
  * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <AnyListener /> instead.
- * @param form The form to listen to.
+ * @param form The form that was passed in.
  */
 export function AnyListener<T, State = DefaultState, Error extends string = DefaultError>(props: {
     form: FormState<T, State, Error>;

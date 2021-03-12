@@ -345,12 +345,14 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @param notifyParent Should this form notify the parent form about this change?
      */
     public setErrors(errors: ErrorMap<T, Error>, notifyChild: boolean = true, notifyParent: boolean = true) {
-        let localKeys = Object.keys(this.errorMap);
+        let keys = Object.keys(this.errorMap);
         let newKeys = Object.keys(errors);
-        let mostKeys = newKeys.length > localKeys.length ? newKeys : localKeys;
+        for (let i = 0; i < newKeys.length; i++) {
+            if (!keys.includes(newKeys[i])) keys.push(newKeys[i]);
+        }
         let changed = false;
-        for (let i = 0; i < mostKeys.length; i++) {
-            let key = mostKeys[i] as keyof T;
+        for (let i = keys.length; i >= 0; i--) {
+            let key = keys[i] as keyof T;
             changed =
                 changed ||
                 this.setError(
