@@ -2,20 +2,15 @@ export type ListenerCallback = () => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
 export type Validator<T, Error> = (values: T) => ErrorMap<T, Error> | Promise<ErrorMap<T, Error>>;
 
-export type ChildFormMap<T, State, Error> = {
-    [Key in keyof T]?: ChildFormState<T, State, Error, Key>;
+export type ChildFormMap<T, State, Error extends string> = {
+    [Key in keyof T]?: ChildFormState<T, Key, State, Error>;
 };
 
 export type DirtyMap<T> = {
     [Key in keyof T]?: boolean;
 };
 
-type ObjectOrArray = {
-    [key: string]: any;
-    [key: number]: any;
-};
-
-export type ErrorType<T, Error> = T extends ObjectOrArray ? ErrorMap<T, Error> | Error : Error;
+export type ErrorType<T, Error> = T extends object ? ErrorMap<T, Error> | Error : Error;
 
 export type ErrorMap<T, Error> = {
     [Key in keyof T]?: ErrorType<T[Key], Error>;
@@ -54,7 +49,7 @@ export function comparePrimitiveObject<T>(a: T, b: T): boolean | undefined {
     return false;
 }
 
-export class FormState<T, State = DefaultState, Error = DefaultError> {
+export class FormState<T, State = DefaultState, Error extends string = DefaultError> {
     /**
      * The id of this form, for debugging purposes.
      */
@@ -486,7 +481,7 @@ export class FormState<T, State = DefaultState, Error = DefaultError> {
     }
 }
 
-export class ChildFormState<Parent, ParentState, ParentError, Key extends keyof Parent> extends FormState<
+export class ChildFormState<Parent, Key extends keyof Parent, ParentState, ParentError extends string> extends FormState<
     NonNullable<Parent[Key]>,
     ParentState,
     ParentError

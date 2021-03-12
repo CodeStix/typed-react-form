@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { InputHTMLAttributes } from "react";
-import { DefaultState, FormState } from "../form";
+import { DefaultError, DefaultState, FormState } from "../form";
 import { useListener } from "../hooks";
 
 type BaldInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form" | "value" | "type">;
@@ -32,7 +32,7 @@ export type FormInputType =
     | "tel"
     | "range";
 
-export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]> = BaldInputProps & {
+export type FormInputProps<T, State, Error extends string, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]> = BaldInputProps & {
     form: FormState<T, State, Error>;
     name: Key;
     type?: FormInputType;
@@ -55,7 +55,13 @@ export type FormInputProps<T, State, Error, Key extends keyof T, Value extends T
  *
  * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
  */
-export function FormInput<T, State extends DefaultState, Error, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]>({
+export function FormInput<
+    T,
+    Key extends keyof T,
+    Value extends T[Key] | T[Key][keyof T[Key]],
+    State extends DefaultState = DefaultState,
+    Error extends string = DefaultError
+>({
     form,
     name,
     style,

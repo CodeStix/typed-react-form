@@ -1,9 +1,9 @@
 import React, { TextareaHTMLAttributes } from "react";
-import { DefaultState, FormState } from "../form";
+import { DefaultError, DefaultState, FormState } from "../form";
 import { DEFAULT_DIRTY_CLASS, DEFAULT_ERROR_CLASS, getClassName } from "./FormInput";
 import { useListener } from "../hooks";
 
-export type FormTextAreaProps<T, State, Error> = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "form" | "name"> & {
+export type FormTextAreaProps<T, State, Error extends string> = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "form" | "name"> & {
     form: FormState<T, State, Error>;
     name: keyof T;
     errorClassName?: string;
@@ -21,7 +21,7 @@ export type FormTextAreaProps<T, State, Error> = Omit<TextareaHTMLAttributes<HTM
  *
  * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
  */
-export function FormTextArea<T, State extends DefaultState, Error>({
+export function FormTextArea<T, State extends DefaultState = DefaultState, Error extends string = DefaultError>({
     form,
     name,
     errorClassName,

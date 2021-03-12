@@ -10,7 +10,7 @@ import { DefaultState, DefaultError, FormState, ChildFormState, Validator } from
  * @param validateOnMount Validate on mount? Optional, default is false.
  * @param defaultState The default state for this form. Form state contains custom global states, example: isSubmitting, isLoading ... Optional, default is `{ isSubmitting: false }`.
  */
-export function useForm<T, State = DefaultState, Error = DefaultError>(
+export function useForm<T, State = DefaultState, Error extends string = DefaultError>(
     defaultValues: T,
     validator?: Validator<T, Error>,
     validateOnChange = false,
@@ -43,8 +43,11 @@ export function useForm<T, State = DefaultState, Error = DefaultError>(
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: FormState<T, State, Error>, name: Key) {
-    let c = useRef<ChildFormState<T, State, Error, Key> | null>(null);
+export function useChildForm<T, Key extends keyof T, State = DefaultState, Error extends string = DefaultError>(
+    parentForm: FormState<T, State, Error>,
+    name: Key
+) {
+    let c = useRef<ChildFormState<T, Key, State, Error> | null>(null);
     if (!c.current) {
         c.current = new ChildFormState(parentForm, name);
     }
@@ -76,7 +79,10 @@ export function useChildForm<T, State, Error, Key extends keyof T>(parentForm: F
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function useListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key) {
+export function useListener<T, Key extends keyof T, State = DefaultState, Error extends string = DefaultError>(
+    form: FormState<T, State, Error>,
+    name: Key
+) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
@@ -102,7 +108,7 @@ export function useListener<T, State, Error, Key extends keyof T>(form: FormStat
  * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <AnyListener /> instead.
  * @param form The form to listen to.
  */
-export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>) {
+export function useAnyListener<T, State = DefaultState, Error extends string = DefaultError>(form: FormState<T, State, Error>) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
@@ -121,11 +127,11 @@ export function useAnyListener<T, State, Error>(form: FormState<T, State, Error>
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof Parent>(
+export function useArrayForm<Parent, Key extends keyof Parent, ParentState = DefaultState, ParentError extends string = DefaultError>(
     parentForm: FormState<Parent, ParentState, ParentError>,
     name: Key
 ) {
-    const form = useChildForm<Parent, ParentState, ParentError, Key>(parentForm, name);
+    const form = useChildForm(parentForm, name);
     const oldLength = useRef(-1);
     const [, setRender] = useState(0);
 
@@ -193,7 +199,10 @@ export function useArrayForm<Parent, ParentState, ParentError, Key extends keyof
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function useTruthyListener<T, State, Error, Key extends keyof T>(form: FormState<T, State, Error>, name: Key) {
+export function useTruthyListener<T, Key extends keyof T, State = DefaultState, Error extends string = DefaultError>(
+    form: FormState<T, State, Error>,
+    name: Key
+) {
     const oldTruthy = useRef(!!form.values[name]);
     const [, setRender] = useState(0);
 
