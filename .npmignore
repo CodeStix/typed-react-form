@@ -7,3 +7,9 @@ yarn.lock
 .prettierrc
 .prettierignore
 .gitignore
+.editorconfig
+.vscode/
+CHANGELOG.md
+CODE_OF_CONDUCT.md
+README.md
+Todo.md
