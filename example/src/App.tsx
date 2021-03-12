@@ -130,7 +130,7 @@ export function ArrayTest() {
 export function Form() {
     const form = useForm(
         initialValues, // <- Default values, may change
-        yupValidator(TodoListSchema), // <- Validator (optional)
+        yupValidator(TodoListSchema, { abortEarly: false }), // <- Validator (optional)
         false, // <- Validate on change (optional)
         false // <- Validate on mount (optional)
     );

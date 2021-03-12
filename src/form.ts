@@ -327,9 +327,12 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         else this.errorMap[key] = error;
 
         if (notifyChild && this.childMap[key]) {
-            let changed = !this.childMap[key]!.setErrors((typeof error === "object" ? error ?? {} : {}) as any, true, false);
-            // Only return if the object changed, when a string error was given, this should not return
-            if (changed && typeof error === "object") return false;
+            if (typeof error === "object") {
+                let changed = this.childMap[key]!.setErrors((error as any) ?? {}, true, false);
+                if (!changed) return false;
+            } else {
+                this.childMap[key]!.setErrors({}, true, false);
+            }
         }
 
         this.fireListeners(key);
