@@ -16,7 +16,7 @@ const OuterContainer = styled.div`
     width: 1175px;
 `;
 
-export function CenterContainer({ children, ...rest }: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
+export function CenterContainer({ children, ref, ...rest }: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
     return (
         <InnerContainer {...rest}>
             <OuterContainer>{children}</OuterContainer>

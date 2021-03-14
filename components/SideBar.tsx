@@ -63,7 +63,7 @@ const CATEGORIES = [
 const Container = styled.div`
     position: sticky;
     top: 1em;
-    max-height: 90vh;
+    max-height: 100vh;
     overflow: auto;
     padding: 0 1em 0 0;
 `;
