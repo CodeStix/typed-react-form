@@ -12,8 +12,8 @@ const InnerContainer = styled.div`
 `;
 
 const OuterContainer = styled.div`
-    max-width: 1000px;
-    width: 1000px;
+    max-width: 1200px;
+    width: 1200px;
 `;
 
 export function CenterContainer({ children, ...rest }: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {

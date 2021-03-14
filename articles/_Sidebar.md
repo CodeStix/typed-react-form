@@ -1,34 +1,70 @@
-- [Home](https://github.com/CodeStix/typed-react-form/wiki/)
-- Guides
-    - [Form fields](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
-        - [FormInput](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
-        - [FormTextArea](https://github.com/CodeStix/typed-react-form/wiki/FormTextArea)
-        - [FormSelect](https://github.com/CodeStix/typed-react-form/wiki/FormSelect)
-        - [FormError](https://github.com/CodeStix/typed-react-form/wiki/FormError)
-        - [Field toggling](https://github.com/CodeStix/typed-react-form/wiki/Toggling-a-field)
-        - [Object fields](https://github.com/CodeStix/typed-react-form/wiki/Object-fields)
-        - [Array fields](https://github.com/CodeStix/typed-react-form/wiki/Array-fields)
-    - [Validation](https://github.com/CodeStix/typed-react-form/wiki/Validation)
-        - [yup](https://github.com/CodeStix/typed-react-form/wiki/yup)
-    - [styled-components](https://github.com/CodeStix/typed-react-form/wiki/Problem-with-styled-components)
-    - [Examples](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs)
-- Reference
-    - Classes
-        - [FormState](https://github.com/CodeStix/typed-react-form/wiki/FormState)
-        - [ChildFormState](https://github.com/CodeStix/typed-react-form/wiki/FormState#childformstate)
-    - Hooks
-        - [useForm](https://github.com/CodeStix/typed-react-form/wiki/useForm)
-        - [useChildForm](https://github.com/CodeStix/typed-react-form/wiki/useChildForm)
-        - [useListener](https://github.com/CodeStix/typed-react-form/wiki/useListener)
-        - [useAnyListener](https://github.com/CodeStix/typed-react-form/wiki/useAnyListener)
-        - [useArrayForm](https://github.com/CodeStix/typed-react-form/wiki/useArrayForm)
-    - Components
-        - [ChildForm](https://github.com/CodeStix/typed-react-form/wiki/ChildForm)
-        - [Listener](https://github.com/CodeStix/typed-react-form/wiki/Listener)
-        - [AnyListener](https://github.com/CodeStix/typed-react-form/wiki/AnyListener)
-        - [ArrayForm](https://github.com/CodeStix/typed-react-form/wiki/ArrayForm)
-    - Form element components
-        - [FormInput](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
-        - [FormSelect](https://github.com/CodeStix/typed-react-form/wiki/FormSelect)
-        - [FormTextArea](https://github.com/CodeStix/typed-react-form/wiki/FormTextArea)
-        - [FormError](https://github.com/CodeStix/typed-react-form/wiki/FormError)
+-   [Home](https://github.com/CodeStix/typed-react-form/wiki/)
+-   Guides
+    -   [Form fields](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
+        -   [FormInput](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
+        -   [FormTextArea](https://github.com/CodeStix/typed-react-form/wiki/FormTextArea)
+        -   [FormSelect](https://github.com/CodeStix/typed-react-form/wiki/FormSelect)
+        -   [FormError](https://github.com/CodeStix/typed-react-form/wiki/FormError)
+        -   [Field toggling](https://github.com/CodeStix/typed-react-form/wiki/Toggling-a-field)
+        -   [Object fields](https://github.com/CodeStix/typed-react-form/wiki/Object-fields)
+        -   [Array fields](https://github.com/CodeStix/typed-react-form/wiki/Array-fields)
+    -   [Validation](https://github.com/CodeStix/typed-react-form/wiki/Validation)
+        -   [yup](https://github.com/CodeStix/typed-react-form/wiki/yup)
+    -   [styled-components](https://github.com/CodeStix/typed-react-form/wiki/Problem-with-styled-components)
+    -   [Examples](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs)
+-   Reference
+
+    -   Classes
+        -   [FormState](https://github.com/CodeStix/typed-react-form/wiki/FormState)
+        -   [ChildFormState](https://github.com/CodeStix/typed-react-form/wiki/FormState#childformstate)
+    -   Hooks
+        -   [useForm](https://github.com/CodeStix/typed-react-form/wiki/useForm)
+        -   [useChildForm](https://github.com/CodeStix/typed-react-form/wiki/useChildForm)
+        -   [useListener](https://github.com/CodeStix/typed-react-form/wiki/useListener)
+        -   [useAnyListener](https://github.com/CodeStix/typed-react-form/wiki/useAnyListener)
+        -   [useArrayForm](https://github.com/CodeStix/typed-react-form/wiki/useArrayForm)
+    -   Components
+        -   [ChildForm](https://github.com/CodeStix/typed-react-form/wiki/ChildForm)
+        -   [Listener](https://github.com/CodeStix/typed-react-form/wiki/Listener)
+        -   [AnyListener](https://github.com/CodeStix/typed-react-form/wiki/AnyListener)
+        -   [ArrayForm](https://github.com/CodeStix/typed-react-form/wiki/ArrayForm)
+    -   Form element components
+        -   [FormInput](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
+        -   [FormSelect](https://github.com/CodeStix/typed-react-form/wiki/FormSelect)
+        -   [FormTextArea](https://github.com/CodeStix/typed-react-form/wiki/FormTextArea)
+        -   [FormError](https://github.com/CodeStix/typed-react-form/wiki/FormError)
+
+-   [Home](https://github.com/CodeStix/typed-react-form/wiki/)
+-   Guides
+    -   [Form fields](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
+        -   [FormInput](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
+        -   [FormTextArea](https://github.com/CodeStix/typed-react-form/wiki/FormTextArea)
+        -   [FormSelect](https://github.com/CodeStix/typed-react-form/wiki/FormSelect)
+        -   [FormError](https://github.com/CodeStix/typed-react-form/wiki/FormError)
+        -   [Field toggling](https://github.com/CodeStix/typed-react-form/wiki/Toggling-a-field)
+        -   [Object fields](https://github.com/CodeStix/typed-react-form/wiki/Object-fields)
+        -   [Array fields](https://github.com/CodeStix/typed-react-form/wiki/Array-fields)
+    -   [Validation](https://github.com/CodeStix/typed-react-form/wiki/Validation)
+        -   [yup](https://github.com/CodeStix/typed-react-form/wiki/yup)
+    -   [styled-components](https://github.com/CodeStix/typed-react-form/wiki/Problem-with-styled-components)
+    -   [Examples](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs)
+-   Reference
+    -   Classes
+        -   [FormState](https://github.com/CodeStix/typed-react-form/wiki/FormState)
+        -   [ChildFormState](https://github.com/CodeStix/typed-react-form/wiki/FormState#childformstate)
+    -   Hooks
+        -   [useForm](https://github.com/CodeStix/typed-react-form/wiki/useForm)
+        -   [useChildForm](https://github.com/CodeStix/typed-react-form/wiki/useChildForm)
+        -   [useListener](https://github.com/CodeStix/typed-react-form/wiki/useListener)
+        -   [useAnyListener](https://github.com/CodeStix/typed-react-form/wiki/useAnyListener)
+        -   [useArrayForm](https://github.com/CodeStix/typed-react-form/wiki/useArrayForm)
+    -   Components
+        -   [ChildForm](https://github.com/CodeStix/typed-react-form/wiki/ChildForm)
+        -   [Listener](https://github.com/CodeStix/typed-react-form/wiki/Listener)
+        -   [AnyListener](https://github.com/CodeStix/typed-react-form/wiki/AnyListener)
+        -   [ArrayForm](https://github.com/CodeStix/typed-react-form/wiki/ArrayForm)
+    -   Form element components
+        -   [FormInput](https://github.com/CodeStix/typed-react-form/wiki/FormInput)
+        -   [FormSelect](https://github.com/CodeStix/typed-react-form/wiki/FormSelect)
+        -   [FormTextArea](https://github.com/CodeStix/typed-react-form/wiki/FormTextArea)
+        -   [FormError](https://github.com/CodeStix/typed-react-form/wiki/FormError)

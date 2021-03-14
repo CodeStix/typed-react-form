@@ -18,7 +18,7 @@ interface Props {
 
 const Container = styled.div`
     display: grid;
-    gap: 2em;
+    gap: 3em;
     grid-template-columns: 200px 1fr;
 `;
 

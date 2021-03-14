@@ -1,4 +1,5 @@
 ## Example: Custom input
+
 If the default input types (FormInput, FormSelect ...) do not provide enough functionality for you, you should create a custom input component.
 
 ![custom input](https://raw.githubusercontent.com/wiki/CodeStix/typed-react-form/images/custominput.gif)
@@ -53,44 +54,6 @@ function ExampleForm() {
 }
 ```
 
-## Example: Form JSON component
-
-![live updating form values](https://raw.githubusercontent.com/wiki/CodeStix/typed-react-form/images/jsoncomponent.gif)
-
-```jsx
-// Take a form containing any values
-function FormJson(props: { form: FormState<any> }) {
-    // Listen for all changes on the form
-    const { values } = useAnyListener(props.form);
-    // Show the json representation of the values in the form
-    return <pre>
-        {JSON.stringify(values, null, 2)}
-    </pre>;
-}
-
-// Usage
-function ExampleForm() {
-    const form = useForm({ name: "John", age: 19 });
-    return (
-        <form
-            style={{ margin: "1em" }}
-            onSubmit={async (ev) => {
-                ev.preventDefault();
-                console.log("submit", form.values);
-            }}
-        >
-            <FormInput form={form} name="name" />
-            <FormInput type="number" form={form} name="age" />
-            {/* Use your component, pass the form */}
-            <FormJson form={form} />
-            {/* Using AnyListener, provides the same functionality */}
-            <AnyListener form={form} render={({ values }) => <pre>{JSON.stringify(values, null, 2)}</pre>} />
-            <button>Submit</button>
-        </form>
-    );
-}
-```
-
 ## Example: Submit button that disables when unmodified/error
 
 ![live updating form values](https://raw.githubusercontent.com/wiki/CodeStix/typed-react-form/images/submitbutton.gif)
@@ -99,7 +62,7 @@ function ExampleForm() {
 function FormExample() {
     const form = useForm(
         {
-            name: "John"
+            name: "John",
         },
         (values) => ({ name: values.name.length < 3 ? "Name must be longer" : undefined }) // Example validator
     );
@@ -109,8 +72,7 @@ function FormExample() {
                 ev.preventDefault();
                 console.log("save", form.values);
                 form.setDefaultValues(form.values);
-            }}
-        >
+            }}>
             <FormInput form={form} name="name" />
             {/* Listen for any change on the form */}
             <AnyListener form={form} render={(form) => <button disabled={!form.dirty || form.error}>Save</button>} />
