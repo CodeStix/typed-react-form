@@ -4,7 +4,7 @@ If the default input types (FormInput, FormSelect ...) do not provide enough fun
 
 ![custom input](https://raw.githubusercontent.com/wiki/CodeStix/typed-react-form/images/custominput.gif)
 
-Custom input that shows an error when needed, paints gray background when modified, gets disabled when submitting and shows its defaultValue as a placeholder. You can tweak this custom input further by implementing transformations for different input types, allowing `HTMLInputAttributes` etc.
+The following code resembles a custom input component that shows an error when needed, paints gray background when modified, gets disabled when submitting and shows its defaultValue as a placeholder. You can tweak this custom input further by implementing transformations for different input types, allowing `HTMLInputAttributes` etc.
 
 ```jsx
 function CustomInput<T>(props: { form: FormState<T>; name: keyof T; children?: React.ReactNode }) {

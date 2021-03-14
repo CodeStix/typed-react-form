@@ -2,7 +2,7 @@ import { GetStaticProps, GetServerSideProps, GetStaticPaths } from "next";
 import fs from "fs/promises";
 import path from "path";
 import ReactMarkdown from "react-markdown";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CenterContainer } from "../../components/CenterContainer";
 import { NavBar } from "../../components/NavBar";
 import { SideBar } from "../../components/SideBar";
@@ -11,6 +11,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialOceanic } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import Link from "next/link";
 import Head from "next/head";
+import { useRouter } from "next/router";
 
 const ARTICLES_PATH = path.join(process.cwd(), "articles");
 
@@ -22,15 +23,28 @@ const Container = styled.div`
     display: grid;
     gap: 3em;
     grid-template-columns: 200px 1fr;
+
+    @media only screen and (max-width: 600px) {
+        grid-template-columns: 1fr;
+        /* display: block; */
+        /* max-width: 100vw; */
+    }
 `;
 
 const ReactMarkdownContainer = styled.div`
+    display: block;
     overflow: hidden;
     margin-bottom: 30em;
 
     code {
         font-size: 1.3em;
     }
+
+    /* @media only screen and (max-width: 600px) {
+        pre {
+            margin: 0 -2em !important;
+        }
+    } */
 
     a {
         padding: 0.3em 0;
@@ -59,19 +73,39 @@ const ReactMarkdownContainer = styled.div`
     }
 `;
 
+const SidebarHolder = styled.div`
+    @media only screen and (max-width: 600px) {
+        top: 0em;
+        left: 0em;
+        width: 100%;
+        z-index: 100;
+        backdrop-filter: blur(50px);
+        height: 100%;
+        position: fixed;
+        padding: 1em;
+        transform: translateX(0);
+        transition: 100ms ease-in;
+        &.hidden {
+            transition: 100ms ease-in;
+            transform: translateX(-100vw);
+        }
+    }
+`;
+
 export default function DocPage(props: Props) {
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
     return (
-        <>
+        <main onClick={() => setShowMobileMenu(false)}>
             <Head>
                 <link rel="preconnect" href="https://fonts.gstatic.com" />
                 <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap" rel="stylesheet" />
             </Head>
-            <NavBar />
-            <CenterContainer style={{ margin: "2em 0.5em" }}>
+            <NavBar onMenu={() => setShowMobileMenu(true)} />
+            <CenterContainer style={{ margin: "0 0.5em" }}>
                 <Container>
-                    <div>
+                    <SidebarHolder className={!showMobileMenu && "hidden"}>
                         <SideBar />
-                    </div>
+                    </SidebarHolder>
                     <ReactMarkdownContainer>
                         <ReactMarkdown
                             renderers={{
@@ -91,7 +125,7 @@ export default function DocPage(props: Props) {
                     </ReactMarkdownContainer>
                 </Container>
             </CenterContainer>
-        </>
+        </main>
     );
 }
 

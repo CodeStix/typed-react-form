@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faGithubAlt, faGithubSquare } from "@fortawesome/free-brands-svg-icons";
 import Link from "next/link";
-import { faBook } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faBook } from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
 
 const Name = styled.span`
     cursor: pointer;
@@ -12,6 +13,10 @@ const Name = styled.span`
     font-size: 1.5rem;
     color: #2065af;
     margin-right: auto;
+
+    @media only screen and (max-width: 600px) {
+        font-size: 1.2rem;
+    }
 `;
 
 const NavItem = styled.a`
@@ -37,7 +42,16 @@ const Icon = styled(FontAwesomeIcon)`
     /* color: #195daa; */
 `;
 
-export function NavBar() {
+function useWindowWidth() {
+    const [windowWidth, setWindowWidth] = useState(1200);
+    useEffect(() => {
+        setWindowWidth(window.innerWidth);
+    }, []);
+    return windowWidth;
+}
+
+export function NavBar(props: { onMenu: () => void }) {
+    const windowWidth = useWindowWidth();
     return (
         <CenterContainer>
             <Container>
@@ -47,14 +61,26 @@ export function NavBar() {
                         &nbsp;Typed React Form
                     </Name>
                 </Link>
-                <Link href="https://github.com/codestix/typed-react-form" passHref>
+
+                {/* <Link href="https://github.com/codestix/typed-react-form" passHref>
                     <NavItem>GitHub</NavItem>
-                </Link>
+                </Link> */}
+
                 <Link href="https://github.com/codestix/typed-react-form" passHref>
                     <NavItem>
                         <Icon icon={faGithub} />
                     </NavItem>
                 </Link>
+
+                {windowWidth < 600 && (
+                    <NavItem
+                        onClick={(ev) => {
+                            ev.stopPropagation();
+                            props.onMenu();
+                        }}>
+                        <Icon icon={faBars} />
+                    </NavItem>
+                )}
             </Container>
         </CenterContainer>
     );
