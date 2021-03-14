@@ -25,15 +25,16 @@ const Container = styled.div`
 
 const ReactMarkdownContainer = styled.div`
     overflow: hidden;
+    margin-bottom: 30em;
 
     code {
         font-size: 1.3em;
     }
 
     a {
-        color: #0084ff;
-        /* font-weight: bold; */
-        border-bottom: 1px solid #0084ff;
+        padding: 0.3em 0;
+        color: #186eee;
+        text-decoration: 1px solid underline;
     }
 
     hr {

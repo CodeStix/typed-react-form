@@ -116,44 +116,13 @@ function MyForm() {
 
 ## Step 3: It's your turn
 
-Tweak the above example to your desire!
+Tweak the above example to your desire by...
 
-**Find your next step here:**
-
--   [Inputs](/docs/FormInput)
-    -   [Using FormInput, checkboxes, radio buttons](/docs/FormInput)
-    -   [Using FormTextArea](/docs/FormTextArea)
-    -   [Using FormSelect](/docs/FormSelect)
-    -   [Using FormError](/docs/FormError)
-    -   [Toggling a field using checkbox](/docs/Toggling-a-field)
-    -   [Example: creating custom inputs like FormInput, FormSelect ...](/docs/Custom-inputs#example-custom-input)
--   [Using Object fields](/docs/Object-fields)
--   [Using Array fields](/docs/Array-fields)
--   [Using validators](/docs/Validation)
-    -   [Using yup](/docs/yup)
--   [Example: creating a submit button that disables when unmodified/error](/docs/Custom-inputs#example-form-json-component)
--   [Example: creating a component which shows the current form values in JSON](/docs/Custom-inputs#example-form-json-component)
--   [Usage with styled-components](/docs/Problem-with-styled-components)
--   [isSubmitting and custom form state](/docs/useForm#defaultstate-optional-issubmitting-false)
-
-## Reference
-
--   Classes
-    -   [FormState](/docs/FormState)
-    -   [ChildFormState](/docs/FormState#childformstate)
--   Hooks
-    -   [useForm](/docs/useForm)
-    -   [useChildForm](/docs/useChildForm)
-    -   [useListener](/docs/useListener)
-    -   [useAnyListener](/docs/useAnyListener)
-    -   [useArrayForm](/docs/useArrayForm)
--   Components
-    -   [ChildForm](/docs/ChildForm)
-    -   [Listener](/docs/Listener)
-    -   [AnyListener](/docs/AnyListener)
-    -   [ArrayForm](/docs/ArrayForm)
--   Form element components
-    -   [FormInput](/docs/FormInput)
-    -   [FormSelect](/docs/FormSelect)
-    -   [FormTextArea](/docs/FormTextArea)
-    -   [FormError](/docs/FormError)
+-   [Reading more about `FormInput`](/docs/FormInput)
+-   [Implementing validation](/docs/Validation)
+-   [Adding object fields](/docs/Object-fields)
+-   [Adding array fields](/docs/Array-fields)
+-   [Toggling a field using a checkbox](/docs/Toggling-a-field)
+-   [Creating a component which shows the current form values in JSON](/docs/Live-json-component)
+-   [Creating a custom input like FormInput, FormSelect ...](/docs/Custom-input)
+-   **Look at the sidebar for more...**
