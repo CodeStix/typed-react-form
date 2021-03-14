@@ -9,6 +9,7 @@ import { SideBar } from "../../components/SideBar";
 import styled from "styled-components";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialOceanic } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import Link from "next/link";
 
 const ARTICLES_PATH = path.join(process.cwd(), "articles");
 
@@ -53,6 +54,13 @@ export default function DocPage(props: Props) {
                     <ReactMarkdownContainer>
                         <ReactMarkdown
                             renderers={{
+                                link: ({ children, href }) => {
+                                    return (
+                                        <Link href={href}>
+                                            <a>{children}</a>
+                                        </Link>
+                                    );
+                                },
                                 code: ({ language, value }) => {
                                     return <SyntaxHighlighter style={materialOceanic} language={language} children={value} />;
                                 },
