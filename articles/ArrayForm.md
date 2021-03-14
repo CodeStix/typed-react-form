@@ -1,6 +1,6 @@
 # ArrayForm
 
-A component that provides array manipulation functions and optimizations. This is a wrapper around [`useArrayForm`](https://github.com/CodeStix/typed-react-form/wiki/useArrayForm). The only difference is that this component does not render its content when the array is null/undefined ([is togglable](https://github.com/CodeStix/typed-react-form/wiki/Toggling-a-field)).
+A component that provides array manipulation functions and optimizations. This is a wrapper around [`useArrayForm`](/docs/useArrayForm). The only difference is that this component does not render its content when the array is null/undefined ([is togglable](/docs/Toggling-a-field)).
 
 ## Props
 
@@ -36,4 +36,4 @@ The render function provides an object parameter, containing the following field
 
 ## Usage
 
-See [Array fields](https://github.com/CodeStix/typed-react-form/wiki/Array-fields).
+See [Array fields](/docs/Array-fields).

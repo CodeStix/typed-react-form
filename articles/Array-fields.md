@@ -1,11 +1,11 @@
 # Array fields
 
-To create dynamic array fields, you should use the [`ArrayForm`](https://github.com/CodeStix/typed-react-form/wiki/ArrayForm) component or [`useArrayForm`](https://github.com/CodeStix/typed-react-form/wiki/useArrayForm) hook. These are wrappers around [`useChildForm`](https://github.com/CodeStix/typed-react-form/wiki/useChildForm) which provide useful functions and optimizations for arrays.
+To create dynamic array fields, you should use the [`ArrayForm`](/docs/ArrayForm) component or [`useArrayForm`](/docs/useArrayForm) hook. These are wrappers around [`useChildForm`](/docs/useChildForm) which provide useful functions and optimizations for arrays.
 
--   [ArrayForm](https://github.com/CodeStix/typed-react-form/wiki/ArrayForm)
--   [useArrayForm](https://github.com/CodeStix/typed-react-form/wiki/useArrayForm)
+-   [ArrayForm](/docs/ArrayForm)
+-   [useArrayForm](/docs/useArrayForm)
 
-If you have an array field with a constant size, you should probably just use [`ChildForm`](https://github.com/CodeStix/typed-react-form/wiki/ChildForm). (See bottom for examples)
+If you have an array field with a constant size, you should probably just use [`ChildForm`](/docs/ChildForm). (See bottom for examples)
 
 **Note on keys**: you **should** use the index as key, this seems against nature at first, but remember that this library does not rerender each time something in the array changes. When 2 array items get swapped, it does not rerender either, only when the array size changes, it rerenders. For this reason, it is not a problem (and it's recommended) to use index as the key. (This can change in the future)
 
@@ -177,7 +177,7 @@ function ShoppingListItemForm(props: { parent: FormState<ShoppingListItem[]>, in
 
 ## Fixed array example
 
-A fixed array always has the same size, [`ChildForm`](https://github.com/CodeStix/typed-react-form/wiki/ChildForm) is used, and the index into the array is given using the name prop.
+A fixed array always has the same size, [`ChildForm`](/docs/ChildForm) is used, and the index into the array is given using the name prop.
 
 ✔️ **Fixed array field containing strings**
 

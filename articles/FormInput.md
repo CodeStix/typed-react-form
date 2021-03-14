@@ -152,4 +152,4 @@ Make sure you pass along a `value` too, this is the value that will be set when 
 
 ---
 
-All of the input components are wrappers and abstractions around the [`useListener`](https://github.com/CodeStix/typed-react-form/wiki/useListener) hook. Using this hook, you can create your own [custom inputs](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs).
+All of the input components are wrappers and abstractions around the [`useListener`](/docs/useListener) hook. Using this hook, you can create your own [custom inputs](/docs/Custom-inputs).

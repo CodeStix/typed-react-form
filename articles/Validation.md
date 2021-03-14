@@ -2,9 +2,9 @@
 
 A validator is a function that takes form values, and returns errors for these values in the same object structure.
 
-You can use a validator by passing it to the [`useForm`](https://github.com/CodeStix/typed-react-form/wiki/useForm) hook.
+You can use a validator by passing it to the [`useForm`](/docs/useForm) hook.
 
-Its it recommended to use a validation library, as this makes the process of validating data mush easier. This library has [built-in support for yup](https://github.com/CodeStix/typed-react-form/wiki/yup).
+Its it recommended to use a validation library, as this makes the process of validating data mush easier. This library has [built-in support for yup](/docs/yup).
 
 ## Example
 

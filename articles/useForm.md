@@ -2,7 +2,7 @@
 
 Creates a new form state manager. This hook does not cause a rerender.
 
-**Note for using `setState` along with `useForm`**: This library is built upon the fact that only the things that change should rerender. When using `setState` with the form, a state change causes the whole form to rerender. You can reduce this problem by creating components from the things that use the state, or you can use [custom form state](https://github.com/CodeStix/typed-react-form/wiki/useForm#defaultstate-optional-issubmitting-false).
+**Note for using `setState` along with `useForm`**: This library is built upon the fact that only the things that change should rerender. When using `setState` with the form, a state change causes the whole form to rerender. You can reduce this problem by creating components from the things that use the state, or you can use [custom form state](/docs/useForm#defaultstate-optional-issubmitting-false).
 
 `useForm(defaultValues, validator?, validateOnChange = false, validateOnMount = false, defaultState = {isSubmitting: false})`
 
@@ -18,7 +18,7 @@ The initial values of the form. When this parameter changes, the form's default 
 
 The validator of this form, which is a function that accepts form values and returns errors for these values in the same object structure. **This function can be async.**
 
-See [validation](https://github.com/CodeStix/typed-react-form/wiki/Validation).
+See [validation](/docs/Validation).
 
 ---
 
@@ -47,8 +47,8 @@ const form = useForm({ name: "John" }); // form.state = { isSumitting: false } b
 const form = useForm({ name: "John" }, { isSubmitting: false, isLoading: false });
 ```
 
-You can set the form state using [`setState`](https://github.com/CodeStix/typed-react-form/wiki/FormState#setstatenewstate).
+You can set the form state using [`setState`](/docs/FormState#setstatenewstate).
 
 ## Returns
 
-A [`FormState`](https://github.com/CodeStix/typed-react-form/wiki/FormState) object.
+A [`FormState`](/docs/FormState) object.

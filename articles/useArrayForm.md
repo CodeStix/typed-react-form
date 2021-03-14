@@ -1,8 +1,8 @@
 # `useArrayForm`
 
-A hook that provides array manipulation functions and optimizations for an array field. This is the array-optimized version of [`useChildform`](https://github.com/CodeStix/typed-react-form/wiki/useChildForm). This hook only causes a rerender when the array size changes (this is why `values.map((e) => ...)` works when adding/removing a value).
+A hook that provides array manipulation functions and optimizations for an array field. This is the array-optimized version of [`useChildform`](/docs/useChildForm). This hook only causes a rerender when the array size changes (this is why `values.map((e) => ...)` works when adding/removing a value).
 
-**If your array field can/will be null or undefined**, you should use the [`ArrayForm`](https://github.com/CodeStix/typed-react-form/wiki/ArrayForm) component instead, which does not render when the array is null/undefined.
+**If your array field can/will be null or undefined**, you should use the [`ArrayForm`](/docs/ArrayForm) component instead, which does not render when the array is null/undefined.
 
 `useArrayForm(parentForm, nameOfArrayField)`
 
@@ -36,4 +36,4 @@ An object, containing the following fields:
 
 ## Usage
 
-See [Array fields](https://github.com/CodeStix/typed-react-form/wiki/Array-fields) for useful examples.
+See [Array fields](/docs/Array-fields) for useful examples.

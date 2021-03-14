@@ -2,8 +2,8 @@
 
 To be able to create inputs for fields in objects, child form are used. You can create child forms using the `ChildForm` component or `useChildForm` hook.
 
--   [useChildForm](https://github.com/CodeStix/typed-react-form/wiki/useChildForm)
--   [ChildForm](https://github.com/CodeStix/typed-react-form/wiki/ChildForm)
+-   [useChildForm](/docs/useChildForm)
+-   [ChildForm](/docs/ChildForm)
 
 This design choice makes complete type checking possible.
 

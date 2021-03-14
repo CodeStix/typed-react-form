@@ -2,11 +2,11 @@
 
 Because this library does not rerender the whole form component when a field changes, there must be a way to get notified about state changes. This is where listeners come in.
 
-The useAnyListener hook listens for any change on a form. Behaves a lot like [`useListener`](https://github.com/CodeStix/typed-react-form/wiki/useListener) but does not take a `name` parameter.
+The useAnyListener hook listens for any change on a form. Behaves a lot like [`useListener`](/docs/useListener) but does not take a `name` parameter.
 
 **To listen to just one field** instead of every field, use the `useListener` hook instead.
 
-**Use the [`AnyListener` component](https://github.com/CodeStix/typed-react-form/wiki/AnyListener) if you want to use these hooks without creating a new component each time.**
+**Use the [`AnyListener` component](/docs/AnyListener) if you want to use these hooks without creating a new component each time.**
 
 **✔️ Right usage**
 

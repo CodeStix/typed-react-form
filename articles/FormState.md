@@ -38,9 +38,9 @@ Maps field names to errors. Can be set with `setErrors()`.
 
 #### `state` **(readonly)**
 
-Gets the current form state. Form state contains variables like `isSubmitting` etc. This state is synced with parent and child forms. Can be set with [`setState()`](https://github.com/CodeStix/typed-react-form/wiki/FormState#setstatenewstate).
+Gets the current form state. Form state contains variables like `isSubmitting` etc. This state is synced with parent and child forms. Can be set with [`setState()`](/docs/FormState#setstatenewstate).
 
-See [`useForm`](https://github.com/CodeStix/typed-react-form/wiki/useForm) for a guide on how to create custom form state.
+See [`useForm`](/docs/useForm) for a guide on how to create custom form state.
 
 ---
 

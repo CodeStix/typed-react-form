@@ -42,4 +42,4 @@ function CustomFormError<T>(props: { form: FormState<T>; name: keyof T }) {
 
 ```
 
-You can also create custom input components, look [here](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs).
+You can also create custom input components, look [here](/docs/Custom-inputs).

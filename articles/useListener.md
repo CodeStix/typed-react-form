@@ -3,9 +3,9 @@
 Because this library does not rerender the whole form component when a field changes, there must be a way to get notified about state changes. This is where listeners come in.
 
 The useListener hook listens for changes on a specific form's field. Behaves like useState. Because this hooks causes a rerender, you **shouldn't** use
-this hook in the same component as the form it is using (causes the whole form to rerender). You **should** always create a new component which contains the hook and use that. Or use the [`Listener`](https://github.com/CodeStix/typed-react-form/wiki/Listener) component, which wraps the `useListener` hook for you.
+this hook in the same component as the form it is using (causes the whole form to rerender). You **should** always create a new component which contains the hook and use that. Or use the [`Listener`](/docs/Listener) component, which wraps the `useListener` hook for you.
 
-**To listen for all form fields at once**, use the [`useAnyListener`](https://github.com/CodeStix/typed-react-form/wiki/useAnyListener) hook instead.
+**To listen for all form fields at once**, use the [`useAnyListener`](/docs/useAnyListener) hook instead.
 
 **✔️ Right usage**
 
