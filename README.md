@@ -4,11 +4,11 @@
 
 A fast, completely type-checked React form state manager, focussed on typescript integration and minimal rerenders. Featuring:
 
-- [Object fields](https://github.com/CodeStix/typed-react-form/wiki/Object-fields)
-- [Array fields](https://github.com/CodeStix/typed-react-form/wiki/Array-fields)
-- [Validation and yup integration](https://github.com/CodeStix/typed-react-form/wiki/Validation)
-- [Easily toggle fields](https://github.com/CodeStix/typed-react-form/wiki/Toggling-a-field)
-- [Listeners (subscription based state updates)](https://github.com/CodeStix/typed-react-form/wiki/useListener)
+- [Object fields](https://typed-react-form.codestix.nl/docs/Object-fields)
+- [Array fields](https://typed-react-form.codestix.nl/docs/Array-fields)
+- [Validation and yup integration](https://typed-react-form.codestix.nl/docs/Validation)
+- [Easily toggle fields](https://typed-react-form.codestix.nl/docs/Toggling-a-field)
+- [Listeners (subscription based state updates)](https://typed-react-form.codestix.nl/docs/useListener)
 
 **All of this while keeping type-checking!**
 
@@ -18,11 +18,9 @@ A fast, completely type-checked React form state manager, focussed on typescript
 npm install typed-react-form
 ```
 
-## [Documentation](https://github.com/CodeStix/typed-react-form/wiki)
+## [Documentation](https://typed-react-form.codestix.nl/)
 
-**You can find documentation and information on how to get started [on the GitHub wiki page](https://github.com/CodeStix/typed-react-form/wiki).**
-
-**You can see an example form working in action [here](https://codestix.github.io/typed-react-form/).**
+**You can find documentation and information on how to get started [here](https://typed-react-form.codestix.nl/).**
 
 ## Javascript/typescript React
 
