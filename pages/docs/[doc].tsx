@@ -26,7 +26,7 @@ export default function DocPage(props: Props) {
     return (
         <>
             <NavBar />
-            <CenterContainer style={{ margin: "2em 0" }}>
+            <CenterContainer style={{ margin: "2em 0.5em" }}>
                 <Container>
                     <div>
                         <SideBar />

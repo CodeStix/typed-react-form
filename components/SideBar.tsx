@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -13,6 +12,11 @@ const CATEGORIES = [
             { name: "FormTextArea", url: "/docs/FormTextArea" },
             { name: "FormSelect", url: "/docs/FormSelect" },
             { name: "FormError", url: "/docs/FormError" },
+        ],
+    },
+    {
+        category: "Advanced",
+        items: [
             { name: "Field toggling", url: "/docs/Toggling-a-field" },
             { name: "Object fields", url: "/docs/Object-fields" },
             { name: "Array fields", url: "/docs/Array-fields" },
@@ -59,11 +63,15 @@ const CATEGORIES = [
 const Container = styled.div`
     position: sticky;
     top: 1em;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 0 1em 0 0;
 `;
 
 const Item = styled.a<{ current: boolean }>`
     display: block;
     padding: 0.4em 0.8em;
+
     color: #111;
     border-bottom: 1px solid #0002;
     cursor: pointer;
