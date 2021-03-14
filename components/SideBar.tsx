@@ -1,8 +1,13 @@
 import React from "react";
 import styled from "styled-components";
+import ReactMarkdown from "react-markdown";
+
+const Sidebar = {
+    Home: "",
+};
 
 const Container = styled.div`
-    margin: 2em 0;
+    margin: 1em 0;
     position: sticky;
     top: 1em;
 `;
@@ -14,8 +19,9 @@ const Item = styled.div`
     cursor: pointer;
 
     &:hover {
-        transition: 100ms;
-        background: #0001;
+        transition: 50ms;
+        /* background: #0001; */
+        transform: translateX(3px);
         color: #0972d4;
     }
 `;
