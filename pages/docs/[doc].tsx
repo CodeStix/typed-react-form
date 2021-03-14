@@ -10,6 +10,7 @@ import styled from "styled-components";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialOceanic } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import Link from "next/link";
+import Head from "next/head";
 
 const ARTICLES_PATH = path.join(process.cwd(), "articles");
 
@@ -41,11 +42,30 @@ const ReactMarkdownContainer = styled.div`
         margin: 2em 0;
         border: 1px solid #0002;
     }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin: 1.2em 0 0.5em 0;
+    }
+
+    h1,
+    h2 {
+        padding-bottom: 0.2em;
+        border-bottom: 1px solid #0002;
+    }
 `;
 
 export default function DocPage(props: Props) {
     return (
         <>
+            <Head>
+                <link rel="preconnect" href="https://fonts.gstatic.com" />
+                <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap" rel="stylesheet" />
+            </Head>
             <NavBar />
             <CenterContainer style={{ margin: "2em 0.5em" }}>
                 <Container>
