@@ -1,4 +1,4 @@
-# 1.2.9
+# 1.2.9 (12/03/2021)
 
 -   Fixed #2: operator _short-circuiting_ caused only one error to be set when using `form.setErrors`.
 

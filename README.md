@@ -26,7 +26,7 @@ npm install typed-react-form
 
 ## Javascript/typescript React
 
-This library is optimized (and built from the group up) for React with typescript, but it also works with with vanilla React, without enforced type checking.
+This library is built from the ground up for React with typescript, but it also works with with vanilla React, without enforced type checking.
 
 ## Contributing
 
