@@ -7,6 +7,8 @@ import { CenterContainer } from "../../components/CenterContainer";
 import { NavBar } from "../../components/NavBar";
 import { SideBar } from "../../components/SideBar";
 import styled from "styled-components";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { materialOceanic } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 const ARTICLES_PATH = path.join(process.cwd(), "articles");
 
@@ -30,7 +32,14 @@ export default function DocPage(props: Props) {
                         <SideBar />
                     </div>
                     <div style={{ overflow: "hidden" }}>
-                        <ReactMarkdown>{props.content}</ReactMarkdown>;
+                        <ReactMarkdown
+                            renderers={{
+                                code: ({ language, value }) => {
+                                    return <SyntaxHighlighter style={materialOceanic} language={language} children={value} />;
+                                },
+                            }}>
+                            {props.content}
+                        </ReactMarkdown>
                     </div>
                 </Container>
             </CenterContainer>
@@ -39,7 +48,8 @@ export default function DocPage(props: Props) {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async function (props) {
-    let file = path.join(ARTICLES_PATH, props.params!.doc + ".md");
+    let title = props.params!.doc as string;
+    let file = path.join(ARTICLES_PATH, title + ".md");
     return {
         props: {
             content: await fs.readFile(file, "utf-8"),

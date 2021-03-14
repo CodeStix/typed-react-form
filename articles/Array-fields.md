@@ -1,7 +1,9 @@
+# Array fields
+
 To create dynamic array fields, you should use the [`ArrayForm`](https://github.com/CodeStix/typed-react-form/wiki/ArrayForm) component or [`useArrayForm`](https://github.com/CodeStix/typed-react-form/wiki/useArrayForm) hook. These are wrappers around [`useChildForm`](https://github.com/CodeStix/typed-react-form/wiki/useChildForm) which provide useful functions and optimizations for arrays.
 
-- [ArrayForm](https://github.com/CodeStix/typed-react-form/wiki/ArrayForm)
-- [useArrayForm](https://github.com/CodeStix/typed-react-form/wiki/useArrayForm)
+-   [ArrayForm](https://github.com/CodeStix/typed-react-form/wiki/ArrayForm)
+-   [useArrayForm](https://github.com/CodeStix/typed-react-form/wiki/useArrayForm)
 
 If you have an array field with a constant size, you should probably just use [`ChildForm`](https://github.com/CodeStix/typed-react-form/wiki/ChildForm). (See bottom for examples)
 
@@ -10,24 +12,27 @@ If you have an array field with a constant size, you should probably just use [`
 ## Dynamic array examples
 
 ✔️ **Dynamic string array field using `ArrayForm`**
+
 ```jsx
 function NotesList() {
     const form = useForm({
-        notes: ["Do the dishes", "Go outside", "Drink some water"]
+        notes: ["Do the dishes", "Go outside", "Drink some water"],
     });
     return (
         <form
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             <ArrayForm
                 parent={form}
                 name="notes"
                 render={({ form, values, append, remove }) => (
                     <>
-                        {values.map((_, i) => ( // You SHOULD use index as key. See top for info.
+                        {values.map((
+                            _,
+                            i // You SHOULD use index as key. See top for info.
+                        ) => (
                             <div key={i}>
                                 <FormInput form={form} name={i} />
                                 <button type="button" onClick={() => remove(i)}>
@@ -55,7 +60,7 @@ Remember: this is all type checked!
 function ShoppingListForm() {
     const form = useForm({
         title: "My shopping list",
-        items: [{ name: "Coffee", amount: 1 }]
+        items: [{ name: "Coffee", amount: 1 }],
     });
 
     return (
@@ -63,8 +68,7 @@ function ShoppingListForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             <h2>Title</h2>
             <FormInput form={form} type="text" name="title" />
 
@@ -108,6 +112,7 @@ function ShoppingListForm() {
 ```
 
 ✔️ **Dynamic object array field with seperate component for each child form and using `useArrayForm`**
+
 ```jsx
 interface ShoppingListItem {
     name: string;
@@ -119,17 +124,19 @@ interface ShoppingList {
 }
 
 function ShoppingListForm() {
-    const form = useForm<ShoppingList>({
-        title: "My shopping list",
-        items: [{ name: "Coffee", amount: 1 }]
-    });
+    const form =
+        useForm <
+        ShoppingList >
+        {
+            title: "My shopping list",
+            items: [{ name: "Coffee", amount: 1 }],
+        };
     return (
         <form
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             <h2>Title</h2>
             <FormInput form={form} type="text" name="title" />
             <h2>Items</h2>
@@ -154,7 +161,7 @@ function ShoppingListItemsForm(props: { parent: FormState<ShoppingList> }) {
     );
 }
 
-function ShoppingListItemForm(props: { parent: FormState<ShoppingListItem[]>; index: number; remove: (i: number) => void }) {
+function ShoppingListItemForm(props: { parent: FormState<ShoppingListItem[]>, index: number, remove: (i: number) => void }) {
     const form = useChildForm(props.parent, props.index);
     return (
         <div>
@@ -173,19 +180,19 @@ function ShoppingListItemForm(props: { parent: FormState<ShoppingListItem[]>; in
 A fixed array always has the same size, [`ChildForm`](https://github.com/CodeStix/typed-react-form/wiki/ChildForm) is used, and the index into the array is given using the name prop.
 
 ✔️ **Fixed array field containing strings**
+
 ```jsx
 function AnswerForm() {
     const form = useForm({
         // Always 3 items in array
-        answers: ["", "", ""]
+        answers: ["", "", ""],
     });
     return (
         <form
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             <ChildForm
                 parent={form}
                 name="answers"
@@ -208,27 +215,27 @@ function AnswerForm() {
 ```
 
 ✔️ **Fixed array field containing objects**
+
 ```jsx
 function SettingsForm() {
     const form = useForm({
         settings: [
             { name: "Enable email", value: true },
-            { name: "Enable notifications", value: false }
-        ]
+            { name: "Enable notifications", value: false },
+        ],
     });
     return (
         <form
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             <ChildForm // First child form is array
                 parent={form}
                 name="settings"
                 render={(form) =>
                     form.values.map((_, i) => (
-                        <ChildForm // Second child form is object in array 
+                        <ChildForm // Second child form is object in array
                             key={i}
                             parent={form}
                             name={i}
