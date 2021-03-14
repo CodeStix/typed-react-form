@@ -1,4 +1,6 @@
-Creates a form based on another form's field. Use this with nested objects. This hook does not cause a rerender. 
+# `useChildForm`
+
+Creates a form based on another form's field. Use this with nested objects. This hook does not cause a rerender.
 
 **If your field can/will be null or undefined**, you should use the [`ChildForm`](https://github.com/CodeStix/typed-react-form/wiki/ChildForm) component instead, which does not render when the field is null/undefined.
 

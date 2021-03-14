@@ -22,6 +22,25 @@ const Container = styled.div`
     grid-template-columns: 200px 1fr;
 `;
 
+const ReactMarkdownContainer = styled.div`
+    overflow: hidden;
+
+    code {
+        font-size: 1.3em;
+    }
+
+    a {
+        color: #0084ff;
+        /* font-weight: bold; */
+        border-bottom: 1px solid #0084ff;
+    }
+
+    hr {
+        margin: 2em 0;
+        border: 1px solid #0002;
+    }
+`;
+
 export default function DocPage(props: Props) {
     return (
         <>
@@ -31,7 +50,7 @@ export default function DocPage(props: Props) {
                     <div>
                         <SideBar />
                     </div>
-                    <div style={{ overflow: "hidden" }}>
+                    <ReactMarkdownContainer>
                         <ReactMarkdown
                             renderers={{
                                 code: ({ language, value }) => {
@@ -40,7 +59,7 @@ export default function DocPage(props: Props) {
                             }}>
                             {props.content}
                         </ReactMarkdown>
-                    </div>
+                    </ReactMarkdownContainer>
                 </Container>
             </CenterContainer>
         </>

@@ -1,4 +1,6 @@
-To be able to create inputs for fields in objects, child form are used. You can create child forms using the `ChildForm` component or `useChildForm` hook. 
+# Object fields
+
+To be able to create inputs for fields in objects, child form are used. You can create child forms using the `ChildForm` component or `useChildForm` hook.
 
 -   [useChildForm](https://github.com/CodeStix/typed-react-form/wiki/useChildForm)
 -   [ChildForm](https://github.com/CodeStix/typed-react-form/wiki/ChildForm)
@@ -21,8 +23,7 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             {/* Input on root form */}
             <FormInput form={form} type="text" name="name" />
             <ChildForm
@@ -55,8 +56,7 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             {/* Use root form */}
             <FormInput form={form} type="text" name="name" />
             {/* Use child form */}
@@ -92,8 +92,7 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             <FormInput form={form} type="text" name="name" />
             {/* Pass form */}
             <PersonInfoForm parent={form} />
@@ -121,20 +120,18 @@ This is also possible with `ChildForm`.
 ```jsx
 function PersonForm() {
     // Create root form
-    const form = useForm(
-        {
-            name: "John",
-            info: {
-                email: "john@example.com",
-                moreInfo: {
-                    age: 20,
-                    moreMoreInfo: {
-                        birthDate: new Date(),
-                    },
+    const form = useForm({
+        name: "John",
+        info: {
+            email: "john@example.com",
+            moreInfo: {
+                age: 20,
+                moreMoreInfo: {
+                    birthDate: new Date(),
                 },
             },
         },
-    );
+    });
     // Create child form
     const personInfoForm = useChildForm(form, "info");
     // Create child form on child form
@@ -146,8 +143,7 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             <FormInput form={form} type="text" name="name" />
             <FormInput form={personInfoForm} type="text" name="email" />
             <FormInput form={personMoreInfoForm} type="number" name="age" />

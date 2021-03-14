@@ -1,4 +1,6 @@
-For some reason when using the default inputs (FormInput, FormSelect ...) and [styled-components](https://github.com/styled-components/styled-components), there is a weird bug that breaks type checking on the styled component.
+# Problem with styled-components
+
+For some reason when using the builtin inputs (FormInput, FormSelect ...) and [styled-components](https://github.com/styled-components/styled-components), there is a weird bug that breaks type checking on the styled component.
 
 **Use the following solution:**
 
@@ -26,7 +28,10 @@ import { StyledFix } from "typed-react-form";
 
 // Example styled FormInput with styled props (primaryColor)
 // Use the StyledFix helper type to explicitly define the type and prop type.
-const CustomInput: StyledFix<typeof FormInput, { primaryColor: string }> = styled(FormInput)<{ primaryColor: string }>`
+const CustomInput: StyledFix<typeof FormInput, { primaryColor: string }> =
+    styled(FormInput) <
+    { primaryColor: string } >
+    `
 
     border: 1px solid ${(e) => e.primaryColor};
 

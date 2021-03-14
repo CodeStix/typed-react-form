@@ -1,12 +1,14 @@
+# `<FormInput />`
+
 A stateful, type-checked form `input` element.
 
 The input transforms its value based on the `type` prop, which **currently supports the following input types**:
 
-- `text`
-- `number`
-- `date` (Date and number timestamp)
-- `checkbox`
-- `radio`
+-   `text`
+-   `number`
+-   `date` (Date and number timestamp)
+-   `checkbox`
+-   `radio`
 
 It is allowed to use multiple inputs on the same field, all of them will be synchronized. These inputs are given a `className` when errored (`typed-form-error`) or modified (`typed-form-dirty`) by default.
 
@@ -82,64 +84,72 @@ Checkboxes behave like a boolean field by default, but when given a value, it be
 ### Submit
 
 You **cannot** use FormInput to create a submit button (type="submit"). Use one of the following alternatives:
-- ```jsx
-  <input type="submit" value="Click here to submit"/>
-  ```
-- ```jsx
-  <button>Click here to submit</button>
-  ```
+
+-   ```jsx
+    <input type="submit" value="Click here to submit" />
+    ```
+-   ```jsx
+    <button>Click here to submit</button>
+    ```
 
 ## Props
 
 #### `form` **(required)**
+
 The form or child form that contains the field to bind to this input.
 
-***
+---
 
 #### `name` **(required)**
+
 The name of the field in the form that will be bound to this input.
 
-***
+---
 
 #### `errorClassName` and `errorStyle`
+
 The className and/or style to set when there is an error on this field. Default className is `typed-form-error`.
 
-***
+---
 
 #### `dirtyClassName` and `dirtyStyle`
+
 The className and/or style to set when this field has been modified. Default className is `typed-form-dirty`.
 
-***
+---
 
 #### `disableOnSubmitting`
+
 Disable this input on submit? Default is `true`.
 
-***
+---
 
 #### `dateAsNumber` (only type="date")
+
 Serialize this fields value as a timestamp instead of a Date object.
 
-***
+---
 
 #### `hideWhenNull`
 
 Set this prop if you want to hide this input when its field value is `null/undefined`. Default is `false`.
 
-***
+---
 
 #### `setNullOnUncheck` and `setUndefinedOnUncheck` (only type="checkbox")
+
 When using one of these props, the checkbox will set null/undefined on the field when unchecked. This prop is only valid for checkboxes. (Can mimic the same behaviour with radio buttons using value props).
 
 Make sure you pass along a `value` too, this is the value that will be set when it gets checked again. Not doing so, will cause a console warning.
 
-***
+---
 
 #### `value` (only type="radio" or type="checkbox")
-- The value of the radio button when using multi-value fields.
-- The value of the checkbox when using primitive arrays.
-- The on-checked value of the checkbox when using the `setNullOnUncheck/setUndefinedOnUncheck` prop.
 
-***
+-   The value of the radio button when using multi-value fields.
+-   The value of the checkbox when using primitive arrays.
+-   The on-checked value of the checkbox when using the `setNullOnUncheck/setUndefinedOnUncheck` prop.
+
+---
 
 All of the input components are wrappers and abstractions around the [`useListener`](https://github.com/CodeStix/typed-react-form/wiki/useListener) hook. Using this hook, you can create your own [custom inputs](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs).
-

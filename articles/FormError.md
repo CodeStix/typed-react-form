@@ -1,4 +1,6 @@
-A very simple field error component. 
+# `<FormError />`
+
+A very simple field error component.
 
 ```jsx
 const form = useForm(
@@ -29,7 +31,7 @@ function CustomFormError<T>(props: { form: FormState<T>; name: keyof T }) {
     const { error } = useListener(props.form, props.name);
 
     // Render nothing when no error
-    if (!error) 
+    if (!error)
         return null;
 
     // Render a styled span on error.
@@ -41,4 +43,3 @@ function CustomFormError<T>(props: { form: FormState<T>; name: keyof T }) {
 ```
 
 You can also create custom input components, look [here](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs).
-

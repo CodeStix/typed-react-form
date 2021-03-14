@@ -1,3 +1,5 @@
+# ChildForm
+
 Use the `ChildForm` component if you want to make fields inside an object field available to inputs. This is a wrapper around [`useChildForm`](https://github.com/CodeStix/typed-react-form/wiki/useChildForm).
 
 ## Props

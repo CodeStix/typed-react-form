@@ -1,3 +1,5 @@
+# Validation
+
 A validator is a function that takes form values, and returns errors for these values in the same object structure.
 
 You can use a validator by passing it to the [`useForm`](https://github.com/CodeStix/typed-react-form/wiki/useForm) hook.
@@ -25,7 +27,7 @@ function loginValidator(values: LoginRequest): ErrorMap<LoginRequest, string> {
 
 function FormExample() {
     const form = useForm<LoginRequest>(
-        { email: "", password: "" }, 
+        { email: "", password: "" },
         loginValidator,  // Pass loginValidator to useForm
         true, // Validate on change (false by default)
         false, // Validate on mount (false by default)

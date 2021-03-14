@@ -1,7 +1,8 @@
+# `useForm`
+
 Creates a new form state manager. This hook does not cause a rerender.
 
-**Note for using `setState` along with `useForm`**:  This library is built upon the fact that only the things that change should rerender. When using `setState` with the form, a state change causes the whole form to rerender. You can reduce this problem by creating components from the things that use the state, or you can use [custom form state](https://github.com/CodeStix/typed-react-form/wiki/useForm#defaultstate-optional-issubmitting-false).
-
+**Note for using `setState` along with `useForm`**: This library is built upon the fact that only the things that change should rerender. When using `setState` with the form, a state change causes the whole form to rerender. You can reduce this problem by creating components from the things that use the state, or you can use [custom form state](https://github.com/CodeStix/typed-react-form/wiki/useForm#defaultstate-optional-issubmitting-false).
 
 `useForm(defaultValues, validator?, validateOnChange = false, validateOnMount = false, defaultState = {isSubmitting: false})`
 
@@ -41,7 +42,7 @@ The default state of the form. Form state contains variables like isSubmitting a
 const form = useForm({ name: "John" }); // form.state = { isSumitting: false } by default.
 
 // Usage with a custom isLoading state.
-// You can update the state using `form.setState`. Every child form can access and update this state too. 
+// You can update the state using `form.setState`. Every child form can access and update this state too.
 // You must include `isSubmitting: false` when using the built-in inputs (FormInput, FormSelect ...), because they require it.
 const form = useForm({ name: "John" }, { isSubmitting: false, isLoading: false });
 ```

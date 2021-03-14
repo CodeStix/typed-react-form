@@ -1,3 +1,5 @@
+# `useAnyListener`
+
 Because this library does not rerender the whole form component when a field changes, there must be a way to get notified about state changes. This is where listeners come in.
 
 The useAnyListener hook listens for any change on a form. Behaves a lot like [`useListener`](https://github.com/CodeStix/typed-react-form/wiki/useListener) but does not take a `name` parameter.
@@ -7,6 +9,7 @@ The useAnyListener hook listens for any change on a form. Behaves a lot like [`u
 **Use the [`AnyListener` component](https://github.com/CodeStix/typed-react-form/wiki/AnyListener) if you want to use these hooks without creating a new component each time.**
 
 **✔️ Right usage**
+
 ```jsx
 // Create seperate component
 function FormStringify<T>(props: { form: FormState<T> }) {
@@ -16,7 +19,7 @@ function FormStringify<T>(props: { form: FormState<T> }) {
 }
 
 function BreadForm() {
-    const form = useForm<Bread>({ color: "brown", size: 58 });
+    const form = useForm < Bread > { color: "brown", size: 58 };
     return (
         <form>
             <FormInput form={form} type="text" name="color" />
@@ -29,9 +32,10 @@ function BreadForm() {
 ```
 
 **❌ Wrong usage (causes form rerender)**
+
 ```jsx
 function BreadForm() {
-    const form = useForm<Bread>({ color: "brown", size: 58 });
+    const form = useForm < Bread > { color: "brown", size: 58 };
     const { values } = useAnyListener(form); // Causes a rerender each time something changes, WRONG!!
     return (
         <form>
@@ -45,9 +49,10 @@ function BreadForm() {
 ```
 
 **✔️ Right usage using `AnyListener` instead of `useAnyListener`**
+
 ```jsx
 function BreadForm() {
-    const form = useForm<Bread>({ color: "brown", size: 58 });
+    const form = useForm < Bread > { color: "brown", size: 58 };
     return (
         <form>
             <FormInput form={form} type="text" name="color" />
@@ -63,11 +68,12 @@ function BreadForm() {
 ## Parameters
 
 `useAnyListener(form)`
-- `form` **(required)**: the form to listen for.
+
+-   `form` **(required)**: the form to listen for.
 
 ## Return value
 
-Returns the form that got passed as parameter, you can destructure it. 
+Returns the form that got passed as parameter, you can destructure it.
 
 ```jsx
 // Example usage
