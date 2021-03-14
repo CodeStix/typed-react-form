@@ -8,7 +8,7 @@ const CATEGORIES = [
     {
         category: "Basic",
         items: [
-            { name: "Getting started", url: "/docs/Home" },
+            { name: "Getting started", url: "/docs/Getting-started" },
             { name: "FormInput", url: "/docs/FormInput" },
             { name: "FormTextArea", url: "/docs/FormTextArea" },
             { name: "FormSelect", url: "/docs/FormSelect" },
