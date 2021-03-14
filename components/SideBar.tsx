@@ -90,15 +90,15 @@ export function SideBar() {
 
     return (
         <Container>
-            {CATEGORIES.map((e) => (
-                <>
+            {CATEGORIES.map((e, i) => (
+                <React.Fragment key={i}>
                     <Category>{e.category}</Category>
-                    {e.items.map((e) => (
-                        <Link href={e.url} passHref>
+                    {e.items.map((e, i) => (
+                        <Link key={i} href={e.url} passHref>
                             <Item current={router.asPath === e.url}>{e.name}</Item>
                         </Link>
                     ))}
-                </>
+                </React.Fragment>
             ))}
         </Container>
     );
