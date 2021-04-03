@@ -43,7 +43,8 @@ function ExampleForm() {
                 if (form.error) return;
                 form.setState({ isSubmitting: true });
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <CustomInput form={form} name="firstName" />
             <CustomInput form={form} name="lastName" />
             <button>Submit</button>

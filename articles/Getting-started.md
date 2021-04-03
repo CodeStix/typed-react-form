@@ -53,7 +53,8 @@ function MyForm() {
                 if (form.error) return;
                 // form.values contains the modified values, form.defaultValues contains the initial values
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <button>Submit!</button>
         </form>
     );
@@ -99,7 +100,8 @@ function MyForm() {
                 form.setState({ isSubmitting: false });
                 // Set new default values if needed
                 form.setDefaultValues(form.values);
-            }}>
+            }}
+        >
             {/* Make sure to pass the form prop! */}
             <FormInput form={form} name="email" type="text" />
             <FormInput form={form} name="password" type="password" />

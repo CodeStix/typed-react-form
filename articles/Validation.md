@@ -37,7 +37,8 @@ function FormExample() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <FormInput form={form} name="email" type="email" />
             <FormError form={form} name="email" />
             <FormInput form={form} name="password" type="password" />

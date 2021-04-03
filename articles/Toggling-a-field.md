@@ -18,7 +18,8 @@ function ToggleForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             {/* Use the setNullOnUncheck prop. The value prop contains the value that is set when the box gets checked again, you can omit it to use the default value */}
             <FormInput form={form} name="name" type="checkbox" setNullOnUncheck value="" />
             {/* Use the hideWhenNull prop to hide the input when its field is null */}
@@ -42,7 +43,8 @@ function ToggleForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <FormInput form={form} name="name" type="text" />
 
             {/* Use the setNullOnUncheck prop. The value prop contains the value that is set when the box gets checked again, you can omit it to use the default value */}

@@ -20,7 +20,8 @@ function ExampleForm() {
             onSubmit={async (ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <FormInput form={form} name="name" />
             <FormInput type="number" form={form} name="age" />
             {/* Use your component, pass the form */}

@@ -8,7 +8,10 @@ function FormExample() {
         {
             name: "John",
         },
-        (values) => ({ name: values.name.length < 3 ? "Name must be longer" : undefined }) // Example validator
+        (values) => ({
+            // Example validator
+            name: values.name.length < 3 ? "Name must be longer" : undefined,
+        })
     );
     return (
         <form
@@ -16,7 +19,8 @@ function FormExample() {
                 ev.preventDefault();
                 console.log("save", form.values);
                 form.setDefaultValues(form.values);
-            }}>
+            }}
+        >
             <FormInput form={form} name="name" />
             {/* Listen for any change on the form */}
             <AnyListener form={form} render={(form) => <button disabled={!form.dirty || form.error}>Save</button>} />

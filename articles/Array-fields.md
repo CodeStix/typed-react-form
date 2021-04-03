@@ -23,7 +23,8 @@ function NotesList() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <ArrayForm
                 parent={form}
                 name="notes"
@@ -68,7 +69,8 @@ function ShoppingListForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <h2>Title</h2>
             <FormInput form={form} type="text" name="title" />
 
@@ -136,7 +138,8 @@ function ShoppingListForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <h2>Title</h2>
             <FormInput form={form} type="text" name="title" />
             <h2>Items</h2>
@@ -161,7 +164,11 @@ function ShoppingListItemsForm(props: { parent: FormState<ShoppingList> }) {
     );
 }
 
-function ShoppingListItemForm(props: { parent: FormState<ShoppingListItem[]>; index: number; remove: (i: number) => void }) {
+function ShoppingListItemForm(props: {
+    parent: FormState<ShoppingListItem[]>;
+    index: number;
+    remove: (i: number) => void;
+}) {
     const form = useChildForm(props.parent, props.index);
     return (
         <div>
@@ -192,7 +199,8 @@ function AnswerForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <ChildForm
                 parent={form}
                 name="answers"
@@ -229,7 +237,8 @@ function SettingsForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <ChildForm // First child form is array
                 parent={form}
                 name="settings"

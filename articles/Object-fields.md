@@ -23,7 +23,8 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             {/* Input on root form */}
             <FormInput form={form} type="text" name="name" />
             <ChildForm
@@ -56,7 +57,8 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             {/* Use root form */}
             <FormInput form={form} type="text" name="name" />
             {/* Use child form */}
@@ -92,7 +94,8 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <FormInput form={form} type="text" name="name" />
             {/* Pass form */}
             <PersonInfoForm parent={form} />
@@ -143,7 +146,8 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <FormInput form={form} type="text" name="name" />
             <FormInput form={personInfoForm} type="text" name="email" />
             <FormInput form={personMoreInfoForm} type="number" name="age" />
