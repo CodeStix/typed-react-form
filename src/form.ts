@@ -404,7 +404,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         this._state = newState;
 
         let c = Object.keys(this.values);
-        if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(newState, notifyChild, notifyParent));
+        if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(newState, true, false));
 
         c.forEach((e) => this.fireListeners(e as keyof T));
         this.fireAnyListeners();
