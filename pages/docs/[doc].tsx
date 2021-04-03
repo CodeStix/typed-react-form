@@ -41,7 +41,11 @@ const ReactMarkdownContainer = styled.div`
     }
 
     code {
-        font-size: 1.3em;
+        display: inline-block;
+        padding: 0.1em 0.5em;
+        background: #0001;
+        border-radius: 0.5em;
+        font-size: 1.2em;
     }
 
     /* @media only screen and (max-width: 600px) {
@@ -53,7 +57,9 @@ const ReactMarkdownContainer = styled.div`
     a {
         padding: 0.3em 0;
         color: #186eee;
-        text-decoration: 1px solid underline;
+        &:hover {
+            color: black;
+        }
     }
 
     hr {
@@ -95,6 +101,7 @@ const SidebarHolder = styled.div`
         z-index: 100;
         backdrop-filter: blur(50px);
         height: 100%;
+        overflow: auto;
         position: fixed;
         padding: 1em;
         transform: translateX(0);
