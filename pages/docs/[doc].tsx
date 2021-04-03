@@ -36,6 +36,10 @@ const ReactMarkdownContainer = styled.div`
     overflow: hidden;
     margin-bottom: 30em;
 
+    pre {
+        border-radius: 0.3em;
+    }
+
     code {
         font-size: 1.3em;
     }
@@ -66,14 +70,20 @@ const ReactMarkdownContainer = styled.div`
         margin: 1.2em 0 0.5em 0;
     }
 
-    /* h1,
+    h1,
     h2 {
+        /* color: #004; */
         padding-bottom: 0.2em;
         border-bottom: 1px solid #0002;
-    } */
+    }
 
     p {
         color: #333;
+    }
+
+    li {
+        margin-top: 0.2em;
+        margin-bottom: 0.2em;
     }
 `;
 
@@ -102,7 +112,10 @@ export default function DocPage(props: Props) {
         <main onClick={() => setShowMobileMenu(false)}>
             <Head>
                 <link rel="preconnect" href="https://fonts.gstatic.com" />
-                <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap" rel="stylesheet" />
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap"
+                    rel="stylesheet"
+                />
             </Head>
             <NavBar onMenu={() => setShowMobileMenu(true)} />
             <CenterContainer style={{ margin: "0 0.5em" }}>
@@ -121,9 +134,16 @@ export default function DocPage(props: Props) {
                                     );
                                 },
                                 code: ({ language, value }) => {
-                                    return <SyntaxHighlighter style={materialOceanic} language={language} children={value} />;
+                                    return (
+                                        <SyntaxHighlighter
+                                            style={materialOceanic}
+                                            language={language}
+                                            children={value}
+                                        />
+                                    );
                                 },
-                            }}>
+                            }}
+                        >
                             {props.content}
                         </ReactMarkdown>
                     </ReactMarkdownContainer>

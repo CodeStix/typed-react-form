@@ -11,7 +11,7 @@ npm install --save typed-react-form
 yarn add typed-react-form
 ```
 
-This library works with both **Javascript** and **Typescript**. **Typescript** is certainly preferred because of the enforced type-checking!
+This library works with both **Javascript** and **Typescript**. Typescript is certainly preferred because of the enforced type-checking!
 
 ## Step 2: Creating a form
 
@@ -34,7 +34,8 @@ function MyForm() {
 
 ### Creating the submit handler
 
-**typed-react-form** does not expose any submit events or helpers, you must implement your own submitting procedure. This is typically done by using the `<form>` html element with the `onSubmit` event and using a submit button.
+Pass `form.handleSubmit` to the form's `onSubmit` prop to validate before calling your callback function.
+You can also just use a `<button>` and submitting in the button's `onClick` handler, but this event does not fire when pressing return/enter in a text input!
 
 ✔️ **`<form>` element with `onSubmit` event**
 
@@ -43,29 +44,27 @@ import { useForm } from "typed-react-form";
 
 function MyForm() {
     const form = useForm({ email: "" });
-    // Use the html form element, which exposes the onSubmit event.
+    // Use the standard html form element, which exposes the onSubmit event.
     return (
         <form
-            onSubmit={(ev) => {
-                // IMPORTANT: Prevent the onSubmit event from reloading the page!
-                ev.preventDefault();
-                // Do not submit if there is an error! Use form.validate to validate when validateOnChange is disabled.
-                if (form.error) return;
-                // form.values contains the modified values, form.defaultValues contains the initial values
+            onSubmit={form.handleSubmit(() => {
+                // The form.handleSubmit validates the form before calling your callback
+                // Do your submit logic here...
                 console.log("submit", form.values);
-            }}
+            })}
         >
-            <button>Submit!</button>
+            {/* Make sure to add type="submit" */}
+            <button type="submit">Submit!</button>
         </form>
     );
 }
 ```
 
-You can also just use a `<button>` and submitting in the button's `onClick` handler, but this event does not fire when pressing enter in a text input!
+`form.handleSubmit()` just returns a helper function that wraps `ev.preventDefault()`, `form.validate()` and `form.setState()`.
 
 ### Creating inputs
 
-This library is build upon the fact that only the things that change should rerender (~refresh), for example: when the _name_ field changes, only the inputs that use _name_ field will rerender.
+This library is build upon the fact that only the things that change should rerender (~refresh), for example: when the _name_ field changes, only the inputs that use the _name_ field will rerender.
 
 The built-in form elements ([`FormInput`](/docs/FormInput), [`FormSelect`](/docs/FormSelect) ...) implement this by listening for changes only on their specified field. You can also use multiple inputs on the same field (they will the synchronized) and listen for changes on a field by using the [`useListener`](/docs/useListener) hook or [`Listener`](/docs/Listener) component.
 
@@ -87,25 +86,19 @@ function MyForm() {
     const form = useForm({ email: "", password: "" });
     return (
         <form
-            onSubmit={async (ev) => {
-                ev.preventDefault();
-                if (form.error) return;
-
-                // Notify every input that the form is submitting. This will disable them.
-                form.setState({ isSubmitting: true });
+            onSubmit={form.handleSubmit(async (ev) => {
+                // Implement your submit logic here...
+                console.log("submitting", form.values);
                 // Fake fetch, by waiting for 500ms
-                console.log("submit", form.values);
                 await new Promise((res) => setTimeout(res, 500));
-                // Notify every input that the form is not submitting anymore.
-                form.setState({ isSubmitting: false });
-                // Set new default values if needed
+                // Optional: set new default values
                 form.setDefaultValues(form.values);
-            }}
+            })}
         >
             {/* Make sure to pass the form prop! */}
             <FormInput form={form} name="email" type="text" />
             <FormInput form={form} name="password" type="password" />
-            <button>Submit!</button>
+            <button type="submit">Submit!</button>
         </form>
     );
 }
