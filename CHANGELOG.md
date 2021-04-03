@@ -16,3 +16,7 @@
 
     form.setError("email", ...); // Must be "error-email" | "error-password"
     ```
+
+# 1.2.9 (03/04/2021)
+
+-   Do not reset values on useForm state change, because this can cause confusion.

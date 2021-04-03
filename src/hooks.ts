@@ -4,7 +4,7 @@ import { DefaultState, DefaultError, FormState, ChildFormState, Validator } from
 /**
  * Creates a new root form.
  * This hook doesn't cause a rerender.
- * @param defaultValues The default values for this form.
+ * @param defaultValues The default values for this form. When this value changes, nothing happens, use useEffect() with form.setValues to set form values on state change.
  * @param validator The validator to use, optional.
  * @param validateOnChange Validate on change? Optional, default is false.
  * @param validateOnMount Validate on mount? Optional, default is false.
@@ -30,9 +30,10 @@ export function useForm<T, State = DefaultState, Error extends string = DefaultE
         );
     }
 
-    useEffect(() => {
-        c.current!.setDefaultValues(defaultValues, c.current!.validateOnMount, true, false);
-    }, [defaultValues]);
+    // Do not reset values on state change
+    // useEffect(() => {
+    //     c.current!.setDefaultValues(defaultValues, c.current!.validateOnMount, true, false);
+    // }, [defaultValues]);
 
     return c.current;
 }
