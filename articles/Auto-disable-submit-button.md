@@ -2,7 +2,7 @@
 
 ![live updating form values](https://raw.githubusercontent.com/wiki/CodeStix/typed-react-form/images/submitbutton.gif)
 
-```jsx
+```tsx
 function FormExample() {
     const form = useForm(
         {

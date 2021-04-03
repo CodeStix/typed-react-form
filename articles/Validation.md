@@ -8,7 +8,7 @@ Its it recommended to use a validation library, as this makes the process of val
 
 ## Example
 
-```jsx
+```tsx
 import { useForm, FormInput, FormError, AnyListener, ErrorMap } from "typed-react-form";
 
 interface LoginRequest {
@@ -21,24 +21,23 @@ function loginValidator(values: LoginRequest): ErrorMap<LoginRequest, string> {
     // Example validator logic, the returned error object should follow the same structure as the values object.
     return {
         email: values.email.length < 10 ? "Email must be longer" : undefined,
-        password: values.password.length < 5 ? "Password must be longer" : undefined
+        password: values.password.length < 5 ? "Password must be longer" : undefined,
     };
 }
 
 function FormExample() {
     const form = useForm<LoginRequest>(
         { email: "", password: "" },
-        loginValidator,  // Pass loginValidator to useForm
+        loginValidator, // Pass loginValidator to useForm
         true, // Validate on change (false by default)
-        false, // Validate on mount (false by default)
+        false // Validate on mount (false by default)
     );
     return (
         <form
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             <FormInput form={form} name="email" type="email" />
             <FormError form={form} name="email" />
             <FormInput form={form} name="password" type="password" />

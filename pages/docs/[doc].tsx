@@ -71,6 +71,10 @@ const ReactMarkdownContainer = styled.div`
         padding-bottom: 0.2em;
         border-bottom: 1px solid #0002;
     } */
+
+    p {
+        color: #333;
+    }
 `;
 
 const SidebarHolder = styled.div`

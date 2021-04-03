@@ -23,7 +23,7 @@ All of the form hook ([`useForm`](/docs/useForm), [`useChildForm`](/docs/useChil
 
 ✔️ **Importing and using `useForm`**
 
-```jsx
+```tsx
 import { useForm } from "typed-react-form";
 
 function MyForm() {
@@ -38,7 +38,7 @@ function MyForm() {
 
 ✔️ **`<form>` element with `onSubmit` event**
 
-```jsx
+```tsx
 import { useForm } from "typed-react-form";
 
 function MyForm() {
@@ -78,7 +78,7 @@ You are now ready to create inputs, this library provides the following built-in
 
 ✔️ **Example type-checked form consisting of 2 fields**
 
-```jsx
+```tsx
 // Import FormInput
 import { useForm, FormInput } from "typed-react-form";
 

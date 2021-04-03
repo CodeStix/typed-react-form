@@ -11,7 +11,7 @@ This design choice makes complete type checking possible.
 
 ✔️ **Object field using `ChildForm`**
 
-```jsx
+```tsx
 function PersonForm() {
     // Info object contains email and age
     const form = useForm({
@@ -45,7 +45,7 @@ function PersonForm() {
 
 **✔️ `useChildForm` without seperate component**
 
-```jsx
+```tsx
 function PersonForm() {
     // Create root form
     const form = useForm({ name: "John", info: { email: "john@example.com", age: 20 } });
@@ -70,7 +70,7 @@ function PersonForm() {
 
 **✔️ `useChildForm` with seperate component**
 
-```jsx
+```tsx
 interface Person {
     name: string;
     info: PersonInfo;
@@ -117,7 +117,7 @@ function PersonInfoForm(props: { parent: FormState<Person> }) {
 
 This is also possible with `ChildForm`.
 
-```jsx
+```tsx
 function PersonForm() {
     // Create root form
     const form = useForm({

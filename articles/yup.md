@@ -18,7 +18,7 @@ Yup validation options.
 
 ## Usage example
 
-```jsx
+```tsx
 import { useForm, yupValidator, FormError, FormInput, AnyListener } from "typed-react-form";
 import * as yup from "yup";
 
@@ -33,10 +33,7 @@ const LoginRequestSchema = yup.object({
 });
 
 function FormExample() {
-    const form =
-        useForm <
-        LoginRequest >
-        ({ email: "", password: "" }, yupValidator(LoginRequestSchema)); // Use the yup validator
+    const form = useForm<LoginRequest>({ email: "", password: "" }, yupValidator(LoginRequestSchema)); // Use the yup validator
     return (
         <form
             onSubmit={(ev) => {

@@ -6,7 +6,7 @@
 
 ✔️ **Toggle string field using checkbox**
 
-```jsx
+```tsx
 import { useForm, FormInput } from "typed-react-form";
 
 function ToggleForm() {
@@ -31,7 +31,7 @@ function ToggleForm() {
 
 ✔️ **Toggle object field using checkbox**
 
-```jsx
+```tsx
 function ToggleForm() {
     const form = useForm({
         name: "codestix",

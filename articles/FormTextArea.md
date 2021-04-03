@@ -4,7 +4,7 @@ A stateful, type-checked form `textarea` element.
 
 These inputs are given a `className` when errored (`typed-form-error`) or modified (`typed-form-dirty`) by default.
 
-```jsx
+```tsx
 const form = useForm({
     description: "Ullamco velit eiusmod eiusmod veniam nulla exercitation fugiat.",
 });

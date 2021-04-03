@@ -2,7 +2,7 @@
 
 ![live updating form values](https://raw.githubusercontent.com/wiki/CodeStix/typed-react-form/images/jsoncomponent.gif)
 
-```jsx
+```tsx
 // Take a form containing any values
 function FormJson(props: { form: FormState<any> }) {
     // Listen for all changes on the form

@@ -38,7 +38,7 @@ True if you want to validate when the form mounts.
 
 The default state of the form. Form state contains variables like isSubmitting and other **custom** form related states.
 
-```jsx
+```tsx
 const form = useForm({ name: "John" }); // form.state = { isSumitting: false } by default.
 
 // Usage with a custom isLoading state.

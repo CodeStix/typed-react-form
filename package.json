@@ -17,7 +17,8 @@
     "react-dom": "17.0.1",
     "react-markdown": "^5.0.3",
     "react-syntax-highlighter": "^15.4.3",
-    "styled-components": "^5.2.1"
+    "styled-components": "^5.2.1",
+    "typed-react-form": "^1.2.10"
   },
   "devDependencies": {
     "@types/node": "^14.14.34",

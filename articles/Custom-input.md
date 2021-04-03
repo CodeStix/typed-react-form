@@ -6,7 +6,7 @@ If the default input types (FormInput, FormSelect ...) do not provide enough fun
 
 The following code resembles a custom input component that shows an error when needed, paints gray background when modified, gets disabled when submitting and shows its defaultValue as a placeholder. You can tweak this custom input further by implementing transformations for different input types, allowing `HTMLInputAttributes` etc.
 
-```jsx
+```tsx
 function CustomInput<T>(props: { form: FormState<T>; name: keyof T; children?: React.ReactNode }) {
     const { value, error, dirty, setValue, state, defaultValue } = useListener(props.form, props.name);
 
@@ -30,7 +30,7 @@ function ExampleForm() {
     const form = useForm(
         {
             firstName: "John",
-            lastName: "Pineapple"
+            lastName: "Pineapple",
         },
         (values) => ({ firstName: values.firstName.length < 3 ? "Firstname must be longer!" : undefined }) // Example validator
     );
@@ -43,8 +43,7 @@ function ExampleForm() {
                 if (form.error) return;
                 form.setState({ isSubmitting: true });
                 console.log("submit", form.values);
-            }}
-        >
+            }}>
             <CustomInput form={form} name="firstName" />
             <CustomInput form={form} name="lastName" />
             <button>Submit</button>

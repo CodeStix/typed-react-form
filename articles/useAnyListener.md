@@ -10,7 +10,7 @@ The useAnyListener hook listens for any change on a form. Behaves a lot like [`u
 
 **✔️ Right usage**
 
-```jsx
+```tsx
 // Create seperate component
 function FormStringify<T>(props: { form: FormState<T> }) {
     const { values } = useAnyListener(props.form);
@@ -33,7 +33,7 @@ function BreadForm() {
 
 **❌ Wrong usage (causes form rerender)**
 
-```jsx
+```tsx
 function BreadForm() {
     const form = useForm < Bread > { color: "brown", size: 58 };
     const { values } = useAnyListener(form); // Causes a rerender each time something changes, WRONG!!
@@ -50,7 +50,7 @@ function BreadForm() {
 
 **✔️ Right usage using `AnyListener` instead of `useAnyListener`**
 
-```jsx
+```tsx
 function BreadForm() {
     const form = useForm < Bread > { color: "brown", size: 58 };
     return (
@@ -75,7 +75,7 @@ function BreadForm() {
 
 Returns the form that got passed as parameter, you can destructure it.
 
-```jsx
+```tsx
 // Example usage
 const { values, defaultValues } = useAnyListener(form);
 // Same as form.values, form.defaultValues

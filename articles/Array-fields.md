@@ -13,7 +13,7 @@ If you have an array field with a constant size, you should probably just use [`
 
 ✔️ **Dynamic string array field using `ArrayForm`**
 
-```jsx
+```tsx
 function NotesList() {
     const form = useForm({
         notes: ["Do the dishes", "Go outside", "Drink some water"],
@@ -56,7 +56,7 @@ function NotesList() {
 
 Remember: this is all type checked!
 
-```jsx
+```tsx
 function ShoppingListForm() {
     const form = useForm({
         title: "My shopping list",
@@ -113,7 +113,7 @@ function ShoppingListForm() {
 
 ✔️ **Dynamic object array field with seperate component for each child form and using `useArrayForm`**
 
-```jsx
+```tsx
 interface ShoppingListItem {
     name: string;
     amount: number;
@@ -161,7 +161,7 @@ function ShoppingListItemsForm(props: { parent: FormState<ShoppingList> }) {
     );
 }
 
-function ShoppingListItemForm(props: { parent: FormState<ShoppingListItem[]>, index: number, remove: (i: number) => void }) {
+function ShoppingListItemForm(props: { parent: FormState<ShoppingListItem[]>; index: number; remove: (i: number) => void }) {
     const form = useChildForm(props.parent, props.index);
     return (
         <div>
@@ -181,7 +181,7 @@ A fixed array always has the same size, [`ChildForm`](/docs/ChildForm) is used, 
 
 ✔️ **Fixed array field containing strings**
 
-```jsx
+```tsx
 function AnswerForm() {
     const form = useForm({
         // Always 3 items in array
@@ -216,7 +216,7 @@ function AnswerForm() {
 
 ✔️ **Fixed array field containing objects**
 
-```jsx
+```tsx
 function SettingsForm() {
     const form = useForm({
         settings: [

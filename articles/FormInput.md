@@ -14,7 +14,7 @@ It is allowed to use multiple inputs on the same field, all of them will be sync
 
 ## Examples
 
-```jsx
+```tsx
 const form = useForm({
     name: "codestix",
     age: 19,
@@ -47,7 +47,7 @@ const form = useForm({
 
 Radio buttons must be given a value, and can be used for fields of different types.
 
-```jsx
+```tsx
 
 // Enum field
 <FormInput form={form} type="radio" name="gender" value="male" />
@@ -62,7 +62,7 @@ Radio buttons must be given a value, and can be used for fields of different typ
 
 Checkboxes behave like a boolean field by default, but when given a value, it behaves as a primitive array field (like a select with multiple = true). They can also set values on check/uncheck, this is useful for toggling fields.
 
-```jsx
+```tsx
 // Boolean field
 <FormInput form={form} type="checkbox" name="likePasta" />
 
@@ -85,10 +85,10 @@ Checkboxes behave like a boolean field by default, but when given a value, it be
 
 You **cannot** use FormInput to create a submit button (type="submit"). Use one of the following alternatives:
 
--   ```jsx
+-   ```tsx
     <input type="submit" value="Click here to submit" />
     ```
--   ```jsx
+-   ```tsx
     <button>Click here to submit</button>
     ```
 

@@ -2,7 +2,7 @@
 
 A very simple field error component.
 
-```jsx
+```tsx
 const form = useForm(
     {
         name: "John Tester"
@@ -22,24 +22,18 @@ Because this component doesn't have a lot of functionality (only props are `form
 
 Below is an example of a custom form error component.
 
-```jsx
-
+```tsx
 // Use generics to create type-safe code
 function CustomFormError<T>(props: { form: FormState<T>; name: keyof T }) {
-
     // Listen for changes on a form field, behaves like useState
     const { error } = useListener(props.form, props.name);
 
     // Render nothing when no error
-    if (!error)
-        return null;
+    if (!error) return null;
 
     // Render a styled span on error.
-    return <span style={{ color: "red", fontWeight: "bold" }}>
-        {error}
-    </span>;
+    return <span style={{ color: "red", fontWeight: "bold" }}>{error}</span>;
 }
-
 ```
 
 You can also create custom input components, look [here](/docs/Custom-inputs).
