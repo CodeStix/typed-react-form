@@ -1,6 +1,16 @@
+# 1.2.11 (03/04/2021)
+
+-   Fix: return true when validate is called on a form which doesn't have a validator set.
+
+# 1.2.10 (03/04/2021)
+
+-   Do not reset values on `useForm` state change, because this can cause confusion.
+-   `form.handleSubmit` helper function.
+-   Fix: `form.setState` causing double `form.setState` call.
+
 # 1.2.9 (12/03/2021)
 
--   Fixed #2: operator _short-circuiting_ caused only one error to be set when using `form.setErrors`.
+-   Fixed #2: operator _short-circuiting_ caused only one error to be set when using `form.setErrors`. (#2)
 
 # 1.2.8 (12/03/2021)
 
@@ -16,9 +26,3 @@
 
     form.setError("email", ...); // Must be "error-email" | "error-password"
     ```
-
-# 1.2.9 (03/04/2021)
-
--   Do not reset values on `useForm` state change, because this can cause confusion.
--   `form.handleSubmit` helper function.
--   Fixed `form.setState` causing double `form.setState` call.
