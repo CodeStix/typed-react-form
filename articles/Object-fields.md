@@ -28,7 +28,7 @@ function PersonForm() {
             {/* Input on root form */}
             <FormInput form={form} type="text" name="name" />
             <ChildForm
-                parent={form}
+                form={form}
                 name="info"
                 render={(form) => (
                     <>

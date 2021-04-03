@@ -26,14 +26,12 @@ function NotesList() {
             }}
         >
             <ArrayForm
-                parent={form}
+                form={form}
                 name="notes"
                 render={({ form, values, append, remove }) => (
                     <>
-                        {values.map((
-                            _,
-                            i // You SHOULD use index as key. See top for info.
-                        ) => (
+                        {/* You SHOULD use index as key. See top for info. */}
+                        {values.map((_, i) => (
                             <div key={i}>
                                 <FormInput form={form} name={i} />
                                 <button type="button" onClick={() => remove(i)}>
@@ -74,18 +72,20 @@ function ShoppingListForm() {
             <h2>Title</h2>
             <FormInput form={form} type="text" name="title" />
 
+            {/* Create an array child form for the 'items' field */}
             <h2>Items</h2>
-            <ArrayForm // Create an array child form for the 'items' field
-                parent={form}
+            <ArrayForm
+                form={form}
                 name="items"
                 render={({ form, values, append, remove }) => (
                     <>
                         {/* This only rerenders when the whole array changes. */}
 
                         {values.map((_, i) => (
-                            <ChildForm // Create a child form for each item in the array, because each array item is an object.
+                            // Create a child form for each item in the array, because each array item is an object.
+                            <ChildForm
                                 key={i} // You should index as key
-                                parent={form} // Pass the parent form
+                                form={form} // Pass the parent form
                                 name={i} // Pass the current index as the name
                                 render={(form) => (
                                     <div>
@@ -215,48 +215,6 @@ function AnswerForm() {
                         <FormInput form={form} name={2} type="text" />
                     </div>
                 )}
-            />
-            <button>Submit</button>
-        </form>
-    );
-}
-```
-
-✔️ **Fixed array field containing objects**
-
-```tsx
-function SettingsForm() {
-    const form = useForm({
-        settings: [
-            { name: "Enable email", value: true },
-            { name: "Enable notifications", value: false },
-        ],
-    });
-    return (
-        <form
-            onSubmit={(ev) => {
-                ev.preventDefault();
-                console.log("submit", form.values);
-            }}
-        >
-            <ChildForm // First child form is array
-                parent={form}
-                name="settings"
-                render={(form) =>
-                    form.values.map((_, i) => (
-                        <ChildForm // Second child form is object in array
-                            key={i}
-                            parent={form}
-                            name={i}
-                            render={(form) => (
-                                <div>
-                                    <p>{form.values.name}</p>
-                                    <FormInput form={form} name="value" type="checkbox" />
-                                </div>
-                            )}
-                        />
-                    ))
-                }
             />
             <button>Submit</button>
         </form>

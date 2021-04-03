@@ -115,8 +115,8 @@ Tweak the above example to your desire by...
 
 -   [Reading more about `FormInput`](/docs/FormInput)
 -   [Implementing validation](/docs/Validation)
--   [Adding object fields](/docs/Object-fields)
--   [Adding array fields](/docs/Array-fields)
+-   [Using object fields](/docs/Object-fields)
+-   [Using array fields](/docs/Array-fields)
 -   [Toggling a field using a checkbox](/docs/Toggling-a-field)
 -   [Creating a component which shows the current form values in JSON](/docs/Live-json-component)
 -   [Creating a custom input like FormInput, FormSelect ...](/docs/Custom-input)

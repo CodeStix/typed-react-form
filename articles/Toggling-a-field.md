@@ -51,7 +51,7 @@ function ToggleForm() {
             <FormInput form={form} name="location" type="checkbox" setNullOnUncheck />
             {/* ChildForm hides its contents when null/undefined by default */}
             <ChildForm
-                parent={form}
+                form={form}
                 name="location"
                 render={(form) => (
                     <>
