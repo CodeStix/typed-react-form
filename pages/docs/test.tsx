@@ -104,7 +104,7 @@ function ShoppingListForm() {
     );
 }
 
-function ToggleForm() {
+function ToggleExample() {
     const form = useForm({
         name: "codestix",
         location: { long: 123, lat: 456 }, // Object field
@@ -146,7 +146,7 @@ function FormJson(props: { form: FormState<any> }) {
 }
 
 // Usage
-function ExampleForm() {
+function FormJsonExample() {
     const form = useForm({ name: "John", age: 19 });
     return (
         <form
@@ -181,7 +181,7 @@ function loginValidator(values: LoginRequest): ErrorMap<LoginRequest, string> {
     };
 }
 
-function FormExample() {
+function ValidationExample() {
     const form = useForm<LoginRequest>(
         { email: "", password: "" },
         loginValidator, // Pass loginValidator to useForm
@@ -214,11 +214,11 @@ export default function Testing() {
             <hr />
             <ShoppingListForm />
             <hr />
-            <ToggleForm />
+            <ToggleExample />
             <hr />
-            <ExampleForm />
+            <FormJsonExample />
             <hr />
-            <FormExample />
+            <ValidationExample />
         </>
     );
 }
