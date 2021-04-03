@@ -284,9 +284,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @returns true if the form is valid.
      */
     public async validate() {
-        if (!this.validator) {
-            return false;
-        }
+        if (!this.validator) return true;
         let r = this.validator(this.values);
         if (r instanceof Promise) r = await r;
         this.setErrors(r);
@@ -298,9 +296,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @returns true if the form is valid.
      */
     public validateSync() {
-        if (!this.validator) {
-            return false;
-        }
+        if (!this.validator) return true;
         let r = this.validator(this.values);
         if (r instanceof Promise)
             throw new Error("validateSync() was called on a form with an asynchronous validator set, please use `await form.validate()` instead.");
