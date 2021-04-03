@@ -32,7 +32,7 @@ Contributions are always welcome!
 
 To begin developing yourself, clone this repo, and do the following:
 - `/`: contains the library source code. Use `yarn start` or `npm run start` to watch the files and build each time something changes. This way the testing application gets updated each time.
-- `example/`: contains the testing React app. Use `yarn start` or `npm run start` to start the application.
+- `example/`: contains the testing application. Use `yarn start` or `npm run start` in the example directory to start the application.
 
 ## License
 
