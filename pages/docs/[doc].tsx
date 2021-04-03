@@ -12,11 +12,14 @@ import { materialOceanic } from "react-syntax-highlighter/dist/cjs/styles/prism"
 import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
 
 const ARTICLES_PATH = path.join(process.cwd(), "articles");
 
 interface Props {
     content: string;
+    title: string;
 }
 
 const Container = styled.div`
@@ -32,6 +35,7 @@ const Container = styled.div`
 `;
 
 const ReactMarkdownContainer = styled.div`
+    position: relative;
     display: block;
     overflow: hidden;
     margin-bottom: 30em;
@@ -113,6 +117,16 @@ const SidebarHolder = styled.div`
     }
 `;
 
+const Edit = styled.a`
+    text-decoration: none;
+    color: #186eee;
+    position: absolute;
+    padding: 0 !important;
+    top: 0.8em;
+    right: 0.8em;
+    cursor: pointer;
+`;
+
 export default function DocPage(props: Props) {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     return (
@@ -131,6 +145,14 @@ export default function DocPage(props: Props) {
                         <SideBar />
                     </SidebarHolder>
                     <ReactMarkdownContainer>
+                        <Link
+                            passHref
+                            href={`https://github.com/CodeStix/typed-react-form-docs/tree/main/articles/${props.title}.md`}
+                        >
+                            <Edit>
+                                Edit <FontAwesomeIcon icon={faPen} />
+                            </Edit>
+                        </Link>
                         <ReactMarkdown
                             renderers={{
                                 link: ({ children, href }) => {
@@ -165,6 +187,7 @@ export const getStaticProps: GetStaticProps<Props> = async function (props) {
     let file = path.join(ARTICLES_PATH, title + ".md");
     return {
         props: {
+            title,
             content: await fs.readFile(file, "utf-8"),
         },
     };
