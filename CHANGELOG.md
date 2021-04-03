@@ -21,3 +21,4 @@
 
 -   Do not reset values on `useForm` state change, because this can cause confusion.
 -   `form.handleSubmit` helper function.
+-   Fixed `form.setState` causing double `form.setState` call.
