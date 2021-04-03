@@ -97,7 +97,6 @@ export function ArrayTest() {
     const [values, setValues] = useState({ name: "a list", items: ["asdf"] });
     const form = useForm(values);
     const arrayForm = useArrayForm(form, "items");
-
     return (
         <form
             onSubmit={(ev) => {
@@ -137,19 +136,11 @@ export function Form() {
 
     return (
         <form
-            onSubmit={async (ev) => {
-                ev.preventDefault();
-
-                await form.validate(); // Validate manually when validateOnChange is disabled.
-                if (form.error) return; // Do not submit if errors
-
-                form.setState({ isSubmitting: true }); // Set the form state (updates every component listening for state updates)
-
+            onSubmit={form.handleSubmit(async () => {
                 await new Promise((res) => setTimeout(res, 1000)); // Fake fetch
 
-                form.setState({ isSubmitting: false }); // Set the form state (updates every component listening for state updates)
                 form.setDefaultValues(form.values); // Set new default values
-            }}
+            })}
         >
             <div style={{ display: "grid", gridTemplateColumns: "60% 40%", gridTemplateRows: "100%", gap: "2em", margin: "2em" }}>
                 <VisualRender>
@@ -342,7 +333,7 @@ export function Form() {
                         form={form}
                         render={({ state, dirty }) => (
                             <div style={{ margin: "0.5em 0" }}>
-                                <button style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty}>
+                                <button type="submit" style={{ fontSize: "1.3em" }} disabled={state.isSubmitting || !dirty}>
                                     Submit
                                 </button>
                                 <button

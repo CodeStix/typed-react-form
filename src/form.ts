@@ -241,11 +241,13 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @param notifyParent Should this form notify the parent form about this change?
      */
     public setValues(values: T, validate?: boolean, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
+        // No set is used because this could cause problems with array keys, which must always be in the right order
         let keys = Object.keys(isDefault ? this.defaultValues : this.values);
         let newKeys = Object.keys(values);
         for (let i = 0; i < newKeys.length; i++) {
             if (!keys.includes(newKeys[i])) keys.push(newKeys[i]);
         }
+
         // Traverse backwards, so when removing array items, the whole array gets shifted in the right direction
         for (let i = keys.length - 1; i >= 0; i--) {
             let key = keys[i] as keyof T;
@@ -407,6 +409,34 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         c.forEach((e) => this.fireListeners(e as keyof T));
         this.fireAnyListeners();
         if (notifyParent) this.updateParentState();
+    }
+
+    /**
+     * Creates a submit handler to pass to your `<form onSubmit={...}>`. The function executes the passed handler only if the form validates correctly.
+     * @param handler The handler to execute when this form contains no errors.
+     */
+    public handleSubmit(handler: (form: FormState<T, State, Error>) => void | Promise<void>) {
+        async function handle(this: FormState<T, State, Error>, ev: React.FormEvent<HTMLFormElement>) {
+            ev.preventDefault();
+
+            // Show helpful warning when using buttons to submit
+            if (process.env.NODE_ENV === "development") {
+                let buttons = Array.from((ev.target as HTMLFormElement).querySelectorAll("button"));
+                let noTypeButton = buttons.find((e) => !("type" in e.attributes));
+                if (noTypeButton) {
+                    console.error(
+                        `The submitted form contains a button without a type attribute. Please populate every button in your form with either type="button" or type="submit".`,
+                        noTypeButton
+                    );
+                }
+            }
+
+            if (!(await this.validate())) return;
+            this.setState({ ...this.state, isSubmitting: true });
+            await handler(this);
+            this.setState({ ...this.state, isSubmitting: false });
+        }
+        return handle.bind(this);
     }
 
     /**
