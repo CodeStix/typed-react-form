@@ -1,3 +1,7 @@
+# 1.2.12 (05/04/2021)
+
+-   Excluding \*.modern.js files from build.
+
 # 1.2.11 (03/04/2021)
 
 -   Fix: return true when validate is called on a form which doesn't have a validator set.
