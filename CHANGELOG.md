@@ -1,4 +1,4 @@
-# 1.2.14 (07/04/2021)
+# 1.3.0 (07/04/2021)
 
 -   Moved `yupValidator` to seperate package [`typed-react-form-yup`](https://www.npmjs.com/package/typed-react-form-yup)
 -   Child/array forms name prop only allows object fields now.
