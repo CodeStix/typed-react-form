@@ -213,7 +213,7 @@ export class FormState<T extends object, State = DefaultState, Error extends str
      * @param isDefault Is this the default value?
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
-     * @param setValuesWasUsed Fire all `anyListeners` after field is set? You should not touch this. (will be false for bulk sets, they will call fireAnyListeners() after every field is set)
+     * @param fireAny Fire all `anyListeners` after field is set?
      */
     public setValue<Key extends keyof T>(
         key: Key,
@@ -291,6 +291,7 @@ export class FormState<T extends object, State = DefaultState, Error extends str
         }
 
         this.fireAnyListeners();
+
         if (notifyParent && this instanceof ChildFormState) {
             if (typeof values === "object" && values !== null) {
                 this.parent.setValueInternal(
@@ -354,6 +355,7 @@ export class FormState<T extends object, State = DefaultState, Error extends str
      * @param error The error.
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
+     * @param fireAny Fire all `anyListeners` after field is set?
      */
     public setError<Key extends keyof T>(
         key: Key,
@@ -465,7 +467,7 @@ export class FormState<T extends object, State = DefaultState, Error extends str
      * Creates a submit handler to pass to your `<form onSubmit={...}>`. The function executes the passed handler only if the form validates correctly.
      * @param handler The handler to execute when this form contains no errors.
      */
-    public handleSubmit(handler: (form: FormState<T, State, Error>) => void | Promise<void>) {
+    public handleSubmit(handler: (form: FormState<T, State, Error>, ev: React.FormEvent<HTMLFormElement>) => void | Promise<void>) {
         async function handle(this: FormState<T, State, Error>, ev: React.FormEvent<HTMLFormElement>) {
             ev.preventDefault();
 
@@ -483,7 +485,7 @@ export class FormState<T extends object, State = DefaultState, Error extends str
 
             if (!(await this.validate())) return;
             this.setState({ ...this.state, isSubmitting: true });
-            await handler(this);
+            await handler(this, ev);
             this.setState({ ...this.state, isSubmitting: false });
         }
         return handle.bind(this);
@@ -575,17 +577,4 @@ export class ChildFormState<T extends FieldsOfType<any, object>, K extends KeysO
         this.parent = parent;
         this.name = name;
     }
-
-    // public setValueInternal<F extends keyof NonNullable<T[K]>>(
-    //     key: F,
-    //     value: T[K][F] | undefined,
-    //     dirty: boolean,
-    //     validate?: boolean,
-    //     isDefault: boolean = false,
-    //     notifyChild: boolean = true,
-    //     notifyParent: boolean = true,
-    //     fireAny: boolean = true
-    // ) {
-    //     super.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
-    // }
 }

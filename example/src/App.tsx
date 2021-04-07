@@ -303,6 +303,9 @@ export function Form() {
                                     <button type="button" onClick={() => form.setErrors("This is a parent error")}>
                                         Set parent error
                                     </button>
+                                    <button type="button" onClick={() => form.parent.setValue("author", null, true)}>
+                                        Test
+                                    </button>
                                 </div>
                             </VisualRender>
                         )}
