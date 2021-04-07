@@ -15,8 +15,9 @@ import {
     useArrayForm
 } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
-import * as yup from "yup";
-import { yupValidator } from "typed-react-form-yup";
+// import * as yup from "yup";
+// import { yupValidator } from "typed-react-form-yup";
+import tv from "typed-object-validator";
 
 interface ExampleFormData {
     id: number;
@@ -82,15 +83,25 @@ const initialValues: ExampleFormData = {
     todos: [{ message: "This is a todo", priority: "normal" }]
 };
 
-const TodoListSchema = yup.object({
-    name: yup.string().required("Enter a name").min(5, "Enter a longer name"),
-    language: yup.string().oneOf(["en", "nl"], "Must be english or dutch"),
-    todos: yup.array().of(
-        yup.object({
-            message: yup.string().required("Enter a todo")
+const TodoListSchema = tv.object({
+    name: tv.string().min(5, "Enter a longer name"),
+    language: tv.value("en").or(tv.value("nl", "Must be english or dutch")),
+    todos: tv.array(
+        tv.object({
+            message: tv.string().min(1, "Enter a todo")
         })
     )
 });
+
+// const TodoListSchema = yup.object({
+//     name: yup.string().required("Enter a name").min(5, "Enter a longer name"),
+//     language: yup.string().oneOf(["en", "nl"], "Must be english or dutch"),
+//     todos: yup.array().of(
+//         yup.object({
+//             message: yup.string().required("Enter a todo")
+//         })
+//     )
+// });
 
 export function ArrayTest() {
     const [values, setValues] = useState({ name: "a list", items: ["asdf"] });
@@ -128,7 +139,7 @@ export function ArrayTest() {
 export function Form() {
     const form = useForm(
         initialValues, // <- Default values, may change
-        yupValidator(TodoListSchema, { abortEarly: false }), // <- Validator (optional)
+        (values) => TodoListSchema.validate(values),
         false, // <- Validate on change (optional)
         false // <- Validate on mount (optional)
     );

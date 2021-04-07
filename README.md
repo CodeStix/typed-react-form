@@ -6,7 +6,7 @@ A fast, completely type-checked React form state manager, focussed on typescript
 
 - [Object fields](https://typed-react-form.codestix.nl/docs/Object-fields)
 - [Array fields](https://typed-react-form.codestix.nl/docs/Array-fields)
-- [Validation and yup integration](https://typed-react-form.codestix.nl/docs/Validation)
+- [Validation](https://typed-react-form.codestix.nl/docs/Validation)
 - [Easily toggle fields](https://typed-react-form.codestix.nl/docs/Toggling-a-field)
 - [Listeners (subscription based state updates)](https://typed-react-form.codestix.nl/docs/useListener)
 
@@ -30,9 +30,10 @@ This library is built from the ground up for React with typescript, but it also 
 
 Contributions are always welcome!
 
-To begin developing yourself, clone this repo, and do the following:
-- `/`: contains the library source code. Use `yarn start` or `npm run start` to watch the files and build each time something changes. This way the testing application gets updated each time.
-- `example/`: contains the testing application. Use `yarn start` or `npm run start` in the example directory to start the application.
+1. Clone this repo
+2. Install deps using `yarn`. Yarn is required due to the resolutions field in package.json, npm does not support this.
+3. Open a new terminal and navigate to `example/`, run `yarn` and `yarn start` to start the testing application.
+4. Done! When you edit source code, it will be rebuilt and update the testing application.
 
 ## License
 

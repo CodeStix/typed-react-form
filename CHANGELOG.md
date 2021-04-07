@@ -1,3 +1,11 @@
+# 1.2.14 (07/04/2021)
+
+-   Moved `yupValidator` to seperate package [`typed-react-form-yup`](https://www.npmjs.com/package/typed-react-form-yup)
+-   Child/array forms name prop only allows object fields now.
+-   Pass FormEvent through `form.handleSubmit`
+-   Allow string as argument to setErrors, which sets the error on the parent.
+-   Allow validators to return undefined.
+
 # 1.2.13 (07/04/2021)
 
 -   The `name` prop on FormTextArea and FormSelect did not get passed to their input element.

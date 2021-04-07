@@ -10308,10 +10308,10 @@ type@^2.0.0:
   resolved "https://registry.yarnpkg.com/type/-/type-2.1.0.tgz#9bdc22c648cf8cf86dd23d32336a41cfb6475e3f"
   integrity sha512-G9absDWvhAWCV2gmF1zKud3OyC61nZDwWvBL2DApaVFogI07CprggiQAOOjvp2NRjYWFzPyu7vwtDrQFq8jeSA==
 
-typed-object-validator@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/typed-object-validator/-/typed-object-validator-1.0.1.tgz#524184eec5da5a37a90ea3011877b05189e9faee"
-  integrity sha512-6h0PJeLVW7J9O65HqgotnDxatlwY652+kuA+yU3CPtJTlP+TJAmLHQ4NrqXwSqnwvNTfd54OuUCTrV6if7g+Mw==
+typed-object-validator@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/typed-object-validator/-/typed-object-validator-1.0.2.tgz#19ae734eedeca91a06f1535445ed8188509ba149"
+  integrity sha512-6A9qDfEViI7lB41LjAGsO7MvupvQJg6Yu1V8DWwEjfWhDuZZCD145UfZLMWM3Ani6a53jE2LbjLhn8FCXjejfg==
 
 typed-react-form-yup@^1.0.0:
   version "1.0.0"

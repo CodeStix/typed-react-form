@@ -22,7 +22,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "link:../node_modules/react-scripts",
     "styled-components": "^5.2.1",
-    "typed-object-validator": "^1.0.1",
+    "typed-object-validator": "^1.0.2",
     "typed-react-form": "link:..",
     "typed-react-form-yup": "^1.0.0",
     "typescript": "link:../node_modules/typescript",

@@ -1,6 +1,6 @@
 export type ListenerCallback = () => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
-export type Validator<T, Error> = (values: T) => ErrorType<T, Error> | Promise<ErrorType<T, Error>>;
+export type Validator<T, Error> = (values: T) => ErrorType<T, Error> | undefined | Promise<ErrorType<T, Error> | undefined>;
 
 export type ChildFormMap<T extends object, State, Error extends string> = {
     [K in KeysOfType<T, object>]?: ChildFormState<T, K, State, Error>;
@@ -307,7 +307,7 @@ export class FormState<T extends object, State = DefaultState, Error extends str
         if (!this.validator) return true;
         let r = this.validator(this.values);
         if (r instanceof Promise) r = await r;
-        this.setErrors(r);
+        this.setErrors(r ?? ({} as ErrorType<T, Error>));
         return !this.error;
     }
 
@@ -320,7 +320,7 @@ export class FormState<T extends object, State = DefaultState, Error extends str
         let r = this.validator(this.values);
         if (r instanceof Promise)
             throw new Error("validateSync() was called on a form with an asynchronous validator set, please use `await form.validate()` instead.");
-        this.setErrors(r);
+        this.setErrors(r ?? ({} as ErrorType<T, Error>));
         return !this.error;
     }
 
@@ -371,7 +371,7 @@ export class FormState<T extends object, State = DefaultState, Error extends str
             if (notifyParent && this instanceof ChildFormState) {
                 this.parent.setError(this.name, errors, false, true);
             }
-            errors = {} as any;
+            errors = {} as ErrorType<T, Error>;
         } else {
             addDistinct(keys, Object.keys(errors));
         }
@@ -387,8 +387,9 @@ export class FormState<T extends object, State = DefaultState, Error extends str
                     false, // Will call this.parent.setError by itself after all values have been copied, see 3 lines down
                     false // Will call fireAnyListener by itself after all values have been copied, see 3 lines down
                 )
-            )
+            ) {
                 changed = true;
+            }
         }
         if (!changed) return false;
 
