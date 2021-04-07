@@ -1,6 +1,8 @@
 # Validation
 
-A validator is a function that takes form values, and returns errors for these values in the same object structure.
+A validator is a function that takes form values, and returns errors for these values in the same object structure:
+
+![](/images/validator.png)
 
 You can use a validator by passing it to the [`useForm`](/docs/useForm) hook.
 
@@ -8,6 +10,8 @@ Its it recommended to use a validation library, as this makes the process of val
 
 -   [typed-object-validator](/docs/typed-object-validator): recommended, a typed-checked validation library
 -   [yup](/docs/yup): a widely used validation library
+
+You can ofcourse use every validation library there is, but the errors must be converted to be compatible with this library.
 
 ## Example
 
