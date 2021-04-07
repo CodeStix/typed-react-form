@@ -32,9 +32,15 @@ export type FormInputType =
     | "tel"
     | "range";
 
-export type FormInputProps<T, State, Error extends string, Key extends keyof T, Value extends T[Key] | T[Key][keyof T[Key]]> = BaldInputProps & {
+export type FormInputProps<
+    T extends object,
+    State,
+    Error extends string,
+    K extends keyof T,
+    Value extends T[K] | T[K][keyof T[K]]
+> = BaldInputProps & {
     form: FormState<T, State, Error>;
-    name: Key;
+    name: K;
     type?: FormInputType;
     value?: Value;
     errorClassName?: string;
@@ -56,9 +62,9 @@ export type FormInputProps<T, State, Error extends string, Key extends keyof T, 
  * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
  */
 export function FormInput<
-    T,
-    Key extends keyof T,
-    Value extends T[Key] | T[Key][keyof T[Key]],
+    T extends object,
+    K extends keyof T,
+    Value extends T[K] | T[K][keyof T[K]],
     State extends DefaultState = DefaultState,
     Error extends string = DefaultError
 >({
@@ -78,7 +84,7 @@ export function FormInput<
     value: inputValue,
     checked: inputChecked,
     ...rest
-}: FormInputProps<T, State, Error, Key, Value>) {
+}: FormInputProps<T, State, Error, K, Value>) {
     const { value: currentValue, error, dirty, state, setValue, defaultValue } = useListener(form, name);
 
     let [inValue, inChecked] = useMemo(() => {

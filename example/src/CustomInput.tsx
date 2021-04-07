@@ -5,7 +5,7 @@ import { VisualRender } from "./VisualRender";
 /**
  * A custom input that can be reused everywhere when using useForm
  */
-export function CustomInput<T>({
+export function CustomInput<T extends object>({
     form,
     name,
     ...rest

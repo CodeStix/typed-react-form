@@ -14,7 +14,7 @@ interface YupValidationOptions {
     context?: any;
 }
 
-export function yupValidator<T, Error extends string = string>(
+export function yupValidator<T extends object, Error extends string = string>(
     yupSchema: any,
     options?: YupValidationOptions,
     messageTransformer?: (message: string) => Error
@@ -24,7 +24,7 @@ export function yupValidator<T, Error extends string = string>(
             await yupSchema.validate(values, options);
             return {};
         } catch (ex) {
-            return yupErrorToErrorMap(ex, messageTransformer ?? ((e) => e));
+            return yupErrorToErrorMap(ex, messageTransformer ?? ((e) => e)) as any;
         }
     };
 }

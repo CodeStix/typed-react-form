@@ -3,7 +3,7 @@ import { DefaultError, DefaultState, FormState } from "../form";
 import { DEFAULT_DIRTY_CLASS, DEFAULT_ERROR_CLASS, getClassName } from "./FormInput";
 import { useListener } from "../hooks";
 
-export type FormSelectProps<T, State, Error extends string> = Omit<SelectHTMLAttributes<HTMLSelectElement>, "form" | "name"> & {
+export type FormSelectProps<T extends object, State, Error extends string> = Omit<SelectHTMLAttributes<HTMLSelectElement>, "form" | "name"> & {
     form: FormState<T, State, Error>;
     name: keyof T;
     errorClassName?: string;
@@ -21,7 +21,7 @@ export type FormSelectProps<T, State, Error extends string> = Omit<SelectHTMLAtt
  *
  * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
  */
-export function FormSelect<T, State extends DefaultState = DefaultState, Error extends string = DefaultError>({
+export function FormSelect<T extends object, State extends DefaultState = DefaultState, Error extends string = DefaultError>({
     form,
     name,
     errorClassName,

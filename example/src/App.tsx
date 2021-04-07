@@ -406,7 +406,7 @@ function TodoItem(props: {
 /**
  *  Shows a JSON representation of a form
  */
-function FormValues<T>(props: { form: FormState<T> }) {
+function FormValues<T extends object>(props: { form: FormState<T> }) {
     const form = useAnyListener(props.form);
     const [show, setShow] = useState({ values: true, defaultValues: false, errorMap: true, dirtyMap: true, state: false });
     return (

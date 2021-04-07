@@ -2,8 +2,8 @@ export type ListenerCallback = () => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
 export type Validator<T, Error> = (values: T) => ErrorType<T, Error> | Promise<ErrorType<T, Error>>;
 
-export type ChildFormMap<T, State, Error extends string> = {
-    [Key in keyof T]?: ChildFormState<T, Key, State, Error>;
+export type ChildFormMap<T extends object, State, Error extends string> = {
+    [K in KeysOfType<T, object>]?: ChildFormState<T, K, State, Error>;
 };
 
 export type DirtyMap<T> = {
@@ -18,6 +18,11 @@ export type ErrorMap<T, Error> = {
 
 export type DefaultError = string;
 export type DefaultState = { isSubmitting: boolean };
+
+export type FieldsOfType<T, Field> = {
+    [Key in keyof T as NonNullable<T[Key]> extends Field ? Key : never]: T[Key];
+};
+export type KeysOfType<T extends FieldsOfType<any, Field>, Field> = keyof FieldsOfType<T, Field>;
 
 function memberCopy<T>(value: T): T {
     if (Array.isArray(value)) {
@@ -55,7 +60,7 @@ function comparePrimitiveObject<T>(a: T, b: T): boolean | undefined {
     return false;
 }
 
-export class FormState<T, State = DefaultState, Error extends string = DefaultError> {
+export class FormState<T extends object, State = DefaultState, Error extends string = DefaultError> {
     /**
      * The id of this form, for debugging purposes.
      */
@@ -174,7 +179,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         this.dirtyMap[key] = dirty;
 
         if (notifyChild) {
-            let child = this.childMap[key];
+            let child = this.childMap[key as any];
             if (child) {
                 child.setValues(value, validate, isDefault, true, false);
                 this.dirtyMap[key] = child.dirty;
@@ -362,8 +367,8 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         if (!error) delete this.errorMap[key];
         else this.errorMap[key] = error;
 
-        if (notifyChild && this.childMap[key]) {
-            let changed = this.childMap[key]!.setErrors(error ?? ({} as any), true, false);
+        if (notifyChild && this.childMap[key as any]) {
+            let changed = this.childMap[(key as unknown) as KeysOfType<T, object>]!.setErrors(error ?? ({} as any), true, false);
             if (!changed && error !== undefined) return false;
         }
 
@@ -446,7 +451,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         this._state = newState;
 
         let c = Object.keys(this.values) as (keyof T)[];
-        if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(newState, true, false));
+        if (notifyChild) c.forEach((e) => (this.childMap[e as any] as ChildFormState<T, any, State, Error>).setState(newState, true, false));
 
         c.forEach((e) => this.fireListeners(e));
         this.fireAnyListeners();
@@ -550,15 +555,15 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
     }
 }
 
-export class ChildFormState<Parent, Key extends keyof Parent, ParentState, ParentError extends string> extends FormState<
-    NonNullable<Parent[Key]>,
-    ParentState,
-    ParentError
+export class ChildFormState<T extends FieldsOfType<any, object>, K extends KeysOfType<T, object>, State, Error extends string> extends FormState<
+    NonNullable<T[K]>,
+    State,
+    Error
 > {
-    public name: Key;
-    public readonly parent: FormState<Parent, ParentState, ParentError>;
+    public name: K;
+    public readonly parent: FormState<T, State, Error>;
 
-    public constructor(parent: FormState<Parent, ParentState, ParentError>, name: Key) {
+    public constructor(parent: FormState<T, State, Error>, name: K) {
         super(
             parent.values[name] ?? ({} as any),
             parent.defaultValues[name] ?? ({} as any),
@@ -570,4 +575,17 @@ export class ChildFormState<Parent, Key extends keyof Parent, ParentState, Paren
         this.parent = parent;
         this.name = name;
     }
+
+    // public setValueInternal<F extends keyof NonNullable<T[K]>>(
+    //     key: F,
+    //     value: T[K][F] | undefined,
+    //     dirty: boolean,
+    //     validate?: boolean,
+    //     isDefault: boolean = false,
+    //     notifyChild: boolean = true,
+    //     notifyParent: boolean = true,
+    //     fireAny: boolean = true
+    // ) {
+    //     super.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
+    // }
 }

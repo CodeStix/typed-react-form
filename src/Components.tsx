@@ -1,5 +1,5 @@
 import React from "react";
-import { ChildFormState, DefaultError, DefaultState, DirtyMap, ErrorMap, FormState } from "./form";
+import { ChildFormState, DefaultError, DefaultState, DirtyMap, ErrorMap, FieldsOfType, FormState, KeysOfType } from "./form";
 import { useArrayForm, useListener, useAnyListener, useChildForm, useTruthyListener } from "./hooks";
 
 /**
@@ -9,18 +9,23 @@ import { useArrayForm, useListener, useAnyListener, useChildForm, useTruthyListe
  * @param parent The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function ArrayForm<Parent, Key extends keyof Parent, ParentState = DefaultState, ParentError extends string = DefaultError>(props: {
-    form: FormState<Parent, ParentState, ParentError>;
-    name: Key;
+export function ArrayForm<
+    T extends FieldsOfType<any, any[]>,
+    K extends KeysOfType<T, any[] | object>,
+    State = DefaultState,
+    Error extends string = DefaultError
+>(props: {
+    form: FormState<T, State, Error>;
+    name: K;
     render?: (props: {
-        form: ChildFormState<Parent, Key, ParentState, ParentError>;
+        form: ChildFormState<T, K, State, Error>;
         remove: (index: number) => void;
         clear: () => void;
         move: (index: number, newIndex: number) => void;
         swap: (index: number, newIndex: number) => void;
-        append: (value: NonNullable<Parent[Key]>[any]) => void;
-        values: NonNullable<Parent[Key]>;
-        setValues: (values: NonNullable<Parent[Key]>) => void;
+        append: (value: NonNullable<T[K]>[any]) => void;
+        values: NonNullable<T[K]>;
+        setValues: (values: NonNullable<T[K]>) => void;
     }) => React.ReactNode;
 }) {
     const childForm = useArrayForm(props.form, props.name);
@@ -40,15 +45,15 @@ export function ArrayForm<Parent, Key extends keyof Parent, ParentState = Defaul
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function Listener<T, Key extends keyof T, State = DefaultState, Error extends string = DefaultError>(props: {
+export function Listener<T extends object, K extends keyof T, State = DefaultState, Error extends string = DefaultError>(props: {
     form: FormState<T, State, Error>;
-    name: Key;
+    name: K;
     render?: (props: {
-        value: T[Key];
-        defaultValue: T[Key];
-        setValue: (value: T[Key]) => void;
-        dirty: DirtyMap<T>[Key];
-        error: ErrorMap<T, Error>[Key];
+        value: T[K];
+        defaultValue: T[K];
+        setValue: (value: T[K]) => void;
+        dirty: DirtyMap<T>[K];
+        error: ErrorMap<T, Error>[K];
         state: State;
         form: FormState<T, State, Error>;
     }) => React.ReactNode;
@@ -63,7 +68,7 @@ export function Listener<T, Key extends keyof T, State = DefaultState, Error ext
  * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <AnyListener /> instead.
  * @param form The form that was passed in.
  */
-export function AnyListener<T, State = DefaultState, Error extends string = DefaultError>(props: {
+export function AnyListener<T extends object, State = DefaultState, Error extends string = DefaultError>(props: {
     form: FormState<T, State, Error>;
     render?: (props: FormState<T, State, Error>) => React.ReactNode;
 }) {
@@ -78,10 +83,15 @@ export function AnyListener<T, State = DefaultState, Error extends string = Defa
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function ChildForm<Parent, Key extends keyof Parent, ParentState = DefaultState, ParentError extends string = DefaultError>(props: {
-    form: FormState<Parent, ParentState, ParentError>; // Use the parent prop instead of the form prop when using ChildForm.
-    name: Key;
-    render?: (props: ChildFormState<Parent, Key, ParentState, ParentError>) => React.ReactNode;
+export function ChildForm<
+    T extends FieldsOfType<any, object>,
+    K extends KeysOfType<T, object>,
+    ParentState = DefaultState,
+    ParentError extends string = DefaultError
+>(props: {
+    form: FormState<T, ParentState, ParentError>; // Use the parent prop instead of the form prop when using ChildForm.
+    name: K;
+    render?: (props: ChildFormState<T, K, ParentState, ParentError>) => React.ReactNode;
 }) {
     const childForm = useChildForm(props.form, props.name);
     // Causes a rerender when the object value becomes null/undefined

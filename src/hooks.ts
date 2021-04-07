@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-import { DefaultState, DefaultError, FormState, ChildFormState, Validator } from "./form";
+import { DefaultState, DefaultError, FormState, ChildFormState, Validator, FieldsOfType, KeysOfType } from "./form";
 
 /**
  * Creates a new root form.
@@ -10,7 +10,7 @@ import { DefaultState, DefaultError, FormState, ChildFormState, Validator } from
  * @param validateOnMount Validate on mount? Optional, default is false.
  * @param defaultState The default state for this form. Form state contains custom global states, example: isSubmitting, isLoading ... Optional, default is `{ isSubmitting: false }`.
  */
-export function useForm<T, State = DefaultState, Error extends string = DefaultError>(
+export function useForm<T extends object, State = DefaultState, Error extends string = DefaultError>(
     defaultValues: T,
     validator?: Validator<T, Error>,
     validateOnChange = false,
@@ -30,11 +30,6 @@ export function useForm<T, State = DefaultState, Error extends string = DefaultE
         );
     }
 
-    // Do not reset values on state change
-    // useEffect(() => {
-    //     c.current!.setDefaultValues(defaultValues, c.current!.validateOnMount, true, false);
-    // }, [defaultValues]);
-
     return c.current;
 }
 
@@ -44,11 +39,13 @@ export function useForm<T, State = DefaultState, Error extends string = DefaultE
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useChildForm<T, Key extends keyof T, State = DefaultState, Error extends string = DefaultError>(
-    parentForm: FormState<T, State, Error>,
-    name: Key
-) {
-    let c = useRef<ChildFormState<T, Key, State, Error> | null>(null);
+export function useChildForm<
+    T extends FieldsOfType<any, object | any[]>,
+    K extends KeysOfType<T, object | any[]>,
+    State = DefaultState,
+    Error extends string = DefaultError
+>(parentForm: FormState<T, State, Error>, name: K) {
+    let c = useRef<ChildFormState<T, K, State, Error> | null>(null);
     if (!c.current) {
         c.current = new ChildFormState(parentForm, name);
     }
@@ -80,9 +77,9 @@ export function useChildForm<T, Key extends keyof T, State = DefaultState, Error
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function useListener<T, Key extends keyof T, State = DefaultState, Error extends string = DefaultError>(
+export function useListener<T extends object, K extends keyof T, State = DefaultState, Error extends string = DefaultError>(
     form: FormState<T, State, Error>,
-    name: Key
+    name: K
 ) {
     const [, setRender] = useState(0);
 
@@ -96,7 +93,7 @@ export function useListener<T, Key extends keyof T, State = DefaultState, Error 
     return {
         value: form.values[name],
         defaultValue: form.defaultValues[name],
-        setValue: (value: T[Key]) => form.setValue(name, value),
+        setValue: (value: T[K]) => form.setValue(name, value),
         dirty: form.dirtyMap[name],
         error: form.errorMap[name],
         state: form.state,
@@ -110,7 +107,7 @@ export function useListener<T, Key extends keyof T, State = DefaultState, Error 
  *
  * @param form The form that was passed in.
  */
-export function useAnyListener<T, State = DefaultState, Error extends string = DefaultError>(form: FormState<T, State, Error>) {
+export function useAnyListener<T extends object, State = DefaultState, Error extends string = DefaultError>(form: FormState<T, State, Error>) {
     const [, setRender] = useState(0);
 
     useEffect(() => {
@@ -131,10 +128,12 @@ export function useAnyListener<T, State = DefaultState, Error extends string = D
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useArrayForm<Parent, Key extends keyof Parent, ParentState = DefaultState, ParentError extends string = DefaultError>(
-    parentForm: FormState<Parent, ParentState, ParentError>,
-    name: Key
-) {
+export function useArrayForm<
+    T extends FieldsOfType<any, any[]>,
+    K extends KeysOfType<T, any[] | object>,
+    State = DefaultState,
+    Error extends string = DefaultError
+>(parentForm: FormState<T, State, Error>, name: K) {
     const form = useChildForm(parentForm, name);
     const oldLength = useRef(-1);
     const [, setRender] = useState(0);
@@ -151,7 +150,7 @@ export function useArrayForm<Parent, Key extends keyof Parent, ParentState = Def
         return () => parentForm.ignore(name, id);
     }, []);
 
-    const append = useCallback((value: NonNullable<Parent[Key]>[any]) => {
+    const append = useCallback((value: NonNullable<T[K]>[any]) => {
         form.setValues([...(form.values as any), value] as any);
     }, []);
 
@@ -203,9 +202,9 @@ export function useArrayForm<Parent, Key extends keyof Parent, ParentState = Def
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function useTruthyListener<T, Key extends keyof T, State = DefaultState, Error extends string = DefaultError>(
+export function useTruthyListener<T extends object, K extends keyof T, State = DefaultState, Error extends string = DefaultError>(
     form: FormState<T, State, Error>,
-    name: Key
+    name: K
 ) {
     const oldTruthy = useRef(!!form.values[name]);
     const [, setRender] = useState(0);
