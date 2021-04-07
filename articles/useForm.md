@@ -14,27 +14,19 @@ This hook must be called, unconditionally, at the start of your component, just 
 
 The initial values of the form. When this parameter changes, the form's default values are updated too. (props/state change)
 
----
-
 #### `validator` **(optional)**
 
 The validator of this form, which is a function that accepts form values and returns errors for these values in the same object structure. **This function can be async.**
 
 See [validation](/docs/Validation).
 
----
-
 #### `validateOnChange` **(optional, true)**
 
 True if you want to validate each time a value changes, when false, you have to call `form.validate()` yourself.
 
----
-
 #### `validateOnMount` **(optional, false)**
 
 True if you want to validate when the form mounts.
-
----
 
 #### `defaultState` **(optional, {isSubmitting: false})**
 

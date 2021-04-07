@@ -36,4 +36,4 @@ function CustomFormError<T>(props: { form: FormState<T>; name: keyof T }) {
 }
 ```
 
-You can also create custom input components, look [here](/docs/Custom-inputs).
+You can also create custom input components, look [here](/docs/Custom-input).

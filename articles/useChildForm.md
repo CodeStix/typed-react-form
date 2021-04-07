@@ -14,8 +14,6 @@ This hook must be called, unconditionally, at the start of your component, just 
 
 The parent form that contains the field to create a child form for.
 
----
-
 #### `name` **(required)**
 
 The name of a field in the parent form to create a child form for.

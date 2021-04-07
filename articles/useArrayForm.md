@@ -14,8 +14,6 @@ This hook must be called, unconditionally, at the start of your component, just 
 
 The parent form which contains the array field to create a array child form for.
 
----
-
 #### `name` **(required)**
 
 The name of the array field in the parent form.

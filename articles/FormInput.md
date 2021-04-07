@@ -98,43 +98,29 @@ You **cannot** use FormInput to create a submit button (type="submit"). Use one 
 
 The form or child form that contains the field to bind to this input.
 
----
-
 #### `name` **(required)**
 
 The name of the field in the form that will be bound to this input.
-
----
 
 #### `errorClassName` and `errorStyle`
 
 The className and/or style to set when there is an error on this field. Default className is `typed-form-error`.
 
----
-
 #### `dirtyClassName` and `dirtyStyle`
 
 The className and/or style to set when this field has been modified. Default className is `typed-form-dirty`.
-
----
 
 #### `disableOnSubmitting`
 
 Disable this input on submit? Default is `true`.
 
----
-
 #### `dateAsNumber` (only type="date")
 
 Serialize this fields value as a timestamp instead of a Date object.
 
----
-
 #### `hideWhenNull`
 
 Set this prop if you want to hide this input when its field value is `null/undefined`. Default is `false`.
-
----
 
 #### `setNullOnUncheck` and `setUndefinedOnUncheck` (only type="checkbox")
 
@@ -142,14 +128,10 @@ When using one of these props, the checkbox will set null/undefined on the field
 
 Make sure you pass along a `value` too, this is the value that will be set when it gets checked again. Not doing so, will cause a console warning.
 
----
-
 #### `value` (only type="radio" or type="checkbox")
 
 -   The value of the radio button when using multi-value fields.
 -   The value of the checkbox when using primitive arrays.
 -   The on-checked value of the checkbox when using the `setNullOnUncheck/setUndefinedOnUncheck` prop.
-
----
 
 All of the input components are wrappers and abstractions around the [`useListener`](/docs/useListener) hook. Using this hook, you can create your own [custom inputs](/docs/Custom-input).

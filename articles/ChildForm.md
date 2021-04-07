@@ -8,13 +8,9 @@ Use the `ChildForm` component if you want to make fields inside an object field 
 
 The parent form which contains the object field to create a child form for.
 
----
-
 #### `name` (required)
 
 The name of the field in the parent form to create
-
----
 
 #### `render` (required)
 

@@ -8,13 +8,9 @@ A component that provides array manipulation functions and optimizations. This i
 
 The parent form which contains the array field to create a array child form for.
 
----
-
 #### `name` **(required)**
 
 The name of the array field in the parent form.
-
----
 
 #### `render` **(required)**
 

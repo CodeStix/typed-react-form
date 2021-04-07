@@ -65,7 +65,7 @@ This library provides the following built-in components to create type-checked i
 -   [FormSelect](/docs/FormSelect)
 -   [FormTextArea](/docs/FormTextArea)
 
-When these inputs do not satisfy your needs, you can always [implement your own](/docs/Custom-inputs#example-custom-input). These built-in components are just abstractions around hook calls.
+When these inputs do not satisfy your needs, you can always [implement your own](/docs/Custom-input#example-custom-input). These built-in components are just abstractions around hook calls.
 
 ✔️ **Example type-checked form consisting of 2 fields**
 
