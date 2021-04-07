@@ -59,9 +59,9 @@ export function useChildForm<T, Key extends keyof T, State = DefaultState, Error
         c.current!.name = name;
 
         // First, set new default values, without validating
-        c.current!.setValues(parentForm.defaultValues[name] ?? {}, false, true, true, false);
+        c.current!.setValues(parentForm.defaultValues[name], false, true, true, false);
         // Then, set new values and validate if needed
-        c.current!.setValues(parentForm.values[name] ?? {}, c.current!.validateOnMount, false, true, true);
+        c.current!.setValues(parentForm.values[name], c.current!.validateOnMount, false, true, true);
 
         return () => {
             // Only delete if is not already overwritten by new form
@@ -117,7 +117,9 @@ export function useAnyListener<T, State = DefaultState, Error extends string = D
         let id = form.listenAny(() => {
             setRender((e) => e + 1);
         });
-        return () => form.ignoreAny(id);
+        return () => {
+            form.ignoreAny(id);
+        };
     }, [form]);
 
     return form;

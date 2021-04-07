@@ -141,9 +141,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
     }
 
     /**
-     * Sets a value the advanced way.
-     * @param key The field to set.
-     * @param value The value to set in the field.
+     * Sets a value without calculating whether is has been modified.
      * @param dirty Is this field dirty? Leave undefined to not set any dirty value. (can always be overridden by child forms)
      * @param validate Should the form validate after value set? Overrides `validateOnChange`.
      * @param isDefault Is this the default value for the said field?
@@ -163,8 +161,12 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
     ) {
         let valueMap = isDefault ? this.defaultValues : this.values;
         if (value === undefined) {
-            if (Array.isArray(valueMap)) valueMap.splice(key as number, 1);
-            else delete valueMap[key];
+            if (Array.isArray(valueMap)) {
+                // Deleting a key in an array doesn't work, splice instead
+                valueMap.splice(key as number, 1);
+            } else {
+                delete valueMap[key];
+            }
         } else {
             valueMap[key] = value;
         }
@@ -173,8 +175,8 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
 
         if (notifyChild) {
             let child = this.childMap[key];
-            if (child && value !== undefined && value !== null) {
-                child.setValues(value!, validate, isDefault, true, false);
+            if (child) {
+                child.setValues(value, validate, isDefault, true, false);
                 this.dirtyMap[key] = child.dirty;
             }
         }
@@ -258,16 +260,23 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
-    public setValues(values: Partial<T>, validate?: boolean, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
+    public setValues(
+        values: Partial<T> | undefined,
+        validate?: boolean,
+        isDefault: boolean = false,
+        notifyChild: boolean = true,
+        notifyParent: boolean = true
+    ) {
         let keys = Object.keys(isDefault ? this.defaultValues : this.values);
-        addDistinct(keys, Object.keys(values));
+        let v: typeof values = values ?? {};
+        addDistinct(keys, Object.keys(v));
 
         // Traverse backwards, so when removing array items, the whole array gets shifted in the right direction
         for (let i = keys.length - 1; i >= 0; i--) {
             let key = keys[i] as keyof T;
             this.setValue(
                 key,
-                values[key],
+                v[key],
                 false, // Will validate after all values are copied
                 isDefault,
                 notifyChild,
@@ -275,19 +284,23 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
                 false // Will call fireAnyListener by itself after all values are copied, see 3 lines down
             );
         }
+
         this.fireAnyListeners();
         if (notifyParent && this instanceof ChildFormState) {
-            let values = isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values);
-            this.parent.setValueInternal(
-                this.name,
-                Object.keys(values).length > 0 ? values : undefined,
-                this.dirty,
-                validate,
-                isDefault,
-                false,
-                true,
-                true
-            );
+            if (typeof values === "object" && values !== null) {
+                this.parent.setValueInternal(
+                    this.name,
+                    isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values),
+                    this.dirty,
+                    validate,
+                    isDefault,
+                    false,
+                    true,
+                    true
+                );
+            } else {
+                this.parent.setValueInternal(this.name, values, this.dirty, validate, isDefault, false, true, true);
+            }
         }
 
         if (validate ?? (this.validateOnChange && this.validator)) this.validate();
