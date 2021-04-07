@@ -39,6 +39,7 @@ export function FormTextArea<T, State extends DefaultState = DefaultState, Error
     if (hideWhenNull && (value === null || value === undefined)) return null;
     return (
         <textarea
+            name={name + ""}
             style={{
                 ...style,
                 ...(dirty && dirtyStyle),

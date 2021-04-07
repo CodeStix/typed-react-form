@@ -1,3 +1,7 @@
+# 1.2.13 (07/04/2021)
+
+-   The `name` prop on FormTextArea and FormSelect did not get passed to their input element.
+
 # 1.2.12 (05/04/2021)
 
 -   Excluding \*.modern.js files from build.

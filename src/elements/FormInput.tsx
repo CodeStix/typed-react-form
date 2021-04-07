@@ -198,7 +198,7 @@ export function FormInput<
                     }
                 }
             }}
-            name={name as string}
+            name={name + ""}
             {...rest}
         />
     );

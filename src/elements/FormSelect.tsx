@@ -39,6 +39,7 @@ export function FormSelect<T, State extends DefaultState = DefaultState, Error e
     if (hideWhenNull && (value === null || value === undefined)) return null;
     return (
         <select
+            name={name + ""}
             style={{
                 ...style,
                 ...(dirty && dirtyStyle),
