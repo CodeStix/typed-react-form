@@ -10,7 +10,6 @@ import {
     ErrorMap,
     FormError,
 } from "typed-react-form";
-import tv from "typed-object-validator";
 
 function MyForm() {
     const form = useForm({ email: "" });
@@ -235,8 +234,38 @@ export function YupFormExample() {
             <FormError form={form} name="email" />
             <FormInput form={form} name="password" type="password" />
             <FormError form={form} name="password" />
-            {/* Listen for any change on the form, and disable the submit button when there is an error */}
-            <AnyListener form={form} render={(form) => <button disabled={form.error}>Submit</button>} />
+            <button type="submit">Submit</button>
+        </form>
+    );
+}
+
+import tv, { SchemaType } from "typed-object-validator";
+
+const RegisterRequestSchema = tv.object({
+    email: tv.email("Please enter a valid email address.").doCase("lower").min(1, "Please enter an email"),
+    password: tv.string().min(1, "Please enter a password"),
+});
+type RegisterRequest = SchemaType<typeof RegisterRequestSchema>;
+
+export function TypedValidationExample() {
+    const form = useForm<RegisterRequest>(
+        { email: "", password: "" },
+        (values) => RegisterRequestSchema.validate(values),
+        true
+    );
+
+    function submit() {
+        // Transform if you want (will lowercase email in this case)
+        console.log("submit", form.values, RegisterRequestSchema.transform(form.values));
+    }
+
+    return (
+        <form onSubmit={form.handleSubmit(submit)}>
+            <FormInput form={form} name="email" type="email" />
+            <FormError form={form} name="email" />
+            <FormInput form={form} name="password" type="password" />
+            <FormError form={form} name="password" />
+            <button type="submit">Submit</button>
         </form>
     );
 }
@@ -257,6 +286,8 @@ export default function Testing() {
             <ValidationExample />
             <hr />
             <YupFormExample />
+            <hr />
+            <TypedValidationExample />
         </>
     );
 }

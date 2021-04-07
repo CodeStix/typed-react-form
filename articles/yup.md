@@ -50,8 +50,7 @@ export function YupFormExample() {
             <FormError form={form} name="email" />
             <FormInput form={form} name="password" type="password" />
             <FormError form={form} name="password" />
-            {/* Listen for any change on the form, and disable the submit button when there is an error */}
-            <AnyListener form={form} render={(form) => <button disabled={form.error}>Submit</button>} />
+            <button type="submit">Submit</button>
         </form>
     );
 }
