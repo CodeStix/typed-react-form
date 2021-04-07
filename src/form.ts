@@ -155,6 +155,8 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         notifyParent: boolean = true,
         fireAny: boolean = true
     ) {
+        if (key === "author") console.trace("setValueInternal", key, value, dirty);
+
         let valueMap = isDefault ? this.defaultValues : this.values;
         if (value === undefined) {
             if (Array.isArray(valueMap)) valueMap.splice(key as number, 1);
@@ -240,7 +242,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
-    public setValues(values: T, validate?: boolean, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
+    public setValues(values: Partial<T>, validate?: boolean, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
         // No set is used because this could cause problems with array keys, which must always be in the right order
         let keys = Object.keys(isDefault ? this.defaultValues : this.values);
         let newKeys = Object.keys(values);
@@ -274,7 +276,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
-    public setDefaultValues(values: T, validate: boolean = true, notifyChild: boolean = true, notifyParent: boolean = true) {
+    public setDefaultValues(values: Partial<T>, validate: boolean = true, notifyChild: boolean = true, notifyParent: boolean = true) {
         this.setValues(values, false, true, notifyChild, notifyParent);
         this.setValues(values, validate, false, notifyChild, notifyParent);
     }
@@ -541,9 +543,10 @@ export class ChildFormState<Parent, Key extends keyof Parent, ParentState, Paren
     }
 
     protected updateParentValues(isDefault: boolean, validate: boolean | undefined) {
+        let values = isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values);
         this.parent.setValueInternal(
             this.name,
-            isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values),
+            Object.keys(values).length > 0 ? values : undefined,
             this.dirty,
             validate,
             isDefault,

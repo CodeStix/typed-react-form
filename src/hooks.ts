@@ -59,12 +59,12 @@ export function useChildForm<T, Key extends keyof T, State = DefaultState, Error
         c.current!.name = name;
 
         // First, set new default values, without validating
-        c.current!.setValues(parentForm.defaultValues[name] ?? ({} as any), false, true, true, false);
+        c.current!.setValues(parentForm.defaultValues[name] ?? {}, false, true, true, false);
         // Then, set new values and validate if needed
-        c.current!.setValues(parentForm.values[name] ?? ({} as any), c.current!.validateOnMount, false, true, true);
+        c.current!.setValues(parentForm.values[name] ?? {}, c.current!.validateOnMount, false, true, true);
 
         return () => {
-            // Only clear if is not already overwritten
+            // Only delete if is not already overwritten by new form
             if (parentForm.childMap[name] === c.current!) {
                 delete parentForm.childMap[name];
             }

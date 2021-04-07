@@ -6,3 +6,5 @@
 -   Require index for array fields
 -   Add React.forwardRef to input elements
 -   Pass FormEvent through form.handleSubmit's handler
+-   Rename `setDefaultValues` to `setAllValues`
+-   Let `comparePrimitiveObject` compare deep objects too
