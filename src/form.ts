@@ -246,10 +246,8 @@ export class FormState<T extends object, State = DefaultState, Error extends str
             this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
         } else {
             // Compare value and existing value/defaultValue which determines dirty
-            let dirty = isDefault ? value !== this.values[key] : value !== this.defaultValues[key];
-
-            // Do not set if already set
-            if (((isDefault && this.defaultValues[key] === value) || (!isDefault && this.values[key] === value)) && this.dirtyMap[key] === dirty) {
+            let dirty = value !== (isDefault ? this.values[key] : this.defaultValues[key]);
+            if ((isDefault ? this.defaultValues[key] : this.values[key]) === value && this.dirtyMap[key] === dirty) {
                 return;
             }
 
@@ -453,7 +451,7 @@ export class FormState<T extends object, State = DefaultState, Error extends str
         this._state = newState;
 
         let c = Object.keys(this.values) as (keyof T)[];
-        if (notifyChild) c.forEach((e) => (this.childMap[e as any] as ChildFormState<T, any, State, Error>).setState(newState, true, false));
+        if (notifyChild) c.forEach((e) => (this.childMap[e as any] as ChildFormState<T, any, State, Error>)?.setState(newState, true, false));
 
         c.forEach((e) => this.fireListeners(e));
         this.fireAnyListeners();
