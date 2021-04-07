@@ -40,26 +40,6 @@ function addDistinct<T extends any[]>(arr1: T, arr2: T) {
     }
 }
 
-/**
- * Compares 2 objects that only contain primitive fields (no object fields)
- * @returns true when different, false when 'equal', undefined when an object field was found.
- */
-function comparePrimitiveObject<T>(a: T, b: T): boolean | undefined {
-    // Compare null and undefined
-    if (!a || !b) return a === b;
-    let ak = Object.keys(a),
-        bk = Object.keys(b);
-    let lk = ak.length > bk.length ? ak : bk;
-    for (let i = 0; i < lk.length; i++) {
-        let k = lk[i];
-        let av = a[k],
-            bv = b[k];
-        if ((typeof av === "object" && av !== null) || (typeof bv === "object" && bv !== null)) return undefined;
-        if (av !== bv) return true;
-    }
-    return false;
-}
-
 export class FormState<T extends object, State = DefaultState, Error extends string = DefaultError> {
     /**
      * The id of this form, for debugging purposes.
@@ -230,17 +210,10 @@ export class FormState<T extends object, State = DefaultState, Error extends str
             if (value instanceof Date) {
                 // Compare date objects
                 dirty = value?.getTime() !== (isDefault ? this.values[key] : (this.defaultValues[key] as any))?.getTime();
-            } else if (fireAny) {
-                // Compare primitive objects (objects containing only primitive fields), but only is setValues was not used (dirty value will be determined by child forms)
-                dirty = comparePrimitiveObject(value, isDefault ? this.values[key] : this.defaultValues[key]); // Is switched intentionally
-                if (dirty === undefined) {
-                    console.warn(
-                        "Do not use setValue for object in object fields, use setValueInternal instead (dirty value can not be determined), ",
-                        key,
-                        value
-                    );
-                    dirty = true;
-                }
+            } else if (!(key in this.childMap)) {
+                // Compare objects if there is no child form, because it calculates the dirty value for us
+                let other = isDefault ? this.values[key] : this.defaultValues[key];
+                dirty = JSON.stringify(value) !== JSON.stringify(other);
             }
 
             this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
