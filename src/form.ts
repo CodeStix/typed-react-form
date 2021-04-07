@@ -247,12 +247,8 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @param notifyParent Should this form notify the parent form about this change?
      */
     public setValues(values: Partial<T>, validate?: boolean, isDefault: boolean = false, notifyChild: boolean = true, notifyParent: boolean = true) {
-        // No set is used because this could cause problems with array keys, which must always be in the right order
         let keys = Object.keys(isDefault ? this.defaultValues : this.values);
-        let newKeys = Object.keys(values);
-        for (let i = 0; i < newKeys.length; i++) {
-            if (!keys.includes(newKeys[i])) keys.push(newKeys[i]);
-        }
+        addDistinct(keys, Object.keys(values));
 
         // Traverse backwards, so when removing array items, the whole array gets shifted in the right direction
         for (let i = keys.length - 1; i >= 0; i--) {
@@ -412,10 +408,10 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
     public setState(newState: State, notifyChild: boolean = true, notifyParent: boolean = true) {
         this._state = newState;
 
-        let c = Object.keys(this.values);
+        let c = Object.keys(this.values) as (keyof T)[];
         if (notifyChild) c.forEach((e) => this.childMap[e]?.setState(newState, true, false));
 
-        c.forEach((e) => this.fireListeners(e as keyof T));
+        c.forEach((e) => this.fireListeners(e));
         this.fireAnyListeners();
         if (notifyParent) this.updateParentState();
     }
