@@ -39,7 +39,7 @@ function addDistinct<T extends any[]>(arr1: T, arr2: T) {
  * Compares 2 objects that only contain primitive fields (no object fields)
  * @returns true when different, false when 'equal', undefined when an object field was found.
  */
-export function comparePrimitiveObject<T>(a: T, b: T): boolean | undefined {
+function comparePrimitiveObject<T>(a: T, b: T): boolean | undefined {
     // Compare null and undefined
     if (!a || !b) return a === b;
     let ak = Object.keys(a),
@@ -181,7 +181,19 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
 
         this.fireListeners(key);
         if (fireAny) this.fireAnyListeners(); // Will be false when using setValues, he will call fireAnyListeners and notifyParentValues itself
-        if (notifyParent) this.updateParentValues(isDefault, validate); // Will call setValueInternal on parent
+
+        if (notifyParent && this instanceof ChildFormState) {
+            this.parent.setValueInternal(
+                this.name,
+                Object.keys(valueMap).length > 0 ? memberCopy(valueMap) : undefined,
+                this.dirty,
+                validate,
+                isDefault,
+                false,
+                true,
+                true
+            );
+        }
 
         if (validate ?? (this.validateOnChange && this.validator)) this.validate();
     }
@@ -239,7 +251,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
     }
 
     /**
-     * Set all values OR default values on this form.
+     * Set multiple values OR default values on this form.
      * @param values The new values to set on this form.
      * @param validate Validate? Overrides `validateOnChange`.
      * @param isDefault Are these values the default values for this form? This function only updates values or defaultValues, not both! To set both, use `form.setDefaultValues()`.
@@ -264,13 +276,25 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
             );
         }
         this.fireAnyListeners();
-        if (notifyParent) this.updateParentValues(isDefault, validate);
+        if (notifyParent && this instanceof ChildFormState) {
+            let values = isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values);
+            this.parent.setValueInternal(
+                this.name,
+                Object.keys(values).length > 0 ? values : undefined,
+                this.dirty,
+                validate,
+                isDefault,
+                false,
+                true,
+                true
+            );
+        }
 
         if (validate ?? (this.validateOnChange && this.validator)) this.validate();
     }
 
     /**
-     * Set both values and default values for this form. If you only want to set default values, use `setValues(...,...,true)`.
+     * Set both values and default values for this form. If you only want to set values, use setValues(...). If you only want to set default values, use `setValues(...,...,true)`.
      * @param values The new default values to set on this form.
      * @param validate Validate? Overrides `validateOnChange`.
      * @param notifyChild Should this form notify the child form about this change?
@@ -413,7 +437,10 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
 
         c.forEach((e) => this.fireListeners(e));
         this.fireAnyListeners();
-        if (notifyParent) this.updateParentState();
+
+        if (notifyParent && this instanceof ChildFormState) {
+            this.parent.setState(memberCopy(this.state), false, true);
+        }
     }
 
     /**
@@ -508,14 +535,6 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         let al = Object.keys(this.anyListeners);
         al.forEach((e) => this.anyListeners[e]!());
     }
-
-    protected updateParentValues(_isDefault: boolean, _validate: boolean | undefined) {
-        // Not implemented for root form, as it does not have a parent
-    }
-
-    protected updateParentState() {
-        // Not implemented for root form, as it does not have a parent
-    }
 }
 
 export class ChildFormState<Parent, Key extends keyof Parent, ParentState, ParentError extends string> extends FormState<
@@ -537,23 +556,5 @@ export class ChildFormState<Parent, Key extends keyof Parent, ParentState, Paren
         );
         this.parent = parent;
         this.name = name;
-    }
-
-    protected updateParentValues(isDefault: boolean, validate: boolean | undefined) {
-        let values = isDefault ? memberCopy(this.defaultValues) : memberCopy(this.values);
-        this.parent.setValueInternal(
-            this.name,
-            Object.keys(values).length > 0 ? values : undefined,
-            this.dirty,
-            validate,
-            isDefault,
-            false,
-            true,
-            true
-        );
-    }
-
-    protected updateParentState() {
-        this.parent.setState(memberCopy(this.state), false, true);
     }
 }

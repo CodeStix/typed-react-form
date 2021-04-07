@@ -287,7 +287,7 @@ export function Form() {
                     <hr />
                     <h3>Togglable object field</h3>
                     <label>
-                        <FormInput form={form} name="author" type="checkbox" setUndefinedOnUncheck value={{ name: "", age: 0 }} />
+                        <FormInput form={form} name="author" type="checkbox" setNullOnUncheck value={{ name: "", age: 0 }} />
                         Enable author
                     </label>
                     <ChildForm
