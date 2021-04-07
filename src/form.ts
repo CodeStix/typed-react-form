@@ -55,6 +55,10 @@ export class FormState<T extends object, State = DefaultState, Error extends str
      * Should the form validate on each value change?
      */
     public validateOnChange: boolean;
+
+    /**
+     * Should the form validate when it gets mounted?
+     */
     public validateOnMount: boolean;
 
     /**

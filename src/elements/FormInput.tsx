@@ -59,7 +59,7 @@ export type FormInputProps<
  *
  * **FormSelect**, **FormTextArea** and **FormError** are also available.
  *
- * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
+ * When this component does not satisfy your needs, you can always [implement your own](https://typed-react-form.codestix.nl/docs/Custom-inputs#example-custom-input).
  */
 export function FormInput<
     T extends object,

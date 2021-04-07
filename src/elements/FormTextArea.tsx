@@ -19,7 +19,7 @@ export type FormTextAreaProps<T extends object, State, Error extends string> = O
  *
  * **FormSelect**, **FormInput** and **FormError** are also available.
  *
- * When this component does not satisfy your needs, you can always [create your own](https://github.com/CodeStix/typed-react-form/wiki/Custom-inputs#example-custom-input).
+ * When this component does not satisfy your needs, you can always [implement your own](https://typed-react-form.codestix.nl/docs/Custom-inputs#example-custom-input).
  */
 export function FormTextArea<T extends object, State extends DefaultState = DefaultState, Error extends string = DefaultError>({
     form,
