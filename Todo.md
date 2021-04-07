@@ -5,3 +5,4 @@
 -   Combine array helpers into one object? This is usefull to pass to other components
 -   Require index for array fields
 -   Add React.forwardRef to input elements
+-   Pass FormEvent through form.handleSubmit's handler
