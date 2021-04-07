@@ -288,7 +288,7 @@ export function Form() {
                     <hr />
                     <h3>Togglable object field</h3>
                     <label>
-                        <FormInput form={form} name="author" type="checkbox" setNullOnUncheck value={{ name: "", age: 0 }} />
+                        <FormInput form={form} name="author" type="checkbox" setUndefinedOnUncheck value={{ name: "", age: 0 }} />
                         Enable author
                     </label>
                     <ChildForm
@@ -301,6 +301,10 @@ export function Form() {
                                     <FormInput form={form} name="name" />
                                     <p>Age</p>
                                     <FormInput form={form} name="age" type="number" />
+                                    <button type="button" onClick={() => form.setErrors("This is a parent error")}>
+                                        Set parent error
+                                    </button>
+                                    j
                                 </div>
                             </VisualRender>
                         )}

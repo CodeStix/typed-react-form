@@ -1,6 +1,6 @@
 export type ListenerCallback = () => void;
 export type ListenerMap = { [T in string]?: ListenerCallback };
-export type Validator<T, Error> = (values: T) => ErrorMap<T, Error> | Promise<ErrorMap<T, Error>>;
+export type Validator<T, Error> = (values: T) => ErrorType<T, Error> | Promise<ErrorType<T, Error>>;
 
 export type ChildFormMap<T, State, Error extends string> = {
     [Key in keyof T]?: ChildFormState<T, Key, State, Error>;
@@ -10,7 +10,7 @@ export type DirtyMap<T> = {
     [Key in keyof T]?: boolean;
 };
 
-export type ErrorType<T, Error> = T extends object ? ErrorMap<T, Error> | Error : Error;
+export type ErrorType<T, Error> = Error | (T extends {} ? ErrorMap<T, Error> : never);
 
 export type ErrorMap<T, Error> = {
     [Key in keyof T]?: ErrorType<T[Key], Error>;
@@ -329,7 +329,7 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
                 let changed = this.childMap[key]!.setErrors((error as any) ?? {}, true, false);
                 if (!changed) return false;
             } else {
-                this.childMap[key]!.setErrors({}, true, false);
+                this.childMap[key]!.setErrors({} as any, true, false);
             }
         }
 
@@ -345,7 +345,13 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
-    public setErrors(errors: ErrorMap<T, Error>, notifyChild: boolean = true, notifyParent: boolean = true) {
+    public setErrors(errors: ErrorType<T, Error>, notifyChild: boolean = true, notifyParent: boolean = true) {
+        if (typeof errors === "string") {
+            if (notifyParent && this instanceof ChildFormState) {
+                this.parent.setError(this.name, errors, false, true);
+            }
+            return;
+        }
         let keys = Object.keys(this.errorMap);
         let newKeys = Object.keys(errors);
         for (let i = 0; i < newKeys.length; i++) {
