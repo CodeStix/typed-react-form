@@ -2,6 +2,8 @@
 
 Creates a form based on another form's field. Use this with nested objects. This hook does not cause a rerender.
 
+This hook must be called, unconditionally, at the start of your component, just like the normal React hooks.
+
 **If your field can/will be null or undefined**, you should use the [`ChildForm`](/docs/ChildForm) component instead, which does not render when the field is null/undefined.
 
 `useChildForm(parentForm, name)`

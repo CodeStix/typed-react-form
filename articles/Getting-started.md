@@ -17,9 +17,7 @@ This library works with both **Javascript** and **Typescript**. Typescript is ce
 
 ### Using the `useForm` hook
 
-A form always starts with the `useForm` hook call, this function returns a form state manager ([FormState](/docs/FormState)), which you must then pass to all your inputs (this is required for type-checking).
-
-All of the form hook ([`useForm`](/docs/useForm), [`useChildForm`](/docs/useChildForm) ...) must be called, unconditionally, at the start of your component, just like the normal React hooks.
+A form always starts with the `useForm` hook call, this function returns a form state manager ([FormState](/docs/FormState)), which you must then pass to all your inputs.
 
 ✔️ **Importing and using `useForm`**
 
@@ -34,8 +32,7 @@ function MyForm() {
 
 ### Creating the submit handler
 
-Pass `form.handleSubmit` to the form's `onSubmit` prop to validate before calling your callback function.
-You can also just use a `<button>` and submitting in the button's `onClick` handler, but this event does not fire when pressing return/enter in a text input!
+Use `form.handleSubmit` to validate before calling your function. It does not get called if there is a validation error, and prevents the page from reloading.
 
 ✔️ **`<form>` element with `onSubmit` event**
 
@@ -44,15 +41,15 @@ import { useForm } from "typed-react-form";
 
 function MyForm() {
     const form = useForm({ email: "" });
+
+    function submit() {
+        // The form.handleSubmit validates the form before calling this function
+        console.log("submit", form.values);
+    }
+
     // Use the standard html form element, which exposes the onSubmit event.
     return (
-        <form
-            onSubmit={form.handleSubmit(() => {
-                // The form.handleSubmit validates the form before calling your callback
-                // Do your submit logic here...
-                console.log("submit", form.values);
-            })}
-        >
+        <form onSubmit={form.handleSubmit(submit)}>
             {/* Make sure to add type="submit" */}
             <button type="submit">Submit!</button>
         </form>
@@ -60,21 +57,15 @@ function MyForm() {
 }
 ```
 
-`form.handleSubmit()` just returns a helper function that wraps `ev.preventDefault()`, `form.validate()` and `form.setState()`.
-
 ### Creating inputs
 
-This library is build upon the fact that only the things that change should rerender (~refresh), for example: when the _name_ field changes, only the inputs that use the _name_ field will rerender.
-
-The built-in form elements ([`FormInput`](/docs/FormInput), [`FormSelect`](/docs/FormSelect) ...) implement this by listening for changes only on their specified field. You can also use multiple inputs on the same field (they will the synchronized) and listen for changes on a field by using the [`useListener`](/docs/useListener) hook or [`Listener`](/docs/Listener) component.
-
-You are now ready to create inputs, this library provides the following built-in components to create type-checked inputs:
+This library provides the following built-in components to create type-checked inputs:
 
 -   [FormInput](/docs/FormInput)
 -   [FormSelect](/docs/FormSelect)
 -   [FormTextArea](/docs/FormTextArea)
 
-**When these inputs do not satisfy your needs**, you can always [create your own](/docs/Custom-inputs#example-custom-input). These built-in components are just abstractions around hook calls.
+When these inputs do not satisfy your needs, you can always [implement your own](/docs/Custom-inputs#example-custom-input). These built-in components are just abstractions around hook calls.
 
 ✔️ **Example type-checked form consisting of 2 fields**
 
@@ -84,17 +75,18 @@ import { useForm, FormInput } from "typed-react-form";
 
 function MyForm() {
     const form = useForm({ email: "", password: "" });
+
+    async function submit() {
+        // Implement your submit logic here...
+        console.log("submitting", form.values);
+        // Fake fetch, by waiting for 500ms
+        await new Promise((res) => setTimeout(res, 500));
+        // Optional: set new default values
+        form.setDefaultValues(form.values);
+    }
+
     return (
-        <form
-            onSubmit={form.handleSubmit(async (ev) => {
-                // Implement your submit logic here...
-                console.log("submitting", form.values);
-                // Fake fetch, by waiting for 500ms
-                await new Promise((res) => setTimeout(res, 500));
-                // Optional: set new default values
-                form.setDefaultValues(form.values);
-            })}
-        >
+        <form onSubmit={form.handleSubmit(submit)}>
             {/* Make sure to pass the form prop! */}
             <FormInput form={form} name="email" type="text" />
             <FormInput form={form} name="password" type="password" />
@@ -103,11 +95,6 @@ function MyForm() {
     );
 }
 ```
-
-**When you have an object or array field**, you need to _unwrap_ this field by using a child/array form. When _unwrapped_ you can use the inputs above.
-
--   [Object fields](/docs/Object-fields)
--   [Array fields](/docs/Array-fields)
 
 ## Step 3: It's your turn
 

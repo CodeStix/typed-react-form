@@ -13,14 +13,15 @@ import {
 
 function MyForm() {
     const form = useForm({ email: "" });
+
+    function submit() {
+        // The form.handleSubmit validates the form before calling this function
+        console.log("submit", form.values);
+    }
+
     // Use the standard html form element, which exposes the onSubmit event.
     return (
-        <form
-            onSubmit={form.handleSubmit(() => {
-                // The form.handleSubmit validates the form before calling your callback
-                console.log("submit", form.values);
-            })}
-        >
+        <form onSubmit={form.handleSubmit(submit)}>
             {/* Make sure to add type="submit" */}
             <button type="submit">Submit!</button>
         </form>
@@ -29,17 +30,18 @@ function MyForm() {
 
 function MyForm2() {
     const form = useForm({ email: "", password: "" });
+
+    async function submit() {
+        // Implement your submit logic here...
+        console.log("submitting", form.values);
+        // Fake fetch, by waiting for 500ms
+        await new Promise((res) => setTimeout(res, 500));
+        // Optional: set new default values
+        form.setDefaultValues(form.values);
+    }
+
     return (
-        <form
-            onSubmit={form.handleSubmit(async (ev) => {
-                // Implement your submit logic here...
-                console.log("submitting", form.values);
-                // Fake fetch, by waiting for 500ms
-                await new Promise((res) => setTimeout(res, 500));
-                // Optional: set new default values
-                form.setDefaultValues(form.values);
-            })}
-        >
+        <form onSubmit={form.handleSubmit(submit)}>
             {/* Make sure to pass the form prop! */}
             <FormInput form={form} name="email" type="text" />
             <FormInput form={form} name="password" type="password" />

@@ -4,6 +4,8 @@ Because this library does not rerender the whole form component when a field cha
 
 The useAnyListener hook listens for any change on a form. Behaves a lot like [`useListener`](/docs/useListener) but does not take a `name` parameter.
 
+This hook must be called, unconditionally, at the start of your component, just like the normal React hooks.
+
 **To listen to just one field** instead of every field, use the `useListener` hook instead.
 
 **Use the [`AnyListener` component](/docs/AnyListener) if you want to use these hooks without creating a new component each time.**

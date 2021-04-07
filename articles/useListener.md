@@ -1,9 +1,13 @@
 # `useListener`
 
-Because this library does not rerender the whole form component when a field changes, there must be a way to get notified about state changes. This is where listeners come in.
+This library is build upon the fact that only the things that change should rerender, for example: when the _name_ field changes, only the inputs that use the _name_ field will rerender.
+
+The built-in form elements ([`FormInput`](/docs/FormInput), [`FormSelect`](/docs/FormSelect) ...) implement this by listening for changes only on their specified field. You can also use multiple inputs on the same field (they will the synchronized).
 
 The useListener hook listens for changes on a specific form field. It behaves like useState. Because this hooks causes a rerender, you **shouldn't** use
 this hook in the same component as the form it is using (causes the whole form to rerender). You **should** always create a new component which contains the hook and use that. Or use the [`Listener`](/docs/Listener) component, which wraps the `useListener` hook for you.
+
+This hook must be called, unconditionally, at the start of your component, just like the normal React hooks.
 
 **To listen for all form fields at once**, use the [`useAnyListener`](/docs/useAnyListener) hook instead.
 

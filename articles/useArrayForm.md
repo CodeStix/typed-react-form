@@ -2,6 +2,8 @@
 
 A hook that provides array manipulation functions and optimizations for an array field. This is the array-optimized version of [`useChildform`](/docs/useChildForm). This hook only causes a rerender when the array size changes (this is why `values.map((e) => ...)` works when adding/removing a value).
 
+This hook must be called, unconditionally, at the start of your component, just like the normal React hooks.
+
 **If your array field can/will be null or undefined**, you should use the [`ArrayForm`](/docs/ArrayForm) component instead, which does not render when the array is null/undefined.
 
 `useArrayForm(parentForm, nameOfArrayField)`
