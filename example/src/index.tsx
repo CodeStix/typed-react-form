@@ -5,16 +5,18 @@ import ReactDOM from "react-dom";
 import App from "./App";
 import OneOfObjectForm from "./OneOfObjectForm";
 import OneOfObjectArrayForm from "./OneOfObjectArrayForm";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 
 function Router() {
-    switch (window.location.hash) {
-        case "#object-types":
-            return <OneOfObjectForm />;
-        case "#object-types-array":
-            return <OneOfObjectArrayForm />;
-        default:
-            return <App />;
-    }
+    return (
+        <BrowserRouter>
+            <Switch>
+                <Route path="/object-types" component={OneOfObjectForm} />
+                <Route path="/object-types-array" component={OneOfObjectArrayForm} />
+                <Route path="/" component={App} />
+            </Switch>
+        </BrowserRouter>
+    );
 }
 
 ReactDOM.render(<Router />, document.getElementById("root"));
