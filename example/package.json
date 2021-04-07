@@ -24,6 +24,7 @@
     "styled-components": "^5.2.1",
     "typed-object-validator": "^1.0.1",
     "typed-react-form": "link:..",
+    "typed-react-form-yup": "^1.0.0",
     "typescript": "link:../node_modules/typescript",
     "yup": "^0.32.8"
   },

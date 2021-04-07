@@ -12,11 +12,11 @@ import {
     Listener,
     FormTextArea,
     ChildForm,
-    yupValidator,
     useArrayForm
 } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 import * as yup from "yup";
+import { yupValidator } from "typed-react-form-yup";
 
 interface ExampleFormData {
     id: number;

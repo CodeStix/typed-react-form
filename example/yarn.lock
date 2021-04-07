@@ -10313,6 +10313,11 @@ typed-object-validator@^1.0.1:
   resolved "https://registry.yarnpkg.com/typed-object-validator/-/typed-object-validator-1.0.1.tgz#524184eec5da5a37a90ea3011877b05189e9faee"
   integrity sha512-6h0PJeLVW7J9O65HqgotnDxatlwY652+kuA+yU3CPtJTlP+TJAmLHQ4NrqXwSqnwvNTfd54OuUCTrV6if7g+Mw==
 
+typed-react-form-yup@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/typed-react-form-yup/-/typed-react-form-yup-1.0.0.tgz#6782a8f55978c655f8e43fd3e1a5f6d2469b2aee"
+  integrity sha512-Am28jVwXnQSjHih3skXkHBESMHnXVmTbJAo7ceLOcNZRb9DA8g4wRTs9BZm2MUj9Hfnf3QG6sZzYP74uIXuc0w==
+
 "typed-react-form@link:..":
   version "0.0.0"
   uid ""
