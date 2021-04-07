@@ -1,4 +1,4 @@
-import { AnyListener, ChildForm, ErrorMap, FormInput, FormSelect, FormTextArea, useForm } from "typed-react-form";
+import { AnyListener, ArrayForm, ChildForm, ErrorMap, FormInput, FormSelect, FormTextArea, useForm } from "typed-react-form";
 import tv, { SchemaType } from "typed-object-validator";
 import React from "react";
 import { VisualRender } from "./VisualRender";
@@ -14,7 +14,14 @@ const FormDataSchema = tv.object({
     object: tv.object({
         childText: tv.string(),
         childNumber: tv.number()
-    })
+    }),
+    array: tv.array(tv.string()),
+    objectArray: tv.array(
+        tv.object({
+            text: tv.string(),
+            boolean: tv.boolean()
+        })
+    )
 });
 type FormData = SchemaType<typeof FormDataSchema>;
 
@@ -25,7 +32,19 @@ function validate(data: FormData) {
 export function ExampleForm() {
     // Initial values as first argument
     const form = useForm(
-        { longText: "", text: "", number: 123, enum: "option1", boolean: false, object: { childText: "", childNumber: 0 } } as FormData,
+        {
+            longText: "",
+            text: "",
+            number: 123,
+            enum: "option1",
+            boolean: false,
+            object: { childText: "", childNumber: 0 },
+            array: ["Item 1", "Item 2"],
+            objectArray: [
+                { boolean: true, text: "Item 1" },
+                { boolean: false, text: "Item 2" }
+            ]
+        } as FormData,
         validate
     );
 
@@ -118,10 +137,12 @@ export function ExampleForm() {
                 <FormInput form={form} type="checkbox" name="text" setUndefinedOnUncheck value="" />
                 <FormInput form={form} name="text" hideWhenNull />
             </div>
-            <pre>{`
+            <pre>
+                {`
 <FormInput form={form} type="checkbox" name="text" setUndefinedOnUncheck value="" />
 <FormInput form={form} name="text" hideWhenNull />
-            `}</pre>
+            `}
+            </pre>
 
             {/* Object field */}
             <label>Object field</label>
@@ -139,7 +160,8 @@ export function ExampleForm() {
                     )}
                 />
             </div>
-            <pre>{`
+            <pre>
+                {`
 <ChildForm
     form={form}
     name="parentObjectFieldName"
@@ -149,19 +171,198 @@ export function ExampleForm() {
         </div>
 )}
 />
-            `}</pre>
+            `}
+            </pre>
 
             {/* Set object field to undefined on uncheck */}
             <label>Toggle object</label>
             <FormInput form={form} type="checkbox" name="object" setUndefinedOnUncheck value={{ childNumber: 0, childText: "" }} />
-            <pre>{`
+            <pre>
+                {`
 <FormInput 
     form={form} 
     type="checkbox" 
     name="fieldName" 
     setUndefinedOnUncheck 
     value={{ childDefaultFieldValue: "" }} 
-/>      `}</pre>
+/>      `}
+            </pre>
+
+            {/* Simple string array */}
+            <label>String array</label>
+            <ArrayForm
+                form={form}
+                name="array"
+                render={({ form }) => (
+                    <ul>
+                        {form.values.map((_, i) => (
+                            <li key={i}>
+                                <FormInput form={form} name={i} />
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            />
+            <pre>
+                {`
+<ArrayForm
+    form={form}
+    name="array"
+    render={({ form }) => (
+        <ul>
+            {form.values.map((_, i) => (
+                <li key={i}>
+                    <FormInput form={form} name={i} />
+                </li>
+            ))}
+        </ul>
+    )}
+/>`}
+            </pre>
+
+            {/* Dynamic string array */}
+            <label>Dynamic string array</label>
+            <ArrayForm
+                form={form}
+                name="array"
+                render={({ form, append, remove }) => (
+                    <ul>
+                        {form.values.map((_, i) => (
+                            <li key={i}>
+                                <FormInput form={form} name={i} />
+                                <button onClick={() => remove(i)}>Remove</button>
+                            </li>
+                        ))}
+                        <button type="button" onClick={() => append("")}>
+                            Add
+                        </button>
+                    </ul>
+                )}
+            />
+            <pre>
+                {`
+<ArrayForm
+    form={form}
+    name="arrayFieldName"
+    render={({ form, append, remove }) => (
+        <div>
+            <ul>
+                {form.values.map((_, i) => (
+                    <li key={i}>
+                        <FormInput form={form} name={i} />
+                        <button onClick={() => remove(i)}>Remove</button>
+                    </li>
+                ))}
+            </ul>
+            <button type="button" onClick={() => append("")}>
+                Add
+            </button>
+        </div>
+    )}
+/> `}
+            </pre>
+
+            {/* Object array */}
+            <label>Object array</label>
+            <ArrayForm
+                form={form}
+                name="objectArray"
+                render={({ form }) => (
+                    <ul>
+                        {form.values.map((_, i) => (
+                            <ChildForm
+                                form={form}
+                                name={i}
+                                render={(form) => (
+                                    <div>
+                                        <FormInput form={form} name="text" />
+                                        <FormInput form={form} name="boolean" type="checkbox" />
+                                    </div>
+                                )}
+                            />
+                        ))}
+                    </ul>
+                )}
+            />
+            <pre>
+                {`
+<ArrayForm
+    form={form}
+    name="objectArrayField"
+    render={({ form }) => (
+        <ul>
+            {form.values.map((_, i) => (
+                <ChildForm
+                    form={form}
+                    name={i}
+                    render={(form) => (
+                        <div>
+                            <FormInput form={form} name="objectFieldName" />
+                        </div>
+                    )}
+                />
+            ))}
+        </ul>
+    )}
+/> `}
+            </pre>
+
+            {/* Dynamic object array */}
+            <label>Dynamic object array</label>
+            <ArrayForm
+                form={form}
+                name="objectArray"
+                render={({ form, append, remove }) => (
+                    <ul>
+                        {form.values.map((_, i) => (
+                            <ChildForm
+                                form={form}
+                                name={i}
+                                render={(form) => (
+                                    <div>
+                                        <FormInput form={form} name="text" />
+                                        <FormInput form={form} name="boolean" type="checkbox" />
+                                        <button type="button" onClick={() => remove(i)}>
+                                            Remove
+                                        </button>
+                                    </div>
+                                )}
+                            />
+                        ))}
+                        <button type="button" onClick={() => append({ text: "", boolean: false })}>
+                            Add item
+                        </button>
+                    </ul>
+                )}
+            />
+            <pre>
+                {`
+<ArrayForm
+    form={form}
+    name="objectArrayField"
+    render={({ form, append, remove }) => (
+        <ul>
+            {form.values.map((_, i) => (
+                <ChildForm
+                    form={form}
+                    name={i}
+                    render={(form) => (
+                        <div>
+                            <FormInput form={form} name="objectFieldName" />
+                            <button type="button" onClick={() => remove(i)}>
+                                Remove
+                            </button>
+                        </div>
+                    )}
+                />
+            ))}
+            <button type="button" onClick={() => append({ objectFieldName: "default value" })}>
+                Add item
+            </button>
+        </ul>
+    )}
+/>`}
+            </pre>
         </form>
     );
 }
