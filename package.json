@@ -18,13 +18,17 @@
     "react-markdown": "^5.0.3",
     "react-syntax-highlighter": "^15.4.3",
     "styled-components": "^5.2.1",
-    "typed-react-form": "^1.2.11"
+    "typed-object-validator": "^1.0.2",
+    "typed-react-form": "^1.3.0",
+    "typed-react-form-yup": "^1.0.2",
+    "yup": "^0.32.9"
   },
   "devDependencies": {
     "@types/node": "^14.14.34",
     "@types/react": "^17.0.3",
     "@types/react-syntax-highlighter": "^13.5.0",
     "@types/styled-components": "^5.1.8",
+    "@types/yup": "^0.29.11",
     "typescript": "^4.2.3"
   }
 }

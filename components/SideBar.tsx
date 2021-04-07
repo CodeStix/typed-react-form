@@ -27,7 +27,8 @@ const CATEGORIES = [
         category: "Validation",
         items: [
             { name: "Validation", url: "/docs/Validation" },
-            { name: "yup", url: "/docs/yup" },
+            { name: "Using yup", url: "/docs/yup" },
+            { name: "Using typed-object-validator", url: "/docs/typed-object-validator" },
         ],
     },
     {

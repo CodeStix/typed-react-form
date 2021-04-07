@@ -10,6 +10,7 @@ import {
     ErrorMap,
     FormError,
 } from "typed-react-form";
+import tv from "typed-object-validator";
 
 function MyForm() {
     const form = useForm({ email: "" });
@@ -207,6 +208,39 @@ function ValidationExample() {
     );
 }
 
+// import { useForm, FormError, FormInput, AnyListener } from "typed-react-form";
+import * as yup from "yup";
+import { yupValidator } from "typed-react-form-yup";
+
+interface LoginRequest {
+    email: string;
+    password: string;
+}
+
+const LoginRequestSchema = yup.object({
+    email: yup.string().required("Please enter an email").email("Please enter a valid email address."),
+    password: yup.string().required("Please enter a password").min(5, "Password must be longer"),
+});
+
+export function YupFormExample() {
+    const form = useForm<LoginRequest>({ email: "", password: "" }, yupValidator(LoginRequestSchema), true);
+
+    function submit() {
+        console.log("submit", form.values);
+    }
+
+    return (
+        <form onSubmit={form.handleSubmit(submit)}>
+            <FormInput form={form} name="email" type="email" />
+            <FormError form={form} name="email" />
+            <FormInput form={form} name="password" type="password" />
+            <FormError form={form} name="password" />
+            {/* Listen for any change on the form, and disable the submit button when there is an error */}
+            <AnyListener form={form} render={(form) => <button disabled={form.error}>Submit</button>} />
+        </form>
+    );
+}
+
 export default function Testing() {
     return (
         <>
@@ -221,6 +255,8 @@ export default function Testing() {
             <FormJsonExample />
             <hr />
             <ValidationExample />
+            <hr />
+            <YupFormExample />
         </>
     );
 }

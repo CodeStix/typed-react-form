@@ -1,16 +1,20 @@
 # yup
 
-**typed-react-form** has built-in support for [yup](https://github.com/jquense/yup). This is a validation library which makes it mush easier to validate data.
+To validate your form using [yup](https://www.npmjs.com/package/yup), do the following:
 
-Use the `yupValidator(yupSchema, options?)` helper function to create a validator function for your yup schema.
+First, install [typed-react-form-yup](https://www.npmjs.com/package/typed-react-form-yup)
+
+```
+npm install typed-react-form-yup
+```
+
+Then use the `yupValidator(yupSchema, options?)` helper function to create a validator function for your yup schema, which you can then pass to the `useForm` hook.
 
 ## Parameters
 
 #### `yupSchema` **(required)**
 
 The yup validation schema that will validate the form values.
-
----
 
 #### `options` **(optional)**
 
@@ -19,7 +23,8 @@ Yup validation options.
 ## Usage example
 
 ```tsx
-import { useForm, yupValidator, FormError, FormInput, AnyListener } from "typed-react-form";
+import { useForm, FormError, FormInput, AnyListener } from "typed-react-form";
+import { yupValidator } from "typed-react-form-yup";
 import * as yup from "yup";
 
 interface LoginRequest {
@@ -32,15 +37,15 @@ const LoginRequestSchema = yup.object({
     password: yup.string().required("Please enter a password").min(5, "Password must be longer"),
 });
 
-function FormExample() {
-    const form = useForm<LoginRequest>({ email: "", password: "" }, yupValidator(LoginRequestSchema)); // Use the yup validator
+export function YupFormExample() {
+    const form = useForm<LoginRequest>({ email: "", password: "" }, yupValidator(LoginRequestSchema), true);
+
+    function submit() {
+        console.log("submit", form.values);
+    }
+
     return (
-        <form
-            onSubmit={(ev) => {
-                ev.preventDefault();
-                console.log("submit", form.values);
-            }}
-        >
+        <form onSubmit={form.handleSubmit(submit)}>
             <FormInput form={form} name="email" type="email" />
             <FormError form={form} name="email" />
             <FormInput form={form} name="password" type="password" />
