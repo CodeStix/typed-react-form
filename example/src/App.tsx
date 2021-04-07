@@ -13,8 +13,7 @@ import {
     FormTextArea,
     ChildForm,
     yupValidator,
-    useArrayForm,
-    memberCopy
+    useArrayForm
 } from "typed-react-form";
 import { VisualRender } from "./VisualRender";
 import * as yup from "yup";
@@ -102,7 +101,7 @@ export function ArrayTest() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log(form.values);
-                setValues(memberCopy(form.values));
+                setValues({ ...form.values });
             }}
         >
             <p>Name</p>

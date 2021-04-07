@@ -10,7 +10,7 @@ export type DirtyMap<T> = {
     [Key in keyof T]?: boolean;
 };
 
-export type ErrorType<T, Error> = Error | (T extends {} ? ErrorMap<T, Error> : never);
+export type ErrorType<T, Error> = Error | (T extends {} ? ErrorMap<NonNullable<T>, Error> : never);
 
 export type ErrorMap<T, Error> = {
     [Key in keyof T]?: ErrorType<T[Key], Error>;
@@ -19,13 +19,19 @@ export type ErrorMap<T, Error> = {
 export type DefaultError = string;
 export type DefaultState = { isSubmitting: boolean };
 
-export function memberCopy<T>(value: T): T {
+function memberCopy<T>(value: T): T {
     if (Array.isArray(value)) {
         return [...value] as any;
     } else if (typeof value === "object") {
         return { ...value };
     } else {
         throw new Error("Can only memberCopy() arrays and objects.");
+    }
+}
+
+function addDistinct<T extends any[]>(arr1: T, arr2: T) {
+    for (let i = 0; i < arr2.length; i++) {
+        if (!arr1.includes(arr2[i])) arr1.push(arr2[i]);
     }
 }
 
@@ -155,8 +161,6 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         notifyParent: boolean = true,
         fireAny: boolean = true
     ) {
-        if (key === "author") console.trace("setValueInternal", key, value, dirty);
-
         let valueMap = isDefault ? this.defaultValues : this.values;
         if (value === undefined) {
             if (Array.isArray(valueMap)) valueMap.splice(key as number, 1);
@@ -312,11 +316,10 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @param error The error.
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
-     * @param setValuesWasUsed
      */
     public setError<Key extends keyof T>(
         key: Key,
-        error: ErrorType<T[Key], Error> | undefined,
+        error: ErrorType<NonNullable<T[Key]>, Error> | undefined,
         notifyChild: boolean = true,
         notifyParent: boolean = true,
         fireAny: boolean = true
@@ -327,17 +330,16 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         else this.errorMap[key] = error;
 
         if (notifyChild && this.childMap[key]) {
-            if (typeof error === "object") {
-                let changed = this.childMap[key]!.setErrors((error as any) ?? {}, true, false);
-                if (!changed) return false;
-            } else {
-                this.childMap[key]!.setErrors({} as any, true, false);
-            }
+            let changed = this.childMap[key]!.setErrors(error ?? ({} as any), true, false);
+            if (!changed && error !== undefined) return false;
         }
 
         this.fireListeners(key);
         if (fireAny) this.fireAnyListeners(); // When setValuesWasUsed, it will call fireAnyListener itself when all values were set
-        if (notifyParent) this.updateParentErrors(); // Will call setError on parent
+
+        if (notifyParent && this instanceof ChildFormState) {
+            this.parent.setError(this.name, this.error ? memberCopy(this.errorMap) : undefined, false, true);
+        }
         return true;
     }
 
@@ -348,34 +350,37 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
      * @param notifyParent Should this form notify the parent form about this change?
      */
     public setErrors(errors: ErrorType<T, Error>, notifyChild: boolean = true, notifyParent: boolean = true) {
+        let keys = Object.keys(this.errorMap);
+
         if (typeof errors === "string") {
             if (notifyParent && this instanceof ChildFormState) {
                 this.parent.setError(this.name, errors, false, true);
             }
-            return;
+            errors = {} as any;
+        } else {
+            addDistinct(keys, Object.keys(errors));
         }
-        let keys = Object.keys(this.errorMap);
-        let newKeys = Object.keys(errors);
-        for (let i = 0; i < newKeys.length; i++) {
-            if (!keys.includes(newKeys[i])) keys.push(newKeys[i]);
-        }
+
         let changed = false;
         for (let i = keys.length; i >= 0; i--) {
             let key = keys[i] as keyof T;
             if (
                 this.setError(
                     key,
-                    errors[key] as any,
+                    (errors as ErrorMap<T, Error>)[key] as ErrorType<NonNullable<T[keyof T]>, Error>,
                     notifyChild,
-                    false, // Will call updateParentErrors by itself after all values have been copied, see 3 lines down
+                    false, // Will call this.parent.setError by itself after all values have been copied, see 3 lines down
                     false // Will call fireAnyListener by itself after all values have been copied, see 3 lines down
                 )
             )
                 changed = true;
         }
         if (!changed) return false;
+
         this.fireAnyListeners();
-        if (notifyParent) this.updateParentErrors();
+        if (notifyParent && this instanceof ChildFormState) {
+            this.parent.setError(this.name, this.error ? (memberCopy(this.errorMap) as any) : undefined, false, true);
+        }
         return true;
     }
 
@@ -512,10 +517,6 @@ export class FormState<T, State = DefaultState, Error extends string = DefaultEr
         // Not implemented for root form, as it does not have a parent
     }
 
-    protected updateParentErrors() {
-        // Not implemented for root form, as it does not have a parent
-    }
-
     protected updateParentState() {
         // Not implemented for root form, as it does not have a parent
     }
@@ -554,10 +555,6 @@ export class ChildFormState<Parent, Key extends keyof Parent, ParentState, Paren
             true,
             true
         );
-    }
-
-    protected updateParentErrors() {
-        this.parent.setError(this.name, this.error ? (memberCopy(this.errorMap) as any) : undefined, false, true);
     }
 
     protected updateParentState() {
