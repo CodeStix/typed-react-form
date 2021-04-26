@@ -3,8 +3,6 @@ import { InputHTMLAttributes } from "react";
 import { DefaultError, DefaultState, FormState } from "../form";
 import { useListener } from "../hooks";
 
-type BaldInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form" | "value" | "type">;
-
 export const DEFAULT_DIRTY_CLASS = "typed-form-dirty";
 export const DEFAULT_ERROR_CLASS = "typed-form-error";
 
@@ -128,7 +126,9 @@ export function defaultDeserializer<T>(inputValue: string, inputChecked: boolean
     }
 }
 
-export type FormInputProps<T extends object, K extends keyof T = keyof T, State = DefaultState, Error extends string = string> = BaldInputProps & {
+export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "form" | "value" | "type">;
+
+export type FormInputProps<T extends object, K extends keyof T = keyof T, State = DefaultState, Error extends string = string> = InputProps & {
     form: FormState<T, State, Error>;
     name: K;
     serializer?: Serializer<FormInputValue<T, K>>;
