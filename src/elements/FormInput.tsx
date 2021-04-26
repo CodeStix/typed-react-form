@@ -32,7 +32,22 @@ export type FormInputType =
     | "tel"
     | "range";
 
-function defaultSerializer(currentValue: any, props: FormInputProps<any>): boolean | string {
+export type Serializer<T extends object, K extends keyof T, State = DefaultState, Error extends string = string> = (
+    currentValue: T[K] | T[K][keyof T[K]],
+    props: FormInputProps<T, K, State, Error>
+) => boolean | string;
+
+export type Deserializer<T extends object, K extends keyof T, State = DefaultState, Error extends string = string> = (
+    inputValue: string,
+    inputChecked: boolean,
+    currentValue: T[K] | T[K][keyof T[K]],
+    props: FormInputProps<T, K, State, Error>
+) => T[K] | T[K][keyof T[K]];
+
+function defaultSerializer<T extends object, K extends keyof T, State = DefaultState, Error extends string = string>(
+    currentValue: T[K] | T[K][keyof T[K]],
+    props: FormInputProps<T, K, State, Error>
+): boolean | string {
     switch (props.type) {
         case "datetime-local":
         case "date": {
@@ -69,7 +84,12 @@ function defaultSerializer(currentValue: any, props: FormInputProps<any>): boole
     }
 }
 
-function defaultDeserializer(inputValue: string, inputChecked: boolean, currentValue: any, props: FormInputProps<any>) {
+function defaultDeserializer<T extends object, K extends keyof T, State = DefaultState, Error extends string = string>(
+    inputValue: string,
+    inputChecked: boolean,
+    currentValue: any,
+    props: FormInputProps<T, K, State, Error>
+) {
     switch (props.type) {
         case "number": {
             return parseFloat(inputValue) as any;
@@ -101,8 +121,8 @@ function defaultDeserializer(inputValue: string, inputChecked: boolean, currentV
             } else if (props.value !== undefined) {
                 // Primitive array field
                 let arr = Array.isArray(currentValue) ? [...currentValue] : [];
-                if (inputChecked) arr.push(inputValue);
-                else arr.splice(arr.indexOf(inputValue), 1);
+                if (inputChecked) arr.push(props.value);
+                else arr.splice(arr.indexOf(props.value), 1);
                 return arr as any;
             } else {
                 // Boolean field
@@ -116,17 +136,13 @@ function defaultDeserializer(inputValue: string, inputChecked: boolean, currentV
     }
 }
 
-export type FormInputProps<
-    T extends object,
-    K extends keyof T = keyof T,
-    Value extends T[K] | T[K][keyof T[K]] = any,
-    State = DefaultState,
-    Error extends string = string
-> = BaldInputProps & {
+export type FormInputProps<T extends object, K extends keyof T = keyof T, State = DefaultState, Error extends string = string> = BaldInputProps & {
     form: FormState<T, State, Error>;
     name: K;
     type?: FormInputType;
-    value?: Value;
+    value?: T[K] | T[K][keyof T[K]];
+    serializer?: Serializer<T, K, State, Error>;
+    deserializer?: Deserializer<T, K, State, Error>;
     errorClassName?: string;
     errorStyle?: React.CSSProperties;
     dirtyClassName?: string;
@@ -143,15 +159,11 @@ export type FormInputProps<
  *
  * **FormSelect**, **FormTextArea** and **FormError** are also available.
  *
- * When this component does not satisfy your needs, you can always [implement your own](https://typed-react-form.codestix.nl/docs/Custom-inputs#example-custom-input).
+ * When this component does not satisfy your needs, you can always [implement your own](https://typed-react-form.codestix.nl/docs/Custom-input#example-custom-input).
  */
-export function FormInput<
-    T extends object,
-    K extends keyof T,
-    Value extends T[K] | T[K][keyof T[K]],
-    State extends DefaultState = DefaultState,
-    Error extends string = DefaultError
->(props: FormInputProps<T, K, Value, State, Error>) {
+export function FormInput<T extends object, K extends keyof T, State extends DefaultState = DefaultState, Error extends string = DefaultError>(
+    props: FormInputProps<T, K, State, Error>
+) {
     const {
         value: inputValue,
         checked: inputChecked,
@@ -165,6 +177,8 @@ export function FormInput<
         setUndefinedOnUncheck,
         className,
         disableOnSubmitting,
+        serializer,
+        deserializer,
         style,
         name,
         type,
@@ -172,7 +186,7 @@ export function FormInput<
     } = props;
     const { value: currentValue, error, dirty, state, setValue } = useListener(form, name);
 
-    let valueChecked = defaultSerializer(currentValue, props);
+    let valueChecked = (serializer ?? defaultSerializer)(currentValue, props);
 
     if (process.env.NODE_ENV === "development") {
         if ((setNullOnUncheck || setUndefinedOnUncheck) && type !== "checkbox")
@@ -190,13 +204,10 @@ export function FormInput<
             }}
             className={getClassName(className, dirty && (dirtyClassName ?? DEFAULT_DIRTY_CLASS), error && (errorClassName ?? DEFAULT_ERROR_CLASS))}
             disabled={(disableOnSubmitting ?? true) && state.isSubmitting}
-            value={typeof valueChecked === "string" ? valueChecked : (inputValue as any)}
-            checked={typeof valueChecked === "boolean" ? valueChecked : inputChecked}
+            value={typeof valueChecked === "string" ? valueChecked : undefined}
+            checked={typeof valueChecked === "boolean" ? valueChecked : undefined}
             onChange={(ev) => {
-                console.log("deserializing", inputValue, ev.target.value, ev.target.checked, currentValue);
-                let dse = defaultDeserializer(ev.target.value, ev.target.checked, currentValue, props);
-                console.log("deserialize", JSON.stringify(dse));
-                setValue(dse);
+                setValue((deserializer ?? defaultDeserializer)(ev.target.value, ev.target.checked, currentValue, props));
             }}
             name={name + ""}
             type={type}
