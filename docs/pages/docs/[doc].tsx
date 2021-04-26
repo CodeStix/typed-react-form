@@ -33,48 +33,42 @@ export default function DocPage(props: Props) {
                 />
             </Head>
             <NavBar onMenu={() => setShowMobileMenu(true)} />
-            <CenterContainer style={{ margin: "0 0.5em" }}>
-                <div className="flex">
-                    <div
-                        className={`md:block md:static top-0 left-0 z-30 h-full overflow-auto fixed p-3 transform translate-x-0 transition`}
-                        style={{ display: showMobileMenu ? "" : "none" }}
-                    >
-                        <SideBar />
-                    </div>
-                    <div className="markdown relative block overflow-hidden mb-72">
-                        <Link
-                            passHref
-                            href={`https://github.com/CodeStix/typed-react-form-docs/tree/main/articles/${props.title}.md`}
-                        >
-                            <a className="no-underline text-blue-700 absolute p-0 top-2 right-2 cursor-pointer">
-                                Edit <FontAwesomeIcon icon={faPen} />
-                            </a>
-                        </Link>
-                        <ReactMarkdown
-                            renderers={{
-                                link: ({ children, href }) => {
-                                    return (
-                                        <Link href={href}>
-                                            <a>{children}</a>
-                                        </Link>
-                                    );
-                                },
-                                code: ({ language, value }) => {
-                                    return (
-                                        <SyntaxHighlighter
-                                            style={materialOceanic}
-                                            language={language}
-                                            children={value}
-                                        />
-                                    );
-                                },
-                            }}
-                        >
-                            {props.content}
-                        </ReactMarkdown>
-                    </div>
+            <div className="md:grid" style={{ gridTemplateColumns: "220px 1fr" }}>
+                <div
+                    className={`md:block md:static top-0 left-0 z-30 overflow-auto fixed p-3 transform translate-x-0 transition`}
+                    // style={{ display: showMobileMenu ? "" : "none" }}
+                >
+                    <SideBar />
                 </div>
-            </CenterContainer>
+                <div className="markdown relative block overflow-hidden mb-72 xl:mx-32 lg:mx-24 md:mx-12 sm:mx-2">
+                    <Link
+                        passHref
+                        href={`https://github.com/CodeStix/typed-react-form-docs/tree/main/articles/${props.title}.md`}
+                    >
+                        <a className="no-underline text-blue-700 absolute p-0 top-2 right-2 cursor-pointer">
+                            Edit <FontAwesomeIcon icon={faPen} />
+                        </a>
+                    </Link>
+                    <ReactMarkdown
+                        renderers={{
+                            link: ({ children, href }) => {
+                                return (
+                                    <Link href={href}>
+                                        <a>{children}</a>
+                                    </Link>
+                                );
+                            },
+                            code: ({ language, value }) => {
+                                return (
+                                    <SyntaxHighlighter style={materialOceanic} language={language} children={value} />
+                                );
+                            },
+                        }}
+                    >
+                        {props.content}
+                    </ReactMarkdown>
+                </div>
+            </div>
         </main>
     );
 }

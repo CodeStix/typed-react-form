@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 
 function NavItem(props: { children?: React.ReactNode; onClick?: (ev: React.MouseEvent) => void }) {
     return (
-        <a onClick={props.onClick} className="block p-4 text-blue-800 cursor-pointer hover:text-black transition">
+        <a onClick={props.onClick} className="block px-4 text-blue-800 cursor-pointer hover:text-black transition">
             {props.children}
         </a>
     );
@@ -24,36 +24,36 @@ function useWindowWidth() {
 export function NavBar(props: { onMenu: () => void }) {
     const windowWidth = useWindowWidth();
     return (
-        <CenterContainer className="">
-            <div className="flex items-center border-b">
-                <Link href="/">
-                    <span className="cursor-poiner p-4 font-bold font-lg text-blue-800 mr-auto">
-                        <FontAwesomeIcon icon={faBook} />
-                        &nbsp;Typed React Form
-                    </span>
-                </Link>
+        <div className="flex items-center border-b">
+            <Link href="/">
+                <span className="cursor-poiner px-4 py-3 font-bold text-lg text-blue-800 mr-auto">
+                    <FontAwesomeIcon icon={faBook} />
+                    &nbsp;Typed React Form
+                </span>
+            </Link>
 
-                {/* <Link href="https://github.com/codestix/typed-react-form" passHref>
+            {/* <Link href="https://github.com/codestix/typed-react-form" passHref>
                     <NavItem>GitHub</NavItem>
                 </Link> */}
 
-                <Link href="https://github.com/codestix/typed-react-form" passHref>
-                    <NavItem>
+            <Link href="https://github.com/codestix/typed-react-form" passHref>
+                <NavItem>
+                    <span className="text-3xl">
                         <FontAwesomeIcon icon={faGithub} />
-                    </NavItem>
-                </Link>
+                    </span>
+                </NavItem>
+            </Link>
 
-                {windowWidth < 600 && (
-                    <NavItem
-                        onClick={(ev) => {
-                            ev.stopPropagation();
-                            props.onMenu();
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faBars} />
-                    </NavItem>
-                )}
-            </div>
-        </CenterContainer>
+            {windowWidth < 600 && (
+                <NavItem
+                    onClick={(ev) => {
+                        ev.stopPropagation();
+                        props.onMenu();
+                    }}
+                >
+                    <FontAwesomeIcon icon={faBars} />
+                </NavItem>
+            )}
+        </div>
     );
 }

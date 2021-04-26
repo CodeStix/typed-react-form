@@ -4,20 +4,9 @@
 
 html,
 body {
-    padding: 0;
-    margin: 0;
     font-family: "Roboto", sans-serif;
     /* font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif; */
-}
-
-a {
-    color: inherit;
-    text-decoration: none;
-}
-
-* {
-    box-sizing: border-box;
 }
 
 h1,
@@ -38,7 +27,6 @@ h6 {
     padding: 0.1em 0.5em;
     background: #0001;
     border-radius: 0.5em;
-    font-size: 1.2em;
 }
 
 .markdown a {
@@ -53,6 +41,26 @@ h6 {
 .markdown hr {
     margin: 2em 0;
     border: 1px solid #0002;
+}
+
+.markdown h1 {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.markdown h2 {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+.markdown h3 {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.markdown h3,
+.markdown h4,
+.markdown h5 {
+    font-weight: bold;
 }
 
 .markdown h1,
@@ -76,6 +84,6 @@ h6 {
 }
 
 .markdown li {
-    margin-top: 0.2em;
-    margin-bottom: 0.2em;
+    list-style: square;
+    margin: 0.2em 0 0.2em 1.5em;
 }
