@@ -1,3 +1,7 @@
+# 1.3.1 (26/04/2021)
+
+-   It is now easier to create custom inputs by exposing `defaultSerializer` and `defaultDeserializer` to the user.
+
 # 1.3.0 (07/04/2021)
 
 -   Moved `yupValidator` to seperate package [`typed-react-form-yup`](https://www.npmjs.com/package/typed-react-form-yup)
