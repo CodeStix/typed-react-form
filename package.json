@@ -5,7 +5,7 @@
   "author": "codestix",
   "license": "MIT",
   "repository": "CodeStix/typed-react-form",
-  "homepage": "https://typed-react-form.codestix.nl/",
+  "homepage": "https://codestix.github.io/typed-react-form/",
   "main": "dist/index.js",
   "source": "src/index.ts",
   "keywords": [

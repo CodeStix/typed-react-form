@@ -1,1 +1,1 @@
-# This is the testing application, you should check out the [documentation](https://typed-react-form.codestix.nl/) for explained examples.
+# This is the testing application, you should check out the [documentation](https://codestix.github.io/typed-react-form/) for better examples.
