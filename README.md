@@ -2,7 +2,7 @@
 
 ![vscode typescript](https://github.com/CodeStix/typed-react-form/raw/master/example/public/thumb.png)
 
-A fast, completely type-checked React form state manager, focussed on typescript integration and minimal rerenders. Featuring:
+A fast, completely type-checked React form builder, focussed on typescript integration and minimal rerenders. Featuring:
 
 - [Object fields](https://typed-react-form.codestix.nl/docs/Object-fields)
 - [Array fields](https://typed-react-form.codestix.nl/docs/Array-fields)
@@ -18,9 +18,7 @@ A fast, completely type-checked React form state manager, focussed on typescript
 npm install typed-react-form
 ```
 
-## [Documentation](https://typed-react-form.codestix.nl/)
-
-**You can find documentation and information on how to get started [here](https://typed-react-form.codestix.nl/).**
+## [Documentation here](https://typed-react-form.codestix.nl/)
 
 ## Javascript/typescript React
 
@@ -28,10 +26,10 @@ This library is built from the ground up for React with typescript, but it also 
 
 ## Contributing
 
-Contributions are always welcome!
+Contributions are welcome.
 
 1. Clone this repo
-2. Install deps using `yarn`. Yarn is required due to the resolutions field in package.json, npm does not support this.
+2. Install deps using `yarn`. Yarn is required because of the resolutions field in package.json, npm does not support this.
 3. Open a new terminal and navigate to `example/`, run `yarn` and `yarn start` to start the testing application.
 4. Done! When you edit source code, it will be rebuilt and update the testing application.
 

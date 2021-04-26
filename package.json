@@ -1,8 +1,8 @@
 {
   "name": "typed-react-form",
   "version": "1.3.0",
-  "description": "A React form state manager, focussed on flawless typescript integration and minimal rerenders.",
-  "author": "CodeStix",
+  "description": "A React form form builder, focussed on typescript integration and minimal rerenders.",
+  "author": "codestix",
   "license": "MIT",
   "repository": "CodeStix/typed-react-form",
   "homepage": "https://typed-react-form.codestix.nl/",
@@ -11,11 +11,10 @@
   "keywords": [
     "react",
     "form",
-    "state-manager",
-    "react-form",
+    "react form",
+    "type checked form",
     "typescript",
-    "react-typescript",
-    "tsx",
+    "react typescript",
     "typescript form"
   ],
   "engines": {
