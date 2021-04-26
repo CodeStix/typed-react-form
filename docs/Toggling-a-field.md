@@ -1,7 +1,3 @@
----
-layout: default
----
-
 # Toggling a field
 
 `typed-react-form` allows you to use multiple inputs on the same field, with this feature, you can create a primary input which contains the actual field value, and a secondary field, a checkbox, which sets the field to null/undefined when unchecked.
