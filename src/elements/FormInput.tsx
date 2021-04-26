@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { InputHTMLAttributes } from "react";
 import { DefaultError, DefaultState, FormState } from "../form";
 import { useListener } from "../hooks";
@@ -32,12 +32,96 @@ export type FormInputType =
     | "tel"
     | "range";
 
+function defaultSerializer(currentValue: any, props: FormInputProps<any>): boolean | string {
+    switch (props.type) {
+        case "datetime-local":
+        case "date": {
+            let dateValue = currentValue as any;
+            if (typeof dateValue === "string") {
+                let ni = parseInt(dateValue);
+                if (!isNaN(ni)) dateValue = ni;
+            }
+            let date = new Date(dateValue);
+            if (!isNaN(date.getTime())) {
+                return date?.toISOString().split("T")[0] ?? "";
+            } else {
+                return "";
+            }
+            break;
+        }
+        case "radio": {
+            return currentValue === props.value;
+        }
+        case "checkbox": {
+            if (props.setNullOnUncheck) {
+                return currentValue !== null;
+            } else if (props.setUndefinedOnUncheck) {
+                return currentValue !== undefined;
+            } else if (props.value !== undefined) {
+                return (Array.isArray(currentValue) ? currentValue : []).includes(props.value as never);
+            } else {
+                return !!currentValue;
+            }
+        }
+        default: {
+            return (currentValue ?? "") + "";
+        }
+    }
+}
+
+function defaultDeserializer(inputValue: string, inputChecked: boolean, currentValue: any, props: FormInputProps<any>) {
+    switch (props.type) {
+        case "number": {
+            return parseFloat(inputValue) as any;
+        }
+        case "datetime-local":
+        case "date": {
+            if (inputValue) {
+                let d = new Date(inputValue);
+                return (props.dateAsNumber ? d.getTime() : d) as any;
+            } else {
+                return null as any;
+            }
+        }
+        case "radio": {
+            // Enum field
+            if (inputChecked) {
+                return props.value as any;
+            }
+            return currentValue;
+        }
+        case "checkbox": {
+            if (props.setNullOnUncheck || props.setUndefinedOnUncheck) {
+                if (inputChecked && props.value === undefined && process.env.NODE_ENV === "development") {
+                    console.error(
+                        "Checkbox using setNullOnUncheck got checked but a value to set was not found, please provide a value to the value prop."
+                    );
+                }
+                return inputChecked ? props.value : ((props.setNullOnUncheck ? null : undefined) as any);
+            } else if (props.value !== undefined) {
+                // Primitive array field
+                let arr = Array.isArray(currentValue) ? [...currentValue] : [];
+                if (inputChecked) arr.push(inputValue);
+                else arr.splice(arr.indexOf(inputValue), 1);
+                return arr as any;
+            } else {
+                // Boolean field
+                return inputChecked as any;
+            }
+        }
+        default: {
+            // String field
+            return inputValue as any;
+        }
+    }
+}
+
 export type FormInputProps<
     T extends object,
-    State,
-    Error extends string,
-    K extends keyof T,
-    Value extends T[K] | T[K][keyof T[K]]
+    K extends keyof T = keyof T,
+    Value extends T[K] | T[K][keyof T[K]] = any,
+    State = DefaultState,
+    Error extends string = string
 > = BaldInputProps & {
     form: FormState<T, State, Error>;
     name: K;
@@ -67,78 +151,35 @@ export function FormInput<
     Value extends T[K] | T[K][keyof T[K]],
     State extends DefaultState = DefaultState,
     Error extends string = DefaultError
->({
-    form,
-    name,
-    style,
-    className,
-    disableOnSubmitting,
-    dateAsNumber,
-    errorClassName,
-    errorStyle,
-    dirtyClassName,
-    dirtyStyle,
-    setUndefinedOnUncheck,
-    setNullOnUncheck,
-    hideWhenNull,
-    value: inputValue,
-    checked: inputChecked,
-    ...rest
-}: FormInputProps<T, State, Error, K, Value>) {
-    const { value: currentValue, error, dirty, state, setValue, defaultValue } = useListener(form, name);
+>(props: FormInputProps<T, K, Value, State, Error>) {
+    const {
+        value: inputValue,
+        checked: inputChecked,
+        form,
+        hideWhenNull,
+        dirtyStyle,
+        errorStyle,
+        dirtyClassName,
+        errorClassName,
+        setNullOnUncheck,
+        setUndefinedOnUncheck,
+        className,
+        disableOnSubmitting,
+        style,
+        name,
+        type,
+        ...rest
+    } = props;
+    const { value: currentValue, error, dirty, state, setValue } = useListener(form, name);
 
-    let [inValue, inChecked] = useMemo(() => {
-        let inValue = undefined,
-            inChecked = undefined;
-        switch (rest.type) {
-            case "number": {
-                inValue = (currentValue ?? "") + "";
-                break;
-            }
-            case "datetime-local":
-            case "date": {
-                let n = currentValue as any;
-                if (typeof n === "string") {
-                    let ni = parseInt(n);
-                    if (!isNaN(ni)) n = ni;
-                }
-                let d = new Date(n);
-                if (d.getTime() === d.getTime()) {
-                    // Trick to check if date is valid: NaN === NaN returns false
-                    inValue = d?.toISOString().split("T")[0] ?? "";
-                } else {
-                    inValue = "";
-                }
-                break;
-            }
-            case "radio": {
-                inChecked = currentValue === inputValue;
-                break;
-            }
-            case "checkbox": {
-                if (setNullOnUncheck) {
-                    inChecked = currentValue !== null;
-                } else if (setUndefinedOnUncheck) {
-                    inChecked = currentValue !== undefined;
-                } else if (inputValue !== undefined) {
-                    inChecked = (Array.isArray(currentValue) ? currentValue : []).includes(inputValue as never);
-                } else {
-                    inChecked = !!currentValue;
-                }
-                break;
-            }
-            default: {
-                inValue = (currentValue ?? "") + "";
-                break;
-            }
-        }
-        return [inValue, inChecked];
-    }, [rest.type, currentValue, inputValue]);
+    let valueChecked = defaultSerializer(currentValue, props);
+
+    if (process.env.NODE_ENV === "development") {
+        if ((setNullOnUncheck || setUndefinedOnUncheck) && type !== "checkbox")
+            console.error("setNullOnUncheck/setUndefinedOnUncheck only has an effect on checkboxes.");
+    }
 
     if (hideWhenNull && (currentValue === null || currentValue === undefined)) return null;
-
-    if ((setNullOnUncheck || setUndefinedOnUncheck) && rest.type !== "checkbox")
-        console.warn("setNullOnUncheck/setUndefinedOnUncheck only has an effect on checkboxes.");
 
     return (
         <input
@@ -149,62 +190,16 @@ export function FormInput<
             }}
             className={getClassName(className, dirty && (dirtyClassName ?? DEFAULT_DIRTY_CLASS), error && (errorClassName ?? DEFAULT_ERROR_CLASS))}
             disabled={(disableOnSubmitting ?? true) && state.isSubmitting}
-            value={inValue}
-            checked={inChecked}
+            value={typeof valueChecked === "string" ? valueChecked : (inputValue as any)}
+            checked={typeof valueChecked === "boolean" ? valueChecked : inputChecked}
             onChange={(ev) => {
-                let newValue = ev.target.value;
-                let newChecked = ev.target.checked;
-                switch (rest.type) {
-                    case "number": {
-                        setValue(parseFloat(newValue) as any);
-                        return;
-                    }
-                    case "datetime-local":
-                    case "date": {
-                        if (newValue) {
-                            let d = new Date(newValue);
-                            setValue((dateAsNumber ? d.getTime() : d) as any);
-                        } else {
-                            setValue(null as any);
-                        }
-                        return;
-                    }
-                    case "radio": {
-                        // Enum field
-                        if (newChecked) {
-                            setValue(inputValue as any);
-                        }
-                        return;
-                    }
-                    case "checkbox": {
-                        if (setNullOnUncheck || setUndefinedOnUncheck) {
-                            if (newChecked && inputValue === undefined && !defaultValue)
-                                console.warn(
-                                    "Toggling checkbox using setNullOnUncheck got checked but a value to set was not found, please provide the value prop"
-                                );
-                            setValue(
-                                newChecked ? (inputValue !== undefined ? inputValue : defaultValue) : ((setNullOnUncheck ? null : undefined) as any)
-                            );
-                        } else if (inputValue !== undefined) {
-                            // Primitive array field
-                            let arr = Array.isArray(currentValue) ? [...currentValue] : [];
-                            if (newChecked) arr.push(inputValue);
-                            else arr.splice(arr.indexOf(inputValue), 1);
-                            setValue(arr as any);
-                        } else {
-                            // Boolean field
-                            setValue(newChecked as any);
-                        }
-                        return;
-                    }
-                    default: {
-                        // String field
-                        setValue(newValue as any);
-                        return;
-                    }
-                }
+                console.log("deserializing", inputValue, ev.target.value, ev.target.checked, currentValue);
+                let dse = defaultDeserializer(ev.target.value, ev.target.checked, currentValue, props);
+                console.log("deserialize", JSON.stringify(dse));
+                setValue(dse);
             }}
             name={name + ""}
+            type={type}
             {...rest}
         />
     );
