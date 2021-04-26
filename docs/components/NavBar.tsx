@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faGithubAlt, faGithubSquare } from "@fortawesome/free-brands-svg-icons";
 import Link from "next/link";
 import { faBars, faBook } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Name = styled.span`
     cursor: pointer;
@@ -19,28 +19,9 @@ const Name = styled.span`
     }
 `;
 
-const NavItem = styled.a`
-    display: block;
-    padding: 0.8em;
-    color: #195daa;
-    cursor: pointer;
-
-    &:hover {
-        transition: 100ms;
-        color: black;
-    }
-`;
-
-const Container = styled.div`
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #0002;
-`;
-
-const Icon = styled(FontAwesomeIcon)`
-    font-size: 2em;
-    /* color: #195daa; */
-`;
+function NavItem(props: { children?: React.ReactNode }) {
+    return <a className="block p-4 text-blue-600 cursor-pointer hover:text-black transition">{props.children}</a>;
+}
 
 function useWindowWidth() {
     const [windowWidth, setWindowWidth] = useState(1200);
@@ -53,8 +34,8 @@ function useWindowWidth() {
 export function NavBar(props: { onMenu: () => void }) {
     const windowWidth = useWindowWidth();
     return (
-        <CenterContainer>
-            <Container>
+        <CenterContainer className="">
+            <div className="flex items-center border-b">
                 <Link href="/">
                     <Name>
                         <FontAwesomeIcon icon={faBook} />
@@ -68,7 +49,7 @@ export function NavBar(props: { onMenu: () => void }) {
 
                 <Link href="https://github.com/codestix/typed-react-form" passHref>
                     <NavItem>
-                        <Icon icon={faGithub} />
+                        <FontAwesomeIcon icon={faGithub} />
                     </NavItem>
                 </Link>
 
@@ -77,11 +58,12 @@ export function NavBar(props: { onMenu: () => void }) {
                         onClick={(ev) => {
                             ev.stopPropagation();
                             props.onMenu();
-                        }}>
-                        <Icon icon={faBars} />
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faBars} />
                     </NavItem>
                 )}
-            </Container>
+            </div>
         </CenterContainer>
     );
 }

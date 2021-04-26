@@ -1,4 +1,5 @@
 import "../styles/globals.css";
+import "tailwindcss/tailwind.css";
 
 // https://stackoverflow.com/questions/57609931/next-js-with-fortawesome-and-ssr
 import { config } from "@fortawesome/fontawesome-svg-core";
