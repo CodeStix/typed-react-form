@@ -15,8 +15,8 @@ You can use a validator by passing it to the [`useForm`](/typed-react-form/refer
 
 Its it recommended to use a validation library, as this makes the process of validating data mush easier. This library has drop-in functionallity for:
 
--   [typed-object-validator](/typed-react-form/validation/typed-object-validator): recommended, a typed-checked validation library
 -   [yup](/typed-react-form/validation/yup): a widely used validation library
+-   [typed-object-validator](/typed-react-form/validation/typed-object-validator): a typed-checked validation library
 
 You can ofcourse use every validation library there is, but the errors must be converted to be compatible with this library.
 
