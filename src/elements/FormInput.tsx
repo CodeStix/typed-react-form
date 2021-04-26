@@ -44,9 +44,17 @@ export type Deserializer<T extends object, K extends keyof T, State = DefaultSta
     props: FormInputProps<T, K, State, Error>
 ) => T[K] | T[K][keyof T[K]];
 
-function defaultSerializer<T extends object, K extends keyof T, State = DefaultState, Error extends string = string>(
+export type SerializeProps<T extends object, K extends keyof T> = {
+    dateAsNumber?: boolean;
+    setUndefinedOnUncheck?: boolean;
+    setNullOnUncheck?: boolean;
+    type?: FormInputType;
+    value?: T[K] | T[K][keyof T[K]];
+};
+
+export function defaultSerializer<T extends object, K extends keyof T>(
     currentValue: T[K] | T[K][keyof T[K]],
-    props: FormInputProps<T, K, State, Error>
+    props: SerializeProps<T, K>
 ): boolean | string {
     switch (props.type) {
         case "datetime-local":
@@ -84,11 +92,11 @@ function defaultSerializer<T extends object, K extends keyof T, State = DefaultS
     }
 }
 
-function defaultDeserializer<T extends object, K extends keyof T, State = DefaultState, Error extends string = string>(
+export function defaultDeserializer<T extends object, K extends keyof T>(
     inputValue: string,
     inputChecked: boolean,
-    currentValue: any,
-    props: FormInputProps<T, K, State, Error>
+    currentValue: T[K],
+    props: SerializeProps<T, K>
 ) {
     switch (props.type) {
         case "number": {
@@ -148,11 +156,8 @@ export type FormInputProps<T extends object, K extends keyof T = keyof T, State 
     dirtyClassName?: string;
     dirtyStyle?: React.CSSProperties;
     disableOnSubmitting?: boolean;
-    dateAsNumber?: boolean;
-    setNullOnUncheck?: boolean;
-    setUndefinedOnUncheck?: boolean;
     hideWhenNull?: boolean;
-};
+} & SerializeProps<T, K>;
 
 /**
  * The builtin form input. You must always specify **form** and **name**. Use the **type** prop to specify what type of field it represents.
@@ -209,7 +214,7 @@ export function FormInput<T extends object, K extends keyof T, State extends Def
             onChange={(ev) => {
                 setValue((deserializer ?? defaultDeserializer)(ev.target.value, ev.target.checked, currentValue, props));
             }}
-            name={name + ""}
+            name={name as string}
             type={type}
             {...rest}
         />
