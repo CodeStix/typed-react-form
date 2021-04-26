@@ -1,3 +1,7 @@
+# 1.3.2 (26/04/2021)
+
+-   Update documentation links.
+
 # 1.3.1 (26/04/2021)
 
 -   It is now easier to create custom inputs by exposing `defaultSerializer` and `defaultDeserializer` to the user.
