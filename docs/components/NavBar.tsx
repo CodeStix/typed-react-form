@@ -6,21 +6,12 @@ import Link from "next/link";
 import { faBars, faBook } from "@fortawesome/free-solid-svg-icons";
 import React, { useEffect, useState } from "react";
 
-const Name = styled.span`
-    cursor: pointer;
-    padding: 0.8em;
-    font-weight: bold;
-    font-size: 1.5rem;
-    color: #2065af;
-    margin-right: auto;
-
-    @media only screen and (max-width: 600px) {
-        font-size: 1.2rem;
-    }
-`;
-
-function NavItem(props: { children?: React.ReactNode }) {
-    return <a className="block p-4 text-blue-600 cursor-pointer hover:text-black transition">{props.children}</a>;
+function NavItem(props: { children?: React.ReactNode; onClick?: (ev: React.MouseEvent) => void }) {
+    return (
+        <a onClick={props.onClick} className="block p-4 text-blue-800 cursor-pointer hover:text-black transition">
+            {props.children}
+        </a>
+    );
 }
 
 function useWindowWidth() {
@@ -37,10 +28,10 @@ export function NavBar(props: { onMenu: () => void }) {
         <CenterContainer className="">
             <div className="flex items-center border-b">
                 <Link href="/">
-                    <Name>
+                    <span className="cursor-poiner p-4 font-bold font-lg text-blue-800 mr-auto">
                         <FontAwesomeIcon icon={faBook} />
                         &nbsp;Typed React Form
-                    </Name>
+                    </span>
                 </Link>
 
                 {/* <Link href="https://github.com/codestix/typed-react-form" passHref>

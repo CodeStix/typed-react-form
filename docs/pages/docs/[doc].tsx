@@ -22,113 +22,8 @@ interface Props {
     title: string;
 }
 
-const Container = styled.div`
-    display: grid;
-    gap: 3em;
-    grid-template-columns: 200px 1fr;
-
-    @media only screen and (max-width: 600px) {
-        grid-template-columns: 1fr;
-        /* display: block; */
-        /* max-width: 100vw; */
-    }
-`;
-
-const ReactMarkdownContainer = styled.div`
-    position: relative;
-    display: block;
-    overflow: hidden;
-    margin-bottom: 30em;
-
-    pre {
-        border-radius: 0.3em;
-    }
-
-    code {
-        display: inline-block;
-        padding: 0.1em 0.5em;
-        background: #0001;
-        border-radius: 0.5em;
-        font-size: 1.2em;
-    }
-
-    /* @media only screen and (max-width: 600px) {
-        pre {
-            margin: 0 -2em !important;
-        }
-    } */
-
-    a {
-        padding: 0.3em 0;
-        color: #186eee;
-        &:hover {
-            color: black;
-        }
-    }
-
-    hr {
-        margin: 2em 0;
-        border: 1px solid #0002;
-    }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        margin: 1.2em 0 0.5em 0;
-    }
-
-    h1,
-    h2 {
-        /* color: #004; */
-        padding-bottom: 0.2em;
-        border-bottom: 1px solid #0002;
-    }
-
-    p {
-        color: #333;
-    }
-
-    li {
-        margin-top: 0.2em;
-        margin-bottom: 0.2em;
-    }
-`;
-
-const SidebarHolder = styled.div`
-    @media only screen and (max-width: 600px) {
-        top: 0em;
-        left: 0em;
-        width: 100%;
-        z-index: 100;
-        backdrop-filter: blur(50px);
-        height: 100%;
-        overflow: auto;
-        position: fixed;
-        padding: 1em;
-        transform: translateX(0);
-        transition: 100ms ease-in;
-        &.hidden {
-            transition: 100ms ease-in;
-            transform: translateX(-100vw);
-        }
-    }
-`;
-
-const Edit = styled.a`
-    text-decoration: none;
-    color: #186eee;
-    position: absolute;
-    padding: 0 !important;
-    top: 0.8em;
-    right: 0.8em;
-    cursor: pointer;
-`;
-
 export default function DocPage(props: Props) {
-    const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [showMobileMenu, setShowMobileMenu] = useState(true);
     return (
         <main onClick={() => setShowMobileMenu(false)}>
             <Head>
@@ -140,18 +35,21 @@ export default function DocPage(props: Props) {
             </Head>
             <NavBar onMenu={() => setShowMobileMenu(true)} />
             <CenterContainer style={{ margin: "0 0.5em" }}>
-                <Container>
-                    <SidebarHolder className={!showMobileMenu && "hidden"}>
+                <div className="flex">
+                    <div
+                        className={`md:block md:static top-0 left-0 z-30 h-full overflow-auto fixed p-3 transform translate-x-0 transition`}
+                        style={{ display: showMobileMenu ? "" : "none" }}
+                    >
                         <SideBar />
-                    </SidebarHolder>
-                    <ReactMarkdownContainer>
+                    </div>
+                    <div className="markdown relative block overflow-hidden mb-72">
                         <Link
                             passHref
                             href={`https://github.com/CodeStix/typed-react-form-docs/tree/main/articles/${props.title}.md`}
                         >
-                            <Edit>
+                            <a className="no-underline text-blue-700 absolute p-0 top-2 right-2 cursor-pointer">
                                 Edit <FontAwesomeIcon icon={faPen} />
-                            </Edit>
+                            </a>
                         </Link>
                         <ReactMarkdown
                             renderers={{
@@ -175,8 +73,8 @@ export default function DocPage(props: Props) {
                         >
                             {props.content}
                         </ReactMarkdown>
-                    </ReactMarkdownContainer>
-                </Container>
+                    </div>
+                </div>
             </CenterContainer>
         </main>
     );

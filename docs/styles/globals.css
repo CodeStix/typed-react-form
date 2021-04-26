@@ -28,3 +28,54 @@ h5,
 h6 {
     font-family: "Open Sans", sans-serif;
 }
+
+.markdown pre {
+    border-radius: 0.3em;
+}
+
+.markdown code {
+    display: inline-block;
+    padding: 0.1em 0.5em;
+    background: #0001;
+    border-radius: 0.5em;
+    font-size: 1.2em;
+}
+
+.markdown a {
+    padding: 0.3em 0;
+    color: #186eee;
+}
+
+.markdown a:hover {
+    color: black;
+}
+
+.markdown hr {
+    margin: 2em 0;
+    border: 1px solid #0002;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+    margin: 1.2em 0 0.5em 0;
+}
+
+.markdown h1,
+.markdown h2 {
+    /* color: #004; */
+    padding-bottom: 0.2em;
+    border-bottom: 1px solid #0002;
+}
+
+.markdown p {
+    color: #333;
+}
+
+.markdown li {
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+}

@@ -61,54 +61,27 @@ const CATEGORIES = [
     },
 ];
 
-const Container = styled.div`
-    position: sticky;
-    top: 0em;
-    max-height: 100vh;
-    overflow: auto;
-    padding: 0 1em 0 0;
-`;
-
-const Item = styled.a<{ current: boolean }>`
-    display: block;
-    padding: 0.4em 0.8em;
-
-    color: #111;
-    border-bottom: 1px solid #0002;
-    cursor: pointer;
-    text-decoration: none;
-
-    ${(e) => e.current && "background: #0972d422; border: none;"}
-
-    &:hover {
-        transition: 50ms;
-        /* background: #0001; */
-        /* transform: translateX(3px); */
-        color: #0972d4;
-    }
-`;
-
-const Category = styled.div`
-    margin: 1.2em 0 0 0;
-    padding: 0.4em 0;
-    font-weight: bold;
-`;
-
 export function SideBar() {
     let router = useRouter();
 
     return (
-        <Container>
+        <div className="sticky top-0 max-h-screen overflow-auto pr-4">
             {CATEGORIES.map((e, i) => (
                 <React.Fragment key={i}>
-                    <Category>{e.category}</Category>
+                    <div className="mt-6 py-3 font-bold">{e.category}</div>
                     {e.items.map((e, i) => (
                         <Link key={i} href={e.url} passHref>
-                            <Item current={router.asPath === e.url}>{e.name}</Item>
+                            <a
+                                className={`block px-4 py-2 text-gray-900 border-b cursor-pointer  no-underline ${
+                                    router.asPath === e.url ? "bg-blue-100" : ""
+                                } hover:text-blue-900 transition`}
+                            >
+                                {e.name}
+                            </a>
                         </Link>
                     ))}
                 </React.Fragment>
             ))}
-        </Container>
+        </div>
     );
 }
