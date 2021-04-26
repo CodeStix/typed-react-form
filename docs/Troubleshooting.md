@@ -1,7 +1,10 @@
 ---
+title: Troubleshooting
 layout: default
 nav_order: 100
 ---
+
+# Troubleshooting
 
 If you don't find your solution here, you can [open an issue](https://github.com/CodeStix/typed-react-form/issues/new)
 
