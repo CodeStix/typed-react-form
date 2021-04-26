@@ -4,11 +4,11 @@
 
 A fast, completely type-checked React form builder, focussed on typescript integration and minimal rerenders. Featuring:
 
-- [Object fields](https://typed-react-form.codestix.nl/docs/Object-fields)
-- [Array fields](https://typed-react-form.codestix.nl/docs/Array-fields)
-- [Validation](https://typed-react-form.codestix.nl/docs/Validation)
-- [Easily toggle fields](https://typed-react-form.codestix.nl/docs/Toggling-a-field)
-- [Listeners (subscription based state updates)](https://typed-react-form.codestix.nl/docs/useListener)
+- [Object fields](https://codestix.github.io/typed-react-form/advanced/Object-fields)
+- [Array fields](https://codestix.github.io/typed-react-form/advanced/Array-fields)
+- [Validation](https://codestix.github.io/typed-react-form/validation)
+- [Easily toggle fields](https://codestix.github.io/typed-react-form/docs/Toggling-a-field)
+- [Listeners (subscription based state updates)](https://codestix.github.io/typed-react-form/reference/useListener)
 
 **All of this while keeping type-checking!**
 
@@ -18,7 +18,7 @@ A fast, completely type-checked React form builder, focussed on typescript integ
 npm install typed-react-form
 ```
 
-## [Documentation here](https://typed-react-form.codestix.nl/)
+## [Documentation here](https://codestix.github.io/typed-react-form/)
 
 ## Javascript/typescript React
 
