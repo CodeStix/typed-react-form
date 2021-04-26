@@ -25,6 +25,8 @@ const RegisterRequestSchema = tv.object({
 type RegisterRequest = SchemaType<typeof RegisterRequestSchema>;
 
 export function TypedValidationExample() {
+    // Make sure to use a lambda function around `Schema.validate()`
+    // typed-object-validator already returns errors in the right object structure 
     const form = useForm<RegisterRequest>({ email: "", password: "" }, (values) => RegisterRequestSchema.validate(values), true);
 
     function submit() {

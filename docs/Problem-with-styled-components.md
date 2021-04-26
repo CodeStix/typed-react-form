@@ -1,6 +1,5 @@
 ---
 layout: default
-parent: Advanced
 ---
 
 # Problem with styled-components
