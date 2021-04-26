@@ -3,7 +3,7 @@ layout: default
 parent: Examples
 ---
 
-## Example: Submit button that disables when unmodified/error
+## Submit button that disables when unmodified/error
 
 ![live updating form values](/typed-react-form/images/submitbutton.gif)
 

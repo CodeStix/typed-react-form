@@ -3,7 +3,7 @@ layout: default
 parent: Examples
 ---
 
-## Example: Custom input
+## Custom input
 
 If the default input types (FormInput, FormSelect ...) do not provide enough functionality for you, you should create a custom input component.
 

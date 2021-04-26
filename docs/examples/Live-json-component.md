@@ -3,7 +3,7 @@ layout: default
 parent: Examples
 ---
 
-## Example: Form JSON component
+## Form JSON component
 
 ![live updating form values](/typed-react-form/images/jsoncomponent.gif)
 
