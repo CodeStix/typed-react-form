@@ -12,9 +12,7 @@ export function getClassName(...args: any) {
     return [...args].filter((e) => !!e).join(" ");
 }
 
-export type FormInputCheckMode = "normal" | "setNull" | "setUndefined";
-
-export type FormInputType =
+export type SerializeType =
     | "number"
     | "text"
     | "password"
@@ -32,30 +30,21 @@ export type FormInputType =
     | "tel"
     | "range";
 
-export type Serializer<T extends object, K extends keyof T, State = DefaultState, Error extends string = string> = (
-    currentValue: T[K] | T[K][keyof T[K]],
-    props: FormInputProps<T, K, State, Error>
-) => boolean | string;
+export type Serializer<T> = (currentValue: T, props: SerializeProps<T>) => boolean | string;
 
-export type Deserializer<T extends object, K extends keyof T, State = DefaultState, Error extends string = string> = (
-    inputValue: string,
-    inputChecked: boolean,
-    currentValue: T[K] | T[K][keyof T[K]],
-    props: FormInputProps<T, K, State, Error>
-) => T[K] | T[K][keyof T[K]];
+export type Deserializer<T> = (inputValue: string, inputChecked: boolean, currentValue: T, props: SerializeProps<T>) => T;
 
-export type SerializeProps<T extends object, K extends keyof T> = {
+export type SerializeProps<V> = {
     dateAsNumber?: boolean;
     setUndefinedOnUncheck?: boolean;
     setNullOnUncheck?: boolean;
-    type?: FormInputType;
-    value?: T[K] | T[K][keyof T[K]];
+    type?: SerializeType;
+    value?: V;
 };
 
-export function defaultSerializer<T extends object, K extends keyof T>(
-    currentValue: T[K] | T[K][keyof T[K]],
-    props: SerializeProps<T, K>
-): boolean | string {
+export type FormInputValue<T extends object, K extends keyof T> = T[K] extends any[] ? T[K][keyof T[K]] : T[K];
+
+export function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>): boolean | string {
     switch (props.type) {
         case "datetime-local":
         case "date": {
@@ -92,12 +81,7 @@ export function defaultSerializer<T extends object, K extends keyof T>(
     }
 }
 
-export function defaultDeserializer<T extends object, K extends keyof T>(
-    inputValue: string,
-    inputChecked: boolean,
-    currentValue: T[K],
-    props: SerializeProps<T, K>
-) {
+export function defaultDeserializer<T>(inputValue: string, inputChecked: boolean, currentValue: T, props: SerializeProps<T>) {
     switch (props.type) {
         case "number": {
             return parseFloat(inputValue) as any;
@@ -147,17 +131,15 @@ export function defaultDeserializer<T extends object, K extends keyof T>(
 export type FormInputProps<T extends object, K extends keyof T = keyof T, State = DefaultState, Error extends string = string> = BaldInputProps & {
     form: FormState<T, State, Error>;
     name: K;
-    type?: FormInputType;
-    value?: T[K] | T[K][keyof T[K]];
-    serializer?: Serializer<T, K, State, Error>;
-    deserializer?: Deserializer<T, K, State, Error>;
+    serializer?: Serializer<FormInputValue<T, K>>;
+    deserializer?: Deserializer<FormInputValue<T, K>>;
     errorClassName?: string;
     errorStyle?: React.CSSProperties;
     dirtyClassName?: string;
     dirtyStyle?: React.CSSProperties;
     disableOnSubmitting?: boolean;
     hideWhenNull?: boolean;
-} & SerializeProps<T, K>;
+} & SerializeProps<FormInputValue<T, K>>;
 
 /**
  * The builtin form input. You must always specify **form** and **name**. Use the **type** prop to specify what type of field it represents.
@@ -191,7 +173,7 @@ export function FormInput<T extends object, K extends keyof T, State extends Def
     } = props;
     const { value: currentValue, error, dirty, state, setValue } = useListener(form, name);
 
-    let valueChecked = (serializer ?? defaultSerializer)(currentValue, props);
+    let valueChecked = (serializer ?? defaultSerializer)(currentValue as FormInputValue<T, K>, props);
 
     if (process.env.NODE_ENV === "development") {
         if ((setNullOnUncheck || setUndefinedOnUncheck) && type !== "checkbox")
@@ -212,7 +194,7 @@ export function FormInput<T extends object, K extends keyof T, State extends Def
             value={typeof valueChecked === "string" ? valueChecked : undefined}
             checked={typeof valueChecked === "boolean" ? valueChecked : undefined}
             onChange={(ev) => {
-                setValue((deserializer ?? defaultDeserializer)(ev.target.value, ev.target.checked, currentValue, props));
+                setValue((deserializer ?? defaultDeserializer)(ev.target.value, ev.target.checked, currentValue as FormInputValue<T, K>, props));
             }}
             name={name as string}
             type={type}

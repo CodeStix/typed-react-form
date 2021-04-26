@@ -11,11 +11,13 @@ const FormDataSchema = tv.object({
     number: tv.number(),
     boolean: tv.boolean(),
     date: tv.date(),
+    tags: tv.array(tv.value("food").or(tv.value("tech").or(tv.value("sports")))),
     object: tv.object({
         childText: tv.string(),
         childNumber: tv.number()
     }),
     array: tv.array(tv.string()),
+    customText: tv.string(),
     objectArray: tv.array(
         tv.object({
             text: tv.string(),
@@ -72,6 +74,11 @@ export function ExampleForm() {
             <FormInput form={form} name="text" />
             <pre>{`<FormInput form={form} name="fieldName" />`}</pre>
 
+            {/* A simple text input */}
+            <label>Deserializer text</label>
+            <FormInput form={form} name="customText" serializer={(e) => e?.toLowerCase()} deserializer={(e) => e.toUpperCase()} />
+            <pre>{`<FormInput form={form} name="fieldName" />`}</pre>
+
             {/* A textarea */}
             <label>Long text</label>
             <FormTextArea form={form} name="longText" />
@@ -100,6 +107,23 @@ export function ExampleForm() {
             {/* A checkbox input */}
             <label>Boolean</label>
             <FormInput form={form} type="checkbox" name="boolean" />
+            <pre>{`<FormInput form={form} type="checkbox" name="fieldName" />`}</pre>
+
+            <label>Tags</label>
+            <div>
+                <label>
+                    Food
+                    <FormInput form={form} type="checkbox" name="tags" value="food" />
+                </label>
+                <label>
+                    Sports
+                    <FormInput form={form} type="checkbox" name="tags" value="sports" />
+                </label>
+                <label>
+                    Tech
+                    <FormInput form={form} type="checkbox" name="tags" value="tech" />
+                </label>
+            </div>
             <pre>{`<FormInput form={form} type="checkbox" name="fieldName" />`}</pre>
 
             {/* A radio input */}
