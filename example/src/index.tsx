@@ -8,6 +8,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { StyledForm } from "./StyledForm";
 import { ExampleForm } from "./ExampleForm";
 import App from "./App";
+import { CustomInputsForm } from "./CustomInput";
 
 function Router() {
     return (
@@ -17,6 +18,7 @@ function Router() {
                 <Route path="/object-types-array" component={OneOfObjectArrayForm} />
                 <Route path="/styled-form" component={StyledForm} />
                 <Route path="/test" component={App} />
+                <Route path="/custom-inputs" component={CustomInputsForm} />
                 <Route path="/" component={ExampleForm} />
             </Switch>
         </BrowserRouter>

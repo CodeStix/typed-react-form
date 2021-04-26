@@ -32,7 +32,7 @@ export type Serializer<T> = (currentValue: T, props: SerializeProps<T>) => boole
 
 export type Deserializer<T> = (inputValue: string, inputChecked: boolean, currentValue: T, props: SerializeProps<T>) => T;
 
-export type SerializeProps<V> = {
+export type SerializeProps<V = any> = {
     dateAsNumber?: boolean;
     setUndefinedOnUncheck?: boolean;
     setNullOnUncheck?: boolean;
