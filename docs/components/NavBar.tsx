@@ -1,5 +1,4 @@
 import { CenterContainer } from "./CenterContainer";
-import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faGithubAlt, faGithubSquare } from "@fortawesome/free-brands-svg-icons";
 import Link from "next/link";

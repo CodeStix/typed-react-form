@@ -6,7 +6,6 @@ import React, { useEffect, useState } from "react";
 import { CenterContainer } from "../../components/CenterContainer";
 import { NavBar } from "../../components/NavBar";
 import { SideBar } from "../../components/SideBar";
-import styled from "styled-components";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialOceanic } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import Link from "next/link";
