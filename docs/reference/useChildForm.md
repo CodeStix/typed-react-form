@@ -1,18 +1,18 @@
 ---
 layout: default
 parent: Reference
-title: useChildForm hook
+title: useObjectField hook
 ---
 
-# `useChildForm`
+# `useObjectField`
 
 Creates a form based on another form's field. Use this with nested objects. This hook does not cause a rerender.
 
 This hook must be called, unconditionally, at the start of your component, just like the normal React hooks.
 
-**If your field can/will be null or undefined**, you should use the [`ChildForm`](/typed-react-form/reference/ChildForm) component instead, which does not render when the field is null/undefined.
+**If your field can/will be null or undefined**, you should use the [`ObjectField`](/typed-react-form/reference/ObjectField) component instead, which does not render when the field is null/undefined.
 
-`useChildForm(parentForm, name)`
+`useObjectField(parentForm, name)`
 
 ## Parameters
 

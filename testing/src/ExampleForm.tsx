@@ -313,7 +313,7 @@ export function ExampleForm() {
             />
             <pre>
                 {`
-<ArrayForm
+<ArrayField
     form={form}
     name="objectArrayField"
     render={({ form }) => (

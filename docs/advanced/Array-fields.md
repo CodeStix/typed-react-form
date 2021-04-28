@@ -6,10 +6,10 @@ title: Array fields
 
 # Array fields
 
-To create dynamic array fields, you should use the [`ArrayForm`](/typed-react-form/reference/ArrayForm) component or [`useArrayForm`](/typed-react-form/useArrayForm) hook. These are wrappers around [`useObjectField`](/typed-react-form/reference/useObjectField) which provide useful functions and optimizations for arrays.
+To create dynamic array fields, you should use the [`ArrayField`](/typed-react-form/reference/ArrayField) component or [`useArrayField`](/typed-react-form/useArrayField) hook. These are wrappers around [`useObjectField`](/typed-react-form/reference/useObjectField) which provide useful functions and optimizations for arrays.
 
--   [ArrayForm](/typed-react-form/reference/ArrayForm)
--   [useArrayForm](/typed-react-form/reference/useArrayForm)
+-   [ArrayField](/typed-react-form/reference/ArrayField)
+-   [useArrayField](/typed-react-form/reference/useArrayField)
 
 If you have an array field with a constant size, you should probably just use [`ObjectField`](/typed-react-form/reference/ObjectField). (See bottom for examples)
 
@@ -17,7 +17,7 @@ If you have an array field with a constant size, you should probably just use [`
 
 ## Dynamic array examples
 
-✔️ **Dynamic string array field using `ArrayForm`**
+✔️ **Dynamic string array field using `ArrayField`**
 
 ```tsx
 function NotesList() {
@@ -31,7 +31,7 @@ function NotesList() {
                 console.log("submit", form.values);
             }}
         >
-            <ArrayForm
+            <ArrayField
                 form={form}
                 name="notes"
                 render={({ form, values, append, remove }) => (
@@ -57,7 +57,7 @@ function NotesList() {
 }
 ```
 
-✔️ **Dynamic object array field using `ArrayForm`**
+✔️ **Dynamic object array field using `ArrayField`**
 
 Remember: this is all type checked!
 
@@ -80,7 +80,7 @@ function ShoppingListForm() {
 
             {/* Create an array child form for the 'items' field */}
             <h2>Items</h2>
-            <ArrayForm
+            <ArrayField
                 form={form}
                 name="items"
                 render={({ form, values, append, remove }) => (
@@ -119,7 +119,7 @@ function ShoppingListForm() {
 }
 ```
 
-✔️ **Dynamic object array field with seperate component for each child form and using `useArrayForm`**
+✔️ **Dynamic object array field with seperate component for each child form and using `useArrayField`**
 
 ```tsx
 interface ShoppingListItem {
@@ -156,7 +156,7 @@ function ShoppingListForm() {
 }
 
 function ShoppingListItemsForm(props: { parent: FormState<ShoppingList> }) {
-    const { form, values, append, remove } = useArrayForm(props.parent, "items");
+    const { form, values, append, remove } = useArrayField(props.parent, "items");
     // This component only rerenders when the whole array changes.
     return (
         <>

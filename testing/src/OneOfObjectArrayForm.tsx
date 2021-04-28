@@ -49,7 +49,7 @@ export default function OneOfObjectArrayForm() {
                             {values.map((_, i) => (
                                 // Use index as key
                                 <li key={i}>
-                                    {/* Make sure to use the form given by ArrayForm! */}
+                                    {/* Make sure to use the form given by <ArrayField />! */}
                                     <BreadOrAppleForm parent={form} index={i} remove={() => remove(i)} />
                                 </li>
                             ))}

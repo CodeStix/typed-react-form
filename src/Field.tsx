@@ -105,7 +105,7 @@ export type SerializeProps<V = any> = {
     value?: V extends any[] ? V[number] : V;
 };
 
-function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>): boolean | string {
+export function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>): boolean | string {
     switch (props.type) {
         case "datetime-local":
         case "date": {
@@ -141,7 +141,7 @@ function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>): boolea
     }
 }
 
-function defaultDeserializer<T>(inputValue: string | boolean, currentValue: T, props: SerializeProps<T>) {
+export function defaultDeserializer<T>(inputValue: string | boolean, currentValue: T, props: SerializeProps<T>) {
     switch (props.type) {
         case "number": {
             return parseFloat(inputValue as any);

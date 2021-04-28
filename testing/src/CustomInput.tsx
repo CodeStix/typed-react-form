@@ -39,7 +39,7 @@ function CustomInput4<T extends object>(props: { form: FormState<T>; name: keyof
             type={props.type}
             value={typeof v === "string" ? v : undefined}
             checked={typeof v === "boolean" ? v : undefined}
-            onChange={(ev) => setValue(defaultDeserializer(ev.target.value, ev.target.checked, value, props))}
+            onChange={(ev) => setValue(defaultDeserializer(ev.target.value ?? ev.target.checked, value, props))}
         />
     );
 }
@@ -54,7 +54,7 @@ function CustomInput5<T extends object, Key extends keyof T>(props: { form: Form
             type={props.type}
             value={typeof v === "string" ? v : undefined}
             checked={typeof v === "boolean" ? v : undefined}
-            onChange={(ev) => setValue(defaultDeserializer(ev.target.value, ev.target.checked, value, props))}
+            onChange={(ev) => setValue(defaultDeserializer(ev.target.value ?? ev.target.checked, value, props))}
         />
     );
 }
@@ -73,7 +73,7 @@ function CustomInput6<T extends object, Key extends keyof T>(
             type={type}
             value={typeof v === "string" ? v : undefined}
             checked={typeof v === "boolean" ? v : undefined}
-            onChange={(ev) => setValue(defaultDeserializer(ev.target.value, ev.target.checked, value, props))}
+            onChange={(ev) => setValue(defaultDeserializer(ev.target.value ?? ev.target.checked, value, props))}
             {...rest}
         />
     );

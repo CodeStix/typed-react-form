@@ -34,7 +34,7 @@ export function useForm<T extends object, State = DefaultState, Error extends st
 }
 
 /**
- * Creates a nested form for another root or nested form. You must use this for object and array (see useArrayForm) field.
+ * Creates a nested form for another root or nested form. You must use this for object and array (see useArrayField) field.
  * This hook doesn't cause a rerender.
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
@@ -123,7 +123,7 @@ export function useAnyListener<T extends object, State = DefaultState, Error ext
 }
 
 /**
- * This is a wrapper around useChildForm, with useful functions to manipulate arrays.
+ * This is a wrapper around useObjectForm, with useful functions to manipulate arrays.
  * This hook does cause a rerender, but only if the array size changes.
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.

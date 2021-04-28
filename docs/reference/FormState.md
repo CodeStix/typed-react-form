@@ -6,7 +6,7 @@ title: FormState class
 
 # `FormState`
 
-The `FormState` class contains all the state of a form. This includes values, default values, errors, dirty flags and form state. You should always use the `useForm` or `useChildForm` hooks to create an instance of this class.
+The `FormState` class contains all the state of a form. This includes values, default values, errors, dirty flags and form state. You should always use the `useForm` or `useObjectField` hooks to create an instance of this class.
 
 This class provides a lot of useful functions to manipulate form values and state.
 

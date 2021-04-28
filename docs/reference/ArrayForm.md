@@ -1,12 +1,12 @@
 ---
 layout: default
 parent: Reference
-title: ArrayForm component
+title: ArrayField component
 ---
 
-# `<ArrayForm />`
+# `<ArrayField />`
 
-A component that provides array manipulation functions and optimizations. This is a wrapper around [`useArrayForm`](/typed-react-form/reference/useArrayForm). The only difference is that this component does not render its content when the array is null/undefined ([is togglable](/typed-react-form/advanced/Toggling-a-field)).
+A component that provides array manipulation functions and optimizations. This is a wrapper around [`useArrayField`](/typed-react-form/reference/useArrayField). The only difference is that this component does not render its content when the array is null/undefined ([is togglable](/typed-react-form/advanced/Toggling-a-field)).
 
 ## Props
 

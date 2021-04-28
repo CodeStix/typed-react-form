@@ -55,7 +55,7 @@ function ToggleForm() {
 
             {/* Use the setNullOnUncheck prop. The value prop contains the value that is set when the box gets checked again, you can omit it to use the default value */}
             <Field form={form} name="location" type="checkbox" setNullOnUncheck />
-            {/* ChildForm hides its contents when null/undefined by default */}
+            {/* ObjectField hides its contents when null/undefined */}
             <ObjectField
                 form={form}
                 name="location"

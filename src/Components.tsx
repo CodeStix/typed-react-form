@@ -3,7 +3,7 @@ import { ChildFormState, DefaultError, DefaultState, DirtyMap, ErrorMap, FieldsO
 import { useArrayField, useListener, useAnyListener, useObjectField, useTruthyListener } from "./hooks";
 
 /**
- * Wrapper around useArrayForm (which is a wrapper around useObjectField).
+ * Wrapper around useArrayField (which is a wrapper around useObjectField).
  * Exports useful functions to manipulate arrays.
  * This hook does cause a rerender, but only if the whole array becomes null/undefined.
  * @param parent The parent form.
@@ -78,7 +78,7 @@ export function AnyListener<T extends object, State = DefaultState, Error extend
 
 /**
  * Wrapper around useObjectField
- * Creates a child form for another root or child form. You must use this for object and array (see useArrayForm) fields.
+ * Creates a child form for another root or child form. You must use this for object and array (see useArrayField) fields.
  * This hook does cause a rerender, but only if the object field becomes null/undefined.
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
@@ -89,7 +89,7 @@ export function ObjectField<
     ParentState = DefaultState,
     ParentError extends string = DefaultError
 >(props: {
-    form: FormState<T, ParentState, ParentError>; // Use the parent prop instead of the form prop when using ChildForm.
+    form: FormState<T, ParentState, ParentError>; // Use the parent prop instead of the form prop when using ObjectField.
     name: K;
     render?: (props: ChildFormState<T, K, ParentState, ParentError>) => React.ReactNode;
 }) {

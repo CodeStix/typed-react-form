@@ -1,12 +1,12 @@
 ---
 layout: default
 parent: Reference
-title: ChildForm component
+title: ObjectField component
 ---
 
 # `<ObjectField />`
 
-Use the `ChildForm` component if you want to make fields inside an object field available to inputs. This is a wrapper around [`useChildForm`](/typed-react-form/reference/useChildForm).
+Use the `ObjectField` component if you want to make fields inside an object field available to inputs. This is a wrapper around [`useObjectField`](/typed-react-form/reference/useObjectField).
 
 ## Props
 
@@ -24,6 +24,6 @@ A function that renders, and creates inputs for the child form, which is passed 
 
 ## Advanced
 
-You can also use this component on array fields (index as name), but [`ArrayForm`](/typed-react-form/reference/ArrayForm) or [`useArrayForm`](/typed-react-form/reference/useArrayForm) is preferred when you want to create [dynamic array fields](/typed-react-form/advanced/Array-fields). It provides useful array manipulation functions and optimizations.
+You can also use this component on array fields (index as name), but [`ArrayField`](/typed-react-form/reference/ArrayField) or [`useArrayField`](/typed-react-form/reference/useArrayField) is preferred when you want to create [dynamic array fields](/typed-react-form/advanced/Array-fields). It provides useful array manipulation functions and optimizations.
 
 This component does not render its content when the form is empty (happens when its parent field has been assigned `null`, `undefined` or `{}`).
