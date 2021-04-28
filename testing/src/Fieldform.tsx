@@ -29,10 +29,11 @@ export function FieldForm() {
 
     return (
         <form onSubmit={form.handleSubmit(submit)}>
-            <Field form={form} name="email" component="input" />
-            <Field form={form} name="email" component={Input} style={{ margin: "2em" }} />
-            <FieldError form={form} name="email" component={Error} />
-            <Field form={form} name="gender" component="select">
+            <Field form={form} name="email" as="input" />
+            <Field form={form} name="email" style={{ margin: "2em" }} />
+            <Field form={form} name="email" as={Input} style={{ margin: "2em" }} />
+            <FieldError form={form} name="email" as={Error} />
+            <Field form={form} name="gender" as="select">
                 <option value="male">male</option>
                 <option value="female">female</option>
             </Field>

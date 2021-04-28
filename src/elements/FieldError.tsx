@@ -13,12 +13,12 @@ export function FieldError<
     props: {
         form: FormState<T, State, Error>;
         name: K;
-        component?: C;
+        as?: C;
         transformer?: (error: Error) => React.ReactNode;
-    } & Omit<ElementProps<C>, "transformer" | "component" | "name" | "form" | "children">
+    } & Omit<ElementProps<C>, "transformer" | "as" | "name" | "form" | "children">
 ) {
-    const { form, component = React.Fragment, transformer, ...rest } = props;
+    const { form, as = React.Fragment, transformer, ...rest } = props;
     const { error } = useListener(form, props.name);
     if (!error || typeof error === "object") return null;
-    return React.createElement(component, { ...rest, children: String(transformer ? transformer(error as Error) : error) });
+    return React.createElement(as, { ...rest, children: String(transformer ? transformer(error as Error) : error) });
 }

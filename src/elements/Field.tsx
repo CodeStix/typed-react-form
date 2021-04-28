@@ -12,11 +12,11 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
     props: {
         form: FormState<T>;
         name: K;
-        component?: C;
-    } & Omit<ElementProps<C>, "form" | "name" | "component" | "value" | "onChange">
+        as?: C;
+    } & Omit<ElementProps<C>, "form" | "name" | "as" | "value" | "onChange">
 ) {
-    const { form, component = "input", ...rest } = props;
+    const { form, as = "input", ...rest } = props;
     const { value, setValue } = useListener(form, props.name);
     const onChange = useCallback((ev: any) => setValue(ev.target?.value ?? ev), [setValue]);
-    return React.createElement(component, { ...rest, value, onChange });
+    return React.createElement(as, { ...rest, value, onChange });
 }
