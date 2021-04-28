@@ -1,6 +1,7 @@
 ---
 layout: default
 parent: Reference
+title: FieldError component
 ---
 
 # `<FieldError />`

@@ -1,6 +1,7 @@
 ---
 layout: default
 parent: Advanced
+title: Toggling a field
 ---
 
 # Toggling a field

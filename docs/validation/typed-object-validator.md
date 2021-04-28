@@ -1,6 +1,7 @@
 ---
 layout: default
 parent: Validation
+title: typed-object-validator
 ---
 
 # typed-object-validator

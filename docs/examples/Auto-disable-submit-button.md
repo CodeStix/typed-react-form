@@ -1,6 +1,7 @@
 ---
 layout: default
 parent: Examples
+title: Submit button that disables when unmodified/error
 ---
 
 ## Submit button that disables when unmodified/error

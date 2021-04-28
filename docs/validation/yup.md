@@ -1,6 +1,7 @@
 ---
 layout: default
 parent: Validation
+title: yup
 ---
 
 # yup

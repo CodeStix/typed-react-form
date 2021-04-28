@@ -1,6 +1,7 @@
 ---
 layout: default
 parent: Advanced
+title: Object fields
 ---
 
 # Object fields

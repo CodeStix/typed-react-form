@@ -1,6 +1,7 @@
 ---
 layout: default
 parent: Examples
+title: Custom input component
 ---
 
 ## Custom input

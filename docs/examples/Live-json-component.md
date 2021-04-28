@@ -1,11 +1,12 @@
 ---
 layout: default
 parent: Examples
+title: Realtime JSON component
 ---
 
 ## Form JSON component
 
-![live updating form values](/typed-react-form/images/jsoncomponent.gif)
+![realtime updating form values](/typed-react-form/images/jsoncomponent.gif)
 
 ```tsx
 // Take a form containing any values

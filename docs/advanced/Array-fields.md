@@ -1,6 +1,7 @@
 ---
 layout: default
 parent: Advanced
+title: Array fields
 ---
 
 # Array fields
