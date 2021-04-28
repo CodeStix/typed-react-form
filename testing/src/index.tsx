@@ -5,9 +5,7 @@ import ReactDOM from "react-dom";
 import OneOfObjectForm from "./OneOfObjectForm";
 import OneOfObjectArrayForm from "./OneOfObjectArrayForm";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
-import { StyledForm } from "./StyledForm";
 import { ExampleForm } from "./ExampleForm";
-import App from "./App";
 import { CustomInputsForm } from "./CustomInput";
 import { FieldForm } from "./Fieldform";
 
@@ -17,8 +15,6 @@ function Router() {
             <Switch>
                 <Route path="/object-types" component={OneOfObjectForm} />
                 <Route path="/object-types-array" component={OneOfObjectArrayForm} />
-                <Route path="/styled-form" component={StyledForm} />
-                <Route path="/test" component={App} />
                 <Route path="/custom-inputs" component={CustomInputsForm} />
                 <Route path="/field" component={FieldForm} />
                 <Route path="/" component={ExampleForm} />

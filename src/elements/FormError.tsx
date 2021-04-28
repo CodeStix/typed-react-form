@@ -1,28 +1,24 @@
-import React, { HTMLAttributes } from "react";
-import { DefaultError, FormState } from "../form";
+import React from "react";
+import { DefaultError, DefaultState, FormState } from "../form";
 import { useListener } from "../hooks";
+import { ElementProps } from "./Field";
 
-export type FormErrorProps<T extends object, K extends keyof T, Error extends string = DefaultError> = Omit<
-    HTMLAttributes<HTMLParagraphElement>,
-    "name" | "form"
-> & {
-    form: FormState<T, any, Error>;
-    name: K;
-};
-
-/**
- * The builtin form error. You must always specify **form** and **name**.
- *
- * **FormInput**, **FormTextArea** and **FormSelect** are also available.
- *
- * Because this component is very basic, it is recommended to [implement your own error component](https://codestix.github.io/typed-react-form/reference/FormError#custom-error-component).
- */
-export function FormError<T extends object, K extends keyof T, Error extends string = DefaultError>({
-    form,
-    name,
-    ...rest
-}: FormErrorProps<T, K, Error>) {
-    const { error } = useListener(form, name);
+export function FieldError<
+    T extends object,
+    K extends keyof T,
+    C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements,
+    Error extends string = DefaultError,
+    State = DefaultState
+>(
+    props: {
+        form: FormState<T, State, Error>;
+        name: K;
+        component?: C;
+        transformer?: (error: Error) => React.ReactNode;
+    } & Omit<ElementProps<C>, "transformer" | "component" | "name" | "form">
+) {
+    const { form, component = React.Fragment, transformer } = props;
+    const { error } = useListener(form, props.name);
     if (!error || typeof error === "object") return null;
-    return <p {...rest}>{error + ""}</p>;
+    return React.createElement(component, { children: String(transformer ? transformer(error as Error) : error) });
 }
