@@ -18,7 +18,7 @@ export type FieldProps<T extends object, K extends keyof T, C> = {
      */
     name: K;
     /**
-     * The element to create, this can be a string specifying "input", "select", "textarea" or a custom component. Is "input" by default. The props of the passed component are available on this field.
+     * The element to create, this can be a string specifying "input", "select", "textarea" or a custom component. Is "input" by default. The props of the passed custom component are available on this field.
      *
      * **Examples**
      *
