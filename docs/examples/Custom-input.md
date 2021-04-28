@@ -5,7 +5,7 @@ parent: Examples
 
 ## Custom input
 
-If the default input types (FormInput, FormSelect ...) do not provide enough functionality for you, you should create a custom input component.
+If the default [`<Field/>`](/typed-react-form/reference/Field) component does not provide enough functionality for you, you can create a custom field component.
 
 ![custom input](/typed-react-form/images/custominput.gif)
 
@@ -37,7 +37,7 @@ function ExampleForm() {
     const form = useForm(
         {
             firstName: "John",
-            lastName: "Pineapple",
+            lastName: "Pineapple"
         },
         (values) => ({ firstName: values.firstName.length < 3 ? "Firstname must be longer!" : undefined }) // Example validator
     );
@@ -50,7 +50,8 @@ function ExampleForm() {
                 if (form.error) return;
                 form.setState({ isSubmitting: true });
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             <CustomInput form={form} name="firstName" />
             <CustomInput form={form} name="lastName" />
             <button>Submit</button>

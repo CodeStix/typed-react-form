@@ -29,8 +29,8 @@ function BreadForm() {
     const form = useForm < Bread > { color: "brown", size: 58 };
     return (
         <form>
-            <FormInput form={form} type="text" name="color" />
-            <FormInput form={form} type="number" name="size" />
+            <Field form={form} type="text" name="color" />
+            <Field form={form} type="number" name="size" />
             <Listener form={form} name="size" render={({ value }) => <span>{value > 50 ? "long" : "short"}</span>} />
             <FormStringify form={form} />
         </form>
@@ -46,8 +46,8 @@ function BreadForm() {
     const { values } = useAnyListener(form); // Causes a rerender each time something changes, WRONG!!
     return (
         <form>
-            <FormInput form={form} type="text" name="color" />
-            <FormInput form={form} type="number" name="size" />
+            <Field form={form} type="text" name="color" />
+            <Field form={form} type="number" name="size" />
             <Listener form={form} name="size" render={({ value }) => <span>{value > 50 ? "long" : "short"}</span>} />
             <pre>{JSON.stringify(values, null, 2)}</pre>;
         </form>
@@ -62,8 +62,8 @@ function BreadForm() {
     const form = useForm < Bread > { color: "brown", size: 58 };
     return (
         <form>
-            <FormInput form={form} type="text" name="color" />
-            <FormInput form={form} type="number" name="size" />
+            <Field form={form} type="text" name="color" />
+            <Field form={form} type="number" name="size" />
             <Listener form={form} name="size" render={({ value }) => <span>{value > 50 ? "long" : "short"}</span>} />
             {/* Rerenders each time any value on the form changes, shows a live JSON representation of the form. Does not rerender whole form. */}
             <AnyListener form={form} render={({ values }) => <pre>{JSON.stringify(values, null, 2)}</pre>} />

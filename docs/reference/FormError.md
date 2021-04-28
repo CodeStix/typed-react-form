@@ -15,7 +15,7 @@ const form = useForm(
     (values) => ({ name: values.name.length < 5 ? "Name must be longer" : undefined }) // Example validator
 );
 
-<FormInput form={form} name="name" />
+<Field form={form} name="name" />
 
 // Will render a `p` element on error.
 <FormError form={form} name="name" />

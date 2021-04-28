@@ -42,7 +42,7 @@ const form = useForm({ name: "John" }); // form.state = { isSumitting: false } b
 
 // Usage with a custom isLoading state.
 // You can update the state using `form.setState`. Every child form can access and update this state too.
-// You must include `isSubmitting: false` when using the built-in inputs (FormInput, FormSelect ...), because they require it.
+// You must include `isSubmitting: false`, because the `<Field/>` component requires it.
 const form = useForm({ name: "John" }, { isSubmitting: false, isLoading: false });
 ```
 

@@ -3,7 +3,7 @@ layout: default
 parent: Reference
 ---
 
-# `<FormInput />`
+# `<Field />`
 
 A stateful, type-checked form `input` element.
 
@@ -11,7 +11,7 @@ The input transforms its value based on the `type` prop, which **currently suppo
 
 -   `text`
 -   `number`
--   `date` (Date and number timestamp)
+-   `date` (Date and number timestamp, see `dateAsNumber` prop)
 -   `checkbox`
 -   `radio`
 
@@ -21,30 +21,30 @@ It is allowed to use multiple inputs on the same field, all of them will be sync
 
 ```tsx
 const form = useForm({
-    name: "codestix",
+    name: "John",
     age: 19,
     birthDate: new Date(),
     birthDateTimestamp: new Date().getTime(),
-    likePasta: false,
+    likesPasta: false,
     gender: "male",
     favoriteDrinks: ["coffee"],
-    description: "Someone who dislikes coffee"
+    description: "Working.."
 });
 
 // String field
-<FormInput form={form} type="text" name="name" />
+<Field form={form} type="text" name="name" />
 
 // Number field
-<FormInput form={form} type="number" name="age" />
+<Field form={form} type="number" name="age" />
 
 // Date field
-<FormInput form={form} type="date" name="birthDate" />
+<Field form={form} type="date" name="birthDate" />
 
 // Timestamp (number as a date) field
-<FormInput form={form} type="date" name="birthDateTimestamp" dateAsNumber />
+<Field form={form} type="date" name="birthDateTimestamp" dateAsNumber />
 
 // Boolean field
-<FormInput form={form} type="checkbox" name="likePasta" />
+<Field form={form} type="checkbox" name="likesPasta" />
 
 ```
 
@@ -55,12 +55,12 @@ Radio buttons must be given a value, and can be used for fields of different typ
 ```tsx
 
 // Enum field
-<FormInput form={form} type="radio" name="gender" value="male" />
-<FormInput form={form} type="radio" name="gender" value="female" />
+<Field form={form} type="radio" name="gender" value="male" />
+<Field form={form} type="radio" name="gender" value="female" />
 
 // Boolean field
-<FormInput form={form} type="radio" name="likePasta" value={true} />
-<FormInput form={form} type="radio" name="likePasta" value={false} />
+<Field form={form} type="radio" name="likesPasta" value={true} />
+<Field form={form} type="radio" name="likesPasta" value={false} />
 ```
 
 ### Checkboxes
@@ -69,32 +69,36 @@ Checkboxes behave like a boolean field by default, but when given a value, it be
 
 ```tsx
 // Boolean field
-<FormInput form={form} type="checkbox" name="likePasta" />
+<Field form={form} type="checkbox" name="likesPasta" />
 
 // Primitive array field (primitive meaning non-object)
-<FormInput form={form} type="checkbox" name="favoriteDrinks" value="coffee" />
-<FormInput form={form} type="checkbox" name="favoriteDrinks" value="fanta" />
-<FormInput form={form} type="checkbox" name="favoriteDrinks" value="beer" />
+<Field form={form} type="checkbox" name="favoriteDrinks" value="coffee" />
+<Field form={form} type="checkbox" name="favoriteDrinks" value="fanta" />
+<Field form={form} type="checkbox" name="favoriteDrinks" value="beer" />
 
 // Toggling other field, notice setNullOnUncheck and value=""
-<FormInput form={form} type="checkbox" name="description" setNullOnUncheck value="" />
+<Field form={form} type="checkbox" name="description" setNullOnUncheck value="" />
 // Option 1: Use the hideWhenNull prop
-<FormTextArea form={form} name="description" hideWhenNull />
+<Field as="textarea" form={form} name="description" hideWhenNull />
 // Option 2: Listen for changes on the description field, and hide the textarea when the value is null. More flexibility.
 <Listener form={form} name="description" render={
-    ({ value }) => value !== null && <FormTextArea form={form} name="description" />
+    ({ value }) => value !== null && <Field as="textarea" form={form} name="description" />
 }/>
 ```
 
 ### Submit
 
-You **cannot** use FormInput to create a submit button (type="submit"). Use one of the following alternatives:
+You **cannot** use Field to create a submit button (type="submit"). Use one of the following alternatives:
 
 -   ```tsx
-    <input type="submit" value="Click here to submit" />
+    <form>
+        <input type="submit" value="Click here to submit" />
+    </form>
     ```
 -   ```tsx
-    <button>Click here to submit</button>
+    <form>
+        <button type="submit">Click here to submit</button>
+    </form>
     ```
 
 ## Props
@@ -114,10 +118,6 @@ The className and/or style to set when there is an error on this field. Default 
 #### `dirtyClassName` and `dirtyStyle`
 
 The className and/or style to set when this field has been modified. Default className is `typed-form-dirty`.
-
-#### `disableOnSubmitting`
-
-Disable this input on submit? Default is `true`.
 
 #### `dateAsNumber` (only type="date")
 
@@ -139,4 +139,8 @@ Make sure you pass along a `value` too, this is the value that will be set when 
 -   The value of the checkbox when using primitive arrays.
 -   The on-checked value of the checkbox when using the `setNullOnUncheck/setUndefinedOnUncheck` prop.
 
-All of the input components are wrappers and abstractions around the [`useListener`](/typed-react-form/reference/useListener) hook. Using this hook, you can create your own [custom inputs](/typed-react-form/examples/Custom-input).
+---
+
+## Custom fields/inputs
+
+The builtin `<Field />` component is just an abstraction around the [`useListener`](/typed-react-form/reference/useListener) hook. Using this hook, you can create your own [custom inputs](/typed-react-form/examples/Custom-input).

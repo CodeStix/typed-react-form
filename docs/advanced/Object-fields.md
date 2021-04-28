@@ -21,24 +21,25 @@ function PersonForm() {
     // Info object contains email and age
     const form = useForm({
         name: "John",
-        info: { email: "john@example.com", age: 20 },
+        info: { email: "john@example.com", age: 20 }
     });
     return (
         <form
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             {/* Input on root form */}
-            <FormInput form={form} type="text" name="name" />
+            <Field form={form} type="text" name="name" />
             <ChildForm
                 form={form}
                 name="info"
                 render={(form) => (
                     <>
                         {/* Inputs on child form, use new form provided by the render function of ChildForm */}
-                        <FormInput form={form} type="text" name="email" />
-                        <FormInput form={form} type="number" name="age" />
+                        <Field form={form} type="text" name="email" />
+                        <Field form={form} type="number" name="age" />
                     </>
                 )}
             />
@@ -61,12 +62,13 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             {/* Use root form */}
-            <FormInput form={form} type="text" name="name" />
+            <Field form={form} type="text" name="name" />
             {/* Use child form */}
-            <FormInput form={personInfoForm} type="number" name="age" />
-            <FormInput form={personInfoForm} type="text" name="email" />
+            <Field form={personInfoForm} type="number" name="age" />
+            <Field form={personInfoForm} type="text" name="email" />
             <button>Submit</button>
         </form>
     );
@@ -90,15 +92,16 @@ function PersonForm() {
     // Create the root form
     const form = useForm({
         name: "John",
-        info: { email: "john@example.com", age: 20 },
+        info: { email: "john@example.com", age: 20 }
     });
     return (
         <form
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
-            <FormInput form={form} type="text" name="name" />
+            }}
+        >
+            <Field form={form} type="text" name="name" />
             {/* Pass form */}
             <PersonInfoForm parent={form} />
             <button>Submit</button>
@@ -111,8 +114,8 @@ function PersonInfoForm(props: { parent: FormState<Person> }) {
     const form = useChildForm(props.parent, "info");
     return (
         <>
-            <FormInput form={form} type="text" name="email" />
-            <FormInput form={form} type="number" name="age" />
+            <Field form={form} type="text" name="email" />
+            <Field form={form} type="number" name="age" />
         </>
     );
 }
@@ -132,10 +135,10 @@ function PersonForm() {
             moreInfo: {
                 age: 20,
                 moreMoreInfo: {
-                    birthDate: new Date(),
-                },
-            },
-        },
+                    birthDate: new Date()
+                }
+            }
+        }
     });
     // Create child form
     const personInfoForm = useChildForm(form, "info");
@@ -148,11 +151,12 @@ function PersonForm() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
-            <FormInput form={form} type="text" name="name" />
-            <FormInput form={personInfoForm} type="text" name="email" />
-            <FormInput form={personMoreInfoForm} type="number" name="age" />
-            <FormInput form={personMoreMoreInfoForm} type="date" name="birthDate" />
+            }}
+        >
+            <Field form={form} type="text" name="name" />
+            <Field form={personInfoForm} type="text" name="email" />
+            <Field form={personMoreInfoForm} type="number" name="age" />
+            <Field form={personMoreMoreInfoForm} type="date" name="birthDate" />
             <button>Submit</button>
         </form>
     );

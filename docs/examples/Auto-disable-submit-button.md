@@ -11,11 +11,11 @@ parent: Examples
 function FormExample() {
     const form = useForm(
         {
-            name: "John",
+            name: "John"
         },
         (values) => ({
             // Example validator
-            name: values.name.length < 3 ? "Name must be longer" : undefined,
+            name: values.name.length < 3 ? "Name must be longer" : undefined
         })
     );
     return (
@@ -24,8 +24,9 @@ function FormExample() {
                 ev.preventDefault();
                 console.log("save", form.values);
                 form.setDefaultValues(form.values);
-            }}>
-            <FormInput form={form} name="name" />
+            }}
+        >
+            <Field form={form} name="name" />
             {/* Listen for any change on the form */}
             <AnyListener form={form} render={(form) => <button disabled={!form.dirty || form.error}>Save</button>} />
         </form>

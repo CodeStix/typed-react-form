@@ -1,5 +1,5 @@
 import React from "react";
-import { FormInput, useForm } from "typed-react-form";
+import { Field, useForm } from "typed-react-form";
 
 interface RegisterData {
     firstName: string;
@@ -20,17 +20,17 @@ function RegisterForm() {
     return (
         <form className="form" onSubmit={form.handleSubmit(submit)}>
             <label>First name</label>
-            <FormInput form={form} name="firstName" />
+            <Field form={form} name="firstName" />
             <label>Last name</label>
-            <FormInput form={form} name="lastName" />
+            <Field form={form} name="lastName" />
             <label>Email</label>
-            <FormInput form={form} name="email" type="email" />
+            <Field form={form} name="email" type="email" />
             <label>Birthday</label>
-            <FormInput form={form} name="birthDate" type="date" />
+            <Field form={form} name="birthDate" type="date" />
             <label>Password</label>
-            <FormInput form={form} name="password" type="password" />
+            <Field form={form} name="password" type="password" />
             <label>Repeat</label>
-            <FormInput form={form} name="repeatPassword" type="password" />
+            <Field form={form} name="repeatPassword" type="password" />
             <button style={{ gridColumn: "span 2" }} type="submit">
                 Register
             </button>

@@ -23,7 +23,7 @@ You can ofcourse use every validation library there is, but the errors must be c
 ## Example
 
 ```tsx
-import { useForm, FormInput, FormError, AnyListener, ErrorMap } from "typed-react-form";
+import { useForm, Field, FormError, AnyListener, ErrorMap } from "typed-react-form";
 
 interface LoginRequest {
     email: string;
@@ -35,7 +35,7 @@ function loginValidator(values: LoginRequest): ErrorMap<LoginRequest, string> {
     // Example validator logic, the returned error object should follow the same structure as the values object.
     return {
         email: values.email.length < 10 ? "Email must be longer" : undefined,
-        password: values.password.length < 5 ? "Password must be longer" : undefined,
+        password: values.password.length < 5 ? "Password must be longer" : undefined
     };
 }
 
@@ -51,11 +51,13 @@ function FormExample() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
-            <FormInput form={form} name="email" type="email" />
-            <FormError form={form} name="email" />
-            <FormInput form={form} name="password" type="password" />
-            <FormError form={form} name="password" />
+            }}
+        >
+            <Field form={form} name="email" type="email" />
+            {/* Render the error between <p></p> tags, you can also specify your custom component */}
+            <FieldError as="p" form={form} name="email" />
+            <Field form={form} name="password" type="password" />
+            <FieldError as="p" form={form} name="password" />
             {/* Listen for any change on the form, and disable the submit button when there is an error */}
             <AnyListener form={form} render={(form) => <button disabled={form.error}>Submit</button>} />
         </form>

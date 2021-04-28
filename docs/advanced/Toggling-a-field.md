@@ -12,22 +12,23 @@ parent: Advanced
 ✔️ **Toggle string field using checkbox**
 
 ```tsx
-import { useForm, FormInput } from "typed-react-form";
+import { useForm, Field } from "typed-react-form";
 
 function ToggleForm() {
     const form = useForm({
-        name: "codestix",
+        name: "codestix"
     });
     return (
         <form
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
+            }}
+        >
             {/* Use the setNullOnUncheck prop. The value prop contains the value that is set when the box gets checked again, you can omit it to use the default value */}
-            <FormInput form={form} name="name" type="checkbox" setNullOnUncheck value="" />
+            <Field form={form} name="name" type="checkbox" setNullOnUncheck value="" />
             {/* Use the hideWhenNull prop to hide the input when its field is null */}
-            <FormInput form={form} name="name" type="text" hideWhenNull />
+            <Field form={form} name="name" type="text" hideWhenNull />
             <button>Submit</button>
         </form>
     );
@@ -40,18 +41,19 @@ function ToggleForm() {
 function ToggleForm() {
     const form = useForm({
         name: "codestix",
-        location: { long: 123, lat: 456 }, // Object field
+        location: { long: 123, lat: 456 } // Object field
     });
     return (
         <form
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("submit", form.values);
-            }}>
-            <FormInput form={form} name="name" type="text" />
+            }}
+        >
+            <Field form={form} name="name" type="text" />
 
             {/* Use the setNullOnUncheck prop. The value prop contains the value that is set when the box gets checked again, you can omit it to use the default value */}
-            <FormInput form={form} name="location" type="checkbox" setNullOnUncheck />
+            <Field form={form} name="location" type="checkbox" setNullOnUncheck />
             {/* ChildForm hides its contents when null/undefined by default */}
             <ChildForm
                 form={form}
@@ -59,8 +61,8 @@ function ToggleForm() {
                 render={(form) => (
                     <>
                         <p>Location lat/long</p>
-                        <FormInput form={form} name="lat" type="number" />
-                        <FormInput form={form} name="long" type="number" />
+                        <Field form={form} name="lat" type="number" />
+                        <Field form={form} name="long" type="number" />
                     </>
                 )}
             />

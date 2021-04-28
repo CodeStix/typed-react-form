@@ -64,19 +64,12 @@ function MyForm() {
 
 ### Creating inputs
 
-This library provides the following built-in components to create type-checked inputs:
-
--   [FormInput](/typed-react-form/reference/FormInput)
--   [FormSelect](/typed-react-form/reference/FormSelect)
--   [FormTextArea](/typed-react-form/reference/FormTextArea)
-
-When these inputs do not satisfy your needs, you can always [implement your own](/typed-react-form/examples/Custom-input#example-custom-input). These built-in components are just abstractions around hook calls.
+Use the `<Field/>` component to create an input. (Which is type checked, you cannot misspell the field name, awesome!)
 
 ✔️ **Example type-checked form consisting of 2 fields**
 
 ```tsx
-// Import FormInput
-import { useForm, FormInput } from "typed-react-form";
+import { useForm, Field } from "typed-react-form";
 
 function MyForm() {
     const form = useForm({ email: "", password: "" });
@@ -93,23 +86,27 @@ function MyForm() {
     return (
         <form onSubmit={form.handleSubmit(submit)}>
             {/* Make sure to pass the form prop! */}
-            <FormInput form={form} name="email" type="text" />
-            <FormInput form={form} name="password" type="password" />
+            <Field form={form} name="email" type="text" />
+            <Field form={form} name="password" type="password" />
             <button type="submit">Submit!</button>
         </form>
     );
 }
 ```
 
+You can also create checkboxes, radio buttons, textareas and selects with this component, look [here](/typed-react-form/reference/Field) for more information.
+
+If the builtin Field components does not satisfy your needs, you can always [implement your own](/typed-react-form/examples/Custom-input#example-custom-input) custom input component. These built-in components are just abstractions around hook calls.
+
 ## Step 3: It's your turn
 
 Tweak the above example to your desire by...
 
--   [Reading more about `FormInput`](/typed-react-form/reference/FormInput)
+-   [Reading more about `<Field/>`](/typed-react-form/reference/Field)
 -   [Implementing validation](/typed-react-form/validation)
 -   [Using object fields](/typed-react-form/advanced/Object-fields)
 -   [Using array fields](/typed-react-form/advanced/Array-fields)
 -   [Toggling a field using a checkbox](/typed-react-form/advanced/Toggling-a-field)
 -   [Creating a component which shows the current form values in JSON](/typed-react-form/examples/Live-json-component)
--   [Creating a custom input like FormInput, FormSelect ...](/typed-react-form/examples/Custom-input)
+-   [Creating a custom input like `<Field/>`](/typed-react-form/examples/Custom-input)
 -   Look at the sidebar for more...

@@ -28,7 +28,7 @@ Yup validation options.
 ## Usage example
 
 ```tsx
-import { useForm, FormError, FormInput, AnyListener } from "typed-react-form";
+import { useForm, FieldError, Field, AnyListener } from "typed-react-form";
 import { yupValidator } from "typed-react-form-yup";
 import * as yup from "yup";
 
@@ -39,7 +39,7 @@ interface LoginRequest {
 
 const LoginRequestSchema = yup.object({
     email: yup.string().required("Please enter an email").email("Please enter a valid email address."),
-    password: yup.string().required("Please enter a password").min(5, "Password must be longer"),
+    password: yup.string().required("Please enter a password").min(5, "Password must be longer")
 });
 
 export function YupFormExample() {
@@ -51,10 +51,10 @@ export function YupFormExample() {
 
     return (
         <form onSubmit={form.handleSubmit(submit)}>
-            <FormInput form={form} name="email" type="email" />
-            <FormError form={form} name="email" />
-            <FormInput form={form} name="password" type="password" />
-            <FormError form={form} name="password" />
+            <Field form={form} name="email" type="email" />
+            <FieldError form={form} name="email" />
+            <Field form={form} name="password" type="password" />
+            <FieldError form={form} name="password" />
             <button type="submit">Submit</button>
         </form>
     );

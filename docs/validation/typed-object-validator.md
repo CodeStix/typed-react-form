@@ -20,13 +20,13 @@ import tv, { SchemaType } from "typed-object-validator";
 
 const RegisterRequestSchema = tv.object({
     email: tv.email("Please enter a valid email address.").doCase("lower").min(1, "Please enter an email"),
-    password: tv.string().min(1, "Please enter a password"),
+    password: tv.string().min(1, "Please enter a password")
 });
 type RegisterRequest = SchemaType<typeof RegisterRequestSchema>;
 
 export function TypedValidationExample() {
     // Make sure to use a lambda function around `Schema.validate()`
-    // typed-object-validator already returns errors in the right object structure 
+    // typed-object-validator already returns errors in the right object structure
     const form = useForm<RegisterRequest>({ email: "", password: "" }, (values) => RegisterRequestSchema.validate(values), true);
 
     function submit() {
@@ -36,10 +36,10 @@ export function TypedValidationExample() {
 
     return (
         <form onSubmit={form.handleSubmit(submit)}>
-            <FormInput form={form} name="email" type="email" />
-            <FormError form={form} name="email" />
-            <FormInput form={form} name="password" type="password" />
-            <FormError form={form} name="password" />
+            <Field form={form} name="email" type="email" />
+            <FieldError form={form} name="email" />
+            <Field form={form} name="password" type="password" />
+            <FieldError form={form} name="password" />
             <button type="submit">Submit</button>
         </form>
     );

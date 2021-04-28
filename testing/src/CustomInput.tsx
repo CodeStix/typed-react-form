@@ -26,7 +26,7 @@ function CustomInput3<T extends object>(props: { form: FormState<T>; name: keyof
     return <input value={value + ""} onChange={(ev) => setValue(parseFloat(ev.target.value) as any)} />;
 }
 
-// Example of a type-checked input using the builtin serializer (that is also used for FormInput), this
+// Example of a type-checked input using the builtin serializer (that is also used for FieldError), this
 // serializer supports date fields, number fields, primitive array fields. SerializeProps will add the type prop.
 // Make sure to add SerializeProps
 function CustomInput4<T extends object>(props: { form: FormState<T>; name: keyof T } & SerializeProps) {

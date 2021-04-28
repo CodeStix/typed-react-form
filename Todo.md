@@ -9,5 +9,3 @@
 -   Rename `setDefaultValues` to `setAllValues`
 -   Let `comparePrimitiveObject` compare deep objects too
 -   Render JSON.stringify by default when using AnyListener without renderer
-
--   Remove FormInput, FormTextArea and FormSelect
