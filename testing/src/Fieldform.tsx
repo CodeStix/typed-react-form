@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm, Field, AnyListener, FieldError } from "typed-react-form";
+import { useForm, Field, AnyListener, FieldError, FormField } from "typed-react-form";
 
 function Input(props: { value?: string; onChange?: (value: string) => void; style: React.CSSProperties }) {
     return <input style={{ padding: "0.3em", ...props.style }} value={props.value} onChange={(ev) => props.onChange?.(ev.target.value)} />;
@@ -11,11 +11,12 @@ function validate(_: any) {
     };
 }
 
-function Error(props: { children: React.ReactNode }) {
+function Error(props: { children: React.ReactNode; field: FormField }) {
     return (
-        <p>
-            not epic:
-            <strong>{props.children}</strong>
+        <p style={{ color: "red" }}>
+            <strong>
+                {props.children} ({props.field.dirty + ""})
+            </strong>
         </p>
     );
 }

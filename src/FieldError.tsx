@@ -1,5 +1,5 @@
 import React from "react";
-import { DefaultError, DefaultState, FormState } from "./form";
+import { DefaultError, DefaultState, ErrorType, FormState } from "./form";
 import { useListener } from "./hooks";
 import { ElementProps } from "./Field";
 
@@ -29,11 +29,11 @@ export function FieldError<
          * `<FieldError as={CustomError} {...} />`
          */
         as?: C;
-        transformer?: (error: Error) => React.ReactNode;
-    } & Omit<ElementProps<C>, "transformer" | "as" | "name" | "form" | "children">
+        transformer?: (error: ErrorType<T[K], Error>) => React.ReactNode;
+    } & Omit<ElementProps<C>, "transformer" | "as" | "name" | "form" | "children" | "field">
 ) {
     const { form, as = React.Fragment, transformer, ...rest } = props;
-    const { error } = useListener(form, props.name);
-    if (!error || typeof error === "object") return null;
-    return React.createElement(as, { ...rest, children: String(transformer ? transformer(error as Error) : error) });
+    const field = useListener(form, props.name);
+    if (!field.error || typeof field.error === "object") return null;
+    return React.createElement(as, { ...rest, field, children: transformer ? transformer(field.error) : String(field.error) });
 }
