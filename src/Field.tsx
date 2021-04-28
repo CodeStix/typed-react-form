@@ -1,6 +1,6 @@
-import { FormState } from "../form";
+import { FormState } from "./form";
 import React, { useCallback } from "react";
-import { useListener } from "../hooks";
+import { useListener } from "./hooks";
 
 export type ElementProps<C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements> = C extends React.FunctionComponent<infer P>
     ? P
