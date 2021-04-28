@@ -5,3 +5,5 @@ export * from "./FormError";
 export * from "./serializer";
 
 export type StyledFix<T, Props = {}> = T | ((props: Props) => JSX.Element);
+
+export * from "./Field";

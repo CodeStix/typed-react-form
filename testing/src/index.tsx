@@ -9,6 +9,7 @@ import { StyledForm } from "./StyledForm";
 import { ExampleForm } from "./ExampleForm";
 import App from "./App";
 import { CustomInputsForm } from "./CustomInput";
+import { FieldForm } from "./Fieldform";
 
 function Router() {
     return (
@@ -19,6 +20,7 @@ function Router() {
                 <Route path="/styled-form" component={StyledForm} />
                 <Route path="/test" component={App} />
                 <Route path="/custom-inputs" component={CustomInputsForm} />
+                <Route path="/field" component={FieldForm} />
                 <Route path="/" component={ExampleForm} />
             </Switch>
         </BrowserRouter>

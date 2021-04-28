@@ -82,6 +82,7 @@ export function useListener<T extends object, K extends keyof T, State = Default
     name: K
 ) {
     const [, setRender] = useState(0);
+    const setValue = useCallback((value: T[K]) => form.setValue(name, value), [name, form]);
 
     useEffect(() => {
         let id = form.listen(name, () => {
@@ -93,7 +94,7 @@ export function useListener<T extends object, K extends keyof T, State = Default
     return {
         value: form.values[name],
         defaultValue: form.defaultValues[name],
-        setValue: (value: T[K]) => form.setValue(name, value),
+        setValue: setValue,
         dirty: form.dirtyMap[name],
         error: form.errorMap[name],
         state: form.state,
