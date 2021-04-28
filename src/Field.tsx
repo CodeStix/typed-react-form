@@ -12,6 +12,7 @@ export type FieldProps<T extends object, K extends keyof T, C> = {
     form: FormState<T>;
     name: K;
     as?: C;
+    hideWhenNull?: boolean;
     serializer?: Serializer<T[K]>;
     deserializer?: Deserializer<T[K]>;
 };
@@ -19,7 +20,7 @@ export type FieldProps<T extends object, K extends keyof T, C> = {
 export function Field<T extends object, K extends keyof T, C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements = "input">(
     props: FieldProps<T, K, C> & Omit<ElementProps<C>, "value" | "onChange" | keyof FieldProps<T, K, C> | keyof SerializeProps> & SerializeProps
 ) {
-    const { form, as = "input", serializer, dateAsNumber, setNullOnUncheck, setUndefinedOnUncheck, deserializer, ...rest } = props;
+    const { form, as = "input", serializer, dateAsNumber, setNullOnUncheck, setUndefinedOnUncheck, deserializer, hideWhenNull, ...rest } = props;
     const serializeProps = {
         dateAsNumber,
         setNullOnUncheck,
@@ -27,7 +28,7 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
         type: props.type,
         value: props.value
     };
-    const { value, setValue } = useListener(form, props.name);
+    const { value, setValue, state } = useListener(form, props.name);
     const onChange = useCallback(
         (ev: any) => {
             let [v, c] = "target" in ev ? [ev.target.value, ev.target.checked] : [ev, typeof ev === "boolean" ? ev : undefined];
@@ -35,11 +36,13 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
         },
         [setValue]
     );
+    if (hideWhenNull && (value === undefined || value === null)) return null;
     let v = (serializer ?? defaultSerializer)(value, serializeProps);
     return React.createElement(as, {
         ...rest,
         checked: typeof v === "boolean" ? v : undefined,
         value: typeof v === "boolean" ? undefined : value,
+        disabled: state.isSubmitting,
         onChange
     });
 }

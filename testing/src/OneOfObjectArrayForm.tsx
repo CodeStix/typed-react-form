@@ -1,5 +1,5 @@
 import React from "react";
-import { AnyListener, ArrayForm, FormInput, FormState, useChildForm, useForm, useListener } from "typed-react-form";
+import { AnyListener, ArrayForm, Field, FormState, useChildForm, useForm, useListener } from "typed-react-form";
 
 interface Apple {
     type: "apple";
@@ -116,7 +116,7 @@ function AppleForm({ form }: { form: FormState<Apple> }) {
         <div>
             <h4>Apple editor</h4>
             <p>Select the color of your apple</p>
-            <FormInput form={form} type="color" name="color" />
+            <Field form={form} type="color" name="color" />
         </div>
     );
 }
@@ -126,7 +126,7 @@ function BreadForm({ form }: { form: FormState<Bread> }) {
         <div>
             <h4>Bread editor</h4>
             <p>Select the size of your bread</p>
-            <FormInput form={form} type="number" name="size" />
+            <Field form={form} type="number" name="size" />
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import { AnyListener, ArrayForm, ChildForm, ErrorMap, FormInput, FormSelect, FormTextArea, useForm } from "typed-react-form";
+import { AnyListener, ArrayForm, ChildForm, ErrorMap, Field, useForm } from "typed-react-form";
 import tv, { SchemaType } from "typed-object-validator";
 import React from "react";
 import { VisualRender } from "./VisualRender";
@@ -37,15 +37,18 @@ export function ExampleForm() {
         {
             longText: "",
             text: "",
+            customText: "nice",
             number: 123,
             enum: "option1",
             boolean: false,
             object: { childText: "", childNumber: 0 },
+            date: new Date(),
             array: ["Item 1", "Item 2"],
             objectArray: [
                 { boolean: true, text: "Item 1" },
                 { boolean: false, text: "Item 2" }
-            ]
+            ],
+            tags: ["food"]
         } as FormData,
         validate
     );
@@ -71,31 +74,31 @@ export function ExampleForm() {
 
             {/* A simple text input */}
             <label>Text</label>
-            <FormInput form={form} name="text" />
-            <pre>{`<FormInput form={form} name="fieldName" />`}</pre>
+            <Field form={form} name="text" />
+            <pre>{`<Field form={form} name="fieldName" />`}</pre>
 
             {/* A simple text input */}
             <label>Deserializer text</label>
-            <FormInput form={form} name="customText" serializer={(e) => e?.toLowerCase()} deserializer={(e) => e.toUpperCase()} />
-            <pre>{`<FormInput form={form} name="fieldName" />`}</pre>
+            <Field form={form} name="customText" serializer={(e) => e?.toLowerCase()} deserializer={(e) => e.toUpperCase()} />
+            <pre>{`<Field form={form} name="fieldName" />`}</pre>
 
             {/* A textarea */}
             <label>Long text</label>
-            <FormTextArea form={form} name="longText" />
+            <Field form={form} name="longText" as="textarea" />
             <pre>{`<FormTextArea form={form} name="fieldName" />`}</pre>
 
             {/* A number input */}
             <label>Number</label>
-            <FormInput form={form} type="number" name="number" />
-            <pre>{`<FormInput form={form} type="number" name="fieldName" />`}</pre>
+            <Field form={form} type="number" name="number" />
+            <pre>{`<Field form={form} type="number" name="fieldName" />`}</pre>
 
             {/* A select input */}
             <label>Enum</label>
-            <FormSelect form={form} name="enum">
+            <Field form={form} as="select" name="enum">
                 <option value="option1">Option 1</option>
                 <option value="option2">Option 2</option>
                 <option value="option3">Option 3</option>
-            </FormSelect>
+            </Field>
             <pre>{`
 <FormSelect form={form} name="fieldName">
     <option value="option1">Option 1</option>
@@ -106,65 +109,65 @@ export function ExampleForm() {
 
             {/* A checkbox input */}
             <label>Boolean</label>
-            <FormInput form={form} type="checkbox" name="boolean" />
-            <pre>{`<FormInput form={form} type="checkbox" name="fieldName" />`}</pre>
+            <Field form={form} type="checkbox" name="boolean" />
+            <pre>{`<Field form={form} type="checkbox" name="fieldName" />`}</pre>
 
             <label>Tags</label>
             <div>
                 <label>
                     Food
-                    <FormInput form={form} type="checkbox" name="tags" value="food" />
+                    <Field form={form} type="checkbox" name="tags" value="food" />
                 </label>
                 <label>
                     Sports
-                    <FormInput form={form} type="checkbox" name="tags" value="sports" />
+                    <Field form={form} type="checkbox" name="tags" value="sports" />
                 </label>
                 <label>
                     Tech
-                    <FormInput form={form} type="checkbox" name="tags" value="tech" />
+                    <Field form={form} type="checkbox" name="tags" value="tech" />
                 </label>
             </div>
-            <pre>{`<FormInput form={form} type="checkbox" name="fieldName" />`}</pre>
+            <pre>{`<Field form={form} type="checkbox" name="fieldName" />`}</pre>
 
             {/* A radio input */}
             <label>Enum</label>
             <div>
                 <label>
-                    <FormInput form={form} type="radio" name="enum" value="option1" /> Option 1
+                    <Field form={form} type="radio" name="enum" value="option1" /> Option 1
                 </label>
                 <label>
-                    <FormInput form={form} type="radio" name="enum" value="option2" /> Option 2
+                    <Field form={form} type="radio" name="enum" value="option2" /> Option 2
                 </label>
                 <label>
-                    <FormInput form={form} type="radio" name="enum" value="option3" /> Option 3
+                    <Field form={form} type="radio" name="enum" value="option3" /> Option 3
                 </label>
             </div>
             <pre>{`
-<FormInput form={form} type="radio" name="fieldName" value="option1" /> Option 1
-<FormInput form={form} type="radio" name="fieldName" value="option2" /> Option 2
-<FormInput form={form} type="radio" name="fieldName" value="option3" /> Option 3
+<Field form={form} type="radio" name="fieldName" value="option1" /> Option 1
+<Field form={form} type="radio" name="fieldName" value="option2" /> Option 2
+<Field form={form} type="radio" name="fieldName" value="option3" /> Option 3
             `}</pre>
 
             {/* A date input */}
             <label>Date</label>
-            <FormInput form={form} type="date" name="date" />
-            <pre>{`<FormInput form={form} type="date" name="fieldName" />`}</pre>
+            <Field form={form} type="date" name="date" />
+            <pre>{`<Field form={form} type="date" name="fieldName" />`}</pre>
 
             {/* A date timestamp input */}
             <label>Timestamp (number)</label>
-            <FormInput form={form} type="date" name="number" dateAsNumber />
-            <pre>{`<FormInput form={form} type="date" name="fieldName" dateAsNumber />`}</pre>
+            <Field form={form} type="date" name="number" dateAsNumber />
+            <pre>{`<Field form={form} type="date" name="fieldName" dateAsNumber />`}</pre>
 
             {/* Toggle field */}
             <label>Toggle text</label>
             <div>
-                <FormInput form={form} type="checkbox" name="text" setUndefinedOnUncheck value="" />
-                <FormInput form={form} name="text" hideWhenNull />
+                <Field form={form} type="checkbox" name="text" setUndefinedOnUncheck value="" />
+                <Field form={form} name="text" hideWhenNull />
             </div>
             <pre>
                 {`
-<FormInput form={form} type="checkbox" name="text" setUndefinedOnUncheck value="" />
-<FormInput form={form} name="text" hideWhenNull />
+<Field form={form} type="checkbox" name="text" setUndefinedOnUncheck value="" />
+<Field form={form} name="text" hideWhenNull />
             `}
             </pre>
 
@@ -177,9 +180,9 @@ export function ExampleForm() {
                     render={(form) => (
                         <div style={{ background: "#0001" }}>
                             <p>Text</p>
-                            <FormInput form={form} name="childText" />
+                            <Field form={form} name="childText" />
                             <p>Number</p>
-                            <FormInput form={form} name="childNumber" type="number" />
+                            <Field form={form} name="childNumber" type="number" />
                         </div>
                     )}
                 />
@@ -191,7 +194,7 @@ export function ExampleForm() {
     name="parentObjectFieldName"
     render={(childForm) => (
         <div>
-            <FormInput form={childForm} name="childFieldName" />
+            <Field form={childForm} name="childFieldName" />
         </div>
 )}
 />
@@ -200,10 +203,10 @@ export function ExampleForm() {
 
             {/* Set object field to undefined on uncheck */}
             <label>Toggle object</label>
-            <FormInput form={form} type="checkbox" name="object" setUndefinedOnUncheck value={{ childNumber: 0, childText: "" }} />
+            <Field form={form} type="checkbox" name="object" setUndefinedOnUncheck value={{ childNumber: 0, childText: "" }} />
             <pre>
                 {`
-<FormInput 
+<Field 
     form={form} 
     type="checkbox" 
     name="fieldName" 
@@ -221,7 +224,7 @@ export function ExampleForm() {
                     <ul>
                         {form.values.map((_, i) => (
                             <li key={i}>
-                                <FormInput form={form} name={i} />
+                                <Field form={form} name={i} />
                             </li>
                         ))}
                     </ul>
@@ -236,7 +239,7 @@ export function ExampleForm() {
         <ul>
             {form.values.map((_, i) => (
                 <li key={i}>
-                    <FormInput form={form} name={i} />
+                    <Field form={form} name={i} />
                 </li>
             ))}
         </ul>
@@ -253,7 +256,7 @@ export function ExampleForm() {
                     <ul>
                         {form.values.map((_, i) => (
                             <li key={i}>
-                                <FormInput form={form} name={i} />
+                                <Field form={form} name={i} />
                                 <button onClick={() => remove(i)}>Remove</button>
                             </li>
                         ))}
@@ -273,7 +276,7 @@ export function ExampleForm() {
             <ul>
                 {form.values.map((_, i) => (
                     <li key={i}>
-                        <FormInput form={form} name={i} />
+                        <Field form={form} name={i} />
                         <button onClick={() => remove(i)}>Remove</button>
                     </li>
                 ))}
@@ -299,8 +302,8 @@ export function ExampleForm() {
                                 name={i}
                                 render={(form) => (
                                     <div>
-                                        <FormInput form={form} name="text" />
-                                        <FormInput form={form} name="boolean" type="checkbox" />
+                                        <Field form={form} name="text" />
+                                        <Field form={form} name="boolean" type="checkbox" />
                                     </div>
                                 )}
                             />
@@ -321,7 +324,7 @@ export function ExampleForm() {
                     name={i}
                     render={(form) => (
                         <div>
-                            <FormInput form={form} name="objectFieldName" />
+                            <Field form={form} name="objectFieldName" />
                         </div>
                     )}
                 />
@@ -344,8 +347,8 @@ export function ExampleForm() {
                                 name={i}
                                 render={(form) => (
                                     <div>
-                                        <FormInput form={form} name="text" />
-                                        <FormInput form={form} name="boolean" type="checkbox" />
+                                        <Field form={form} name="text" />
+                                        <Field form={form} name="boolean" type="checkbox" />
                                         <button type="button" onClick={() => remove(i)}>
                                             Remove
                                         </button>
@@ -372,7 +375,7 @@ export function ExampleForm() {
                     name={i}
                     render={(form) => (
                         <div>
-                            <FormInput form={form} name="objectFieldName" />
+                            <Field form={form} name="objectFieldName" />
                             <button type="button" onClick={() => remove(i)}>
                                 Remove
                             </button>
