@@ -15,10 +15,10 @@ export function FieldError<
         name: K;
         component?: C;
         transformer?: (error: Error) => React.ReactNode;
-    } & Omit<ElementProps<C>, "transformer" | "component" | "name" | "form">
+    } & Omit<ElementProps<C>, "transformer" | "component" | "name" | "form" | "children">
 ) {
-    const { form, component = React.Fragment, transformer } = props;
+    const { form, component = React.Fragment, transformer, ...rest } = props;
     const { error } = useListener(form, props.name);
     if (!error || typeof error === "object") return null;
-    return React.createElement(component, { children: String(transformer ? transformer(error as Error) : error) });
+    return React.createElement(component, { ...rest, children: String(transformer ? transformer(error as Error) : error) });
 }
