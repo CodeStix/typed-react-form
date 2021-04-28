@@ -39,7 +39,7 @@ export function useForm<T extends object, State = DefaultState, Error extends st
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useChildForm<
+export function useObjectField<
     T extends FieldsOfType<any, object | any[]>,
     K extends KeysOfType<T, object | any[]>,
     State = DefaultState,
@@ -128,13 +128,13 @@ export function useAnyListener<T extends object, State = DefaultState, Error ext
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function useArrayForm<
+export function useArrayField<
     T extends FieldsOfType<any, any[]>,
     K extends KeysOfType<T, any[] | object>,
     State = DefaultState,
     Error extends string = DefaultError
 >(parentForm: FormState<T, State, Error>, name: K) {
-    const form = useChildForm(parentForm, name);
+    const form = useObjectField(parentForm, name);
     const oldLength = useRef(-1);
     const [, setRender] = useState(0);
 

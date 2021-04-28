@@ -1,4 +1,4 @@
-import { AnyListener, ArrayForm, ChildForm, ErrorMap, Field, useForm } from "typed-react-form";
+import { AnyListener, ArrayField, ObjectField, ErrorMap, Field, useForm } from "typed-react-form";
 import tv, { SchemaType } from "typed-object-validator";
 import React from "react";
 import { VisualRender } from "./VisualRender";
@@ -174,7 +174,7 @@ export function ExampleForm() {
             {/* Object field */}
             <label>Object field</label>
             <div>
-                <ChildForm
+                <ObjectField
                     form={form}
                     name="object"
                     render={(form) => (
@@ -189,7 +189,7 @@ export function ExampleForm() {
             </div>
             <pre>
                 {`
-<ChildForm
+<ObjectField
     form={form}
     name="parentObjectFieldName"
     render={(childForm) => (
@@ -217,7 +217,7 @@ export function ExampleForm() {
 
             {/* Simple string array */}
             <label>String array</label>
-            <ArrayForm
+            <ArrayField
                 form={form}
                 name="array"
                 render={({ form }) => (
@@ -232,7 +232,7 @@ export function ExampleForm() {
             />
             <pre>
                 {`
-<ArrayForm
+<ArrayField
     form={form}
     name="array"
     render={({ form }) => (
@@ -249,7 +249,7 @@ export function ExampleForm() {
 
             {/* Dynamic string array */}
             <label>Dynamic string array</label>
-            <ArrayForm
+            <ArrayField
                 form={form}
                 name="array"
                 render={({ form, append, remove }) => (
@@ -268,7 +268,7 @@ export function ExampleForm() {
             />
             <pre>
                 {`
-<ArrayForm
+<ArrayField
     form={form}
     name="arrayFieldName"
     render={({ form, append, remove }) => (
@@ -291,13 +291,13 @@ export function ExampleForm() {
 
             {/* Object array */}
             <label>Object array</label>
-            <ArrayForm
+            <ArrayField
                 form={form}
                 name="objectArray"
                 render={({ form }) => (
                     <ul>
                         {form.values.map((_, i) => (
-                            <ChildForm
+                            <ObjectField
                                 form={form}
                                 name={i}
                                 render={(form) => (
@@ -319,7 +319,7 @@ export function ExampleForm() {
     render={({ form }) => (
         <ul>
             {form.values.map((_, i) => (
-                <ChildForm
+                <ObjectField
                     form={form}
                     name={i}
                     render={(form) => (
@@ -336,13 +336,13 @@ export function ExampleForm() {
 
             {/* Dynamic object array */}
             <label>Dynamic object array</label>
-            <ArrayForm
+            <ArrayField
                 form={form}
                 name="objectArray"
                 render={({ form, append, remove }) => (
                     <ul>
                         {form.values.map((_, i) => (
-                            <ChildForm
+                            <ObjectField
                                 form={form}
                                 name={i}
                                 render={(form) => (
@@ -364,13 +364,13 @@ export function ExampleForm() {
             />
             <pre>
                 {`
-<ArrayForm
+<ArrayField
     form={form}
     name="objectArrayField"
     render={({ form, append, remove }) => (
         <ul>
             {form.values.map((_, i) => (
-                <ChildForm
+                <ObjectField
                     form={form}
                     name={i}
                     render={(form) => (

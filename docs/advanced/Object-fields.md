@@ -33,7 +33,7 @@ function PersonForm() {
         >
             {/* Input on root form */}
             <Field form={form} type="text" name="name" />
-            <ChildForm
+            <ObjectField
                 form={form}
                 name="info"
                 render={(form) => (

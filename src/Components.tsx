@@ -1,15 +1,15 @@
 import React from "react";
 import { ChildFormState, DefaultError, DefaultState, DirtyMap, ErrorMap, FieldsOfType, FormState, KeysOfType } from "./form";
-import { useArrayForm, useListener, useAnyListener, useChildForm, useTruthyListener } from "./hooks";
+import { useArrayField, useListener, useAnyListener, useObjectField, useTruthyListener } from "./hooks";
 
 /**
- * Wrapper around useArrayForm (which is a wrapper around useChildForm).
+ * Wrapper around useArrayForm (which is a wrapper around useObjectField).
  * Exports useful functions to manipulate arrays.
  * This hook does cause a rerender, but only if the whole array becomes null/undefined.
  * @param parent The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function ArrayForm<
+export function ArrayField<
     T extends FieldsOfType<any, any[]>,
     K extends KeysOfType<T, any[] | object>,
     State = DefaultState,
@@ -28,7 +28,7 @@ export function ArrayForm<
         setValues: (values: NonNullable<T[K]>) => void;
     }) => React.ReactNode;
 }) {
-    const childForm = useArrayForm(props.form, props.name);
+    const childForm = useArrayField(props.form, props.name);
 
     // Causes a rerender when the array becomes null/not null
     useTruthyListener(props.form, props.name);
@@ -77,13 +77,13 @@ export function AnyListener<T extends object, State = DefaultState, Error extend
 }
 
 /**
- * Wrapper around useChildForm
+ * Wrapper around useObjectField
  * Creates a child form for another root or child form. You must use this for object and array (see useArrayForm) fields.
  * This hook does cause a rerender, but only if the object field becomes null/undefined.
  * @param parentForm The parent form.
  * @param name The parent's field to create a child form for.
  */
-export function ChildForm<
+export function ObjectField<
     T extends FieldsOfType<any, object>,
     K extends KeysOfType<T, object>,
     ParentState = DefaultState,
@@ -93,7 +93,7 @@ export function ChildForm<
     name: K;
     render?: (props: ChildFormState<T, K, ParentState, ParentError>) => React.ReactNode;
 }) {
-    const childForm = useChildForm(props.form, props.name);
+    const childForm = useObjectField(props.form, props.name);
     // Causes a rerender when the object value becomes null/undefined
     useTruthyListener(props.form, props.name);
 

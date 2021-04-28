@@ -1,5 +1,5 @@
 import React from "react";
-import { AnyListener, Field, FormState, Listener, useChildForm, useForm } from "typed-react-form";
+import { AnyListener, Field, FormState, Listener, useObjectField, useForm } from "typed-react-form";
 
 interface Apple {
     type: "apple";
@@ -59,7 +59,7 @@ export default function OneOfObjectArrayForm() {
 
 function AppleOrBreadForm(props: { parent: FormState<FormData> }) {
     // Create a new form based on the 'breadOrApple' field
-    const form = useChildForm(props.parent, "breadOrApple");
+    const form = useObjectField(props.parent, "breadOrApple");
     return (
         <div style={{ background: "#0001", padding: "1em", margin: "1em" }}>
             <label>Object type: </label>

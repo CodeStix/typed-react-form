@@ -4,7 +4,7 @@ parent: Reference
 title: ChildForm component
 ---
 
-# `<ChildForm />`
+# `<ObjectField />`
 
 Use the `ChildForm` component if you want to make fields inside an object field available to inputs. This is a wrapper around [`useChildForm`](/typed-react-form/reference/useChildForm).
 

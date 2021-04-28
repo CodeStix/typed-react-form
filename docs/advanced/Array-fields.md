@@ -6,12 +6,12 @@ title: Array fields
 
 # Array fields
 
-To create dynamic array fields, you should use the [`ArrayForm`](/typed-react-form/reference/ArrayForm) component or [`useArrayForm`](/typed-react-form/useArrayForm) hook. These are wrappers around [`useChildForm`](/typed-react-form/reference/useChildForm) which provide useful functions and optimizations for arrays.
+To create dynamic array fields, you should use the [`ArrayForm`](/typed-react-form/reference/ArrayForm) component or [`useArrayForm`](/typed-react-form/useArrayForm) hook. These are wrappers around [`useObjectField`](/typed-react-form/reference/useObjectField) which provide useful functions and optimizations for arrays.
 
 -   [ArrayForm](/typed-react-form/reference/ArrayForm)
 -   [useArrayForm](/typed-react-form/reference/useArrayForm)
 
-If you have an array field with a constant size, you should probably just use [`ChildForm`](/typed-react-form/reference/ChildForm). (See bottom for examples)
+If you have an array field with a constant size, you should probably just use [`ObjectField`](/typed-react-form/reference/ObjectField). (See bottom for examples)
 
 **Note on keys**: you **should** use the index as key, this seems against nature at first, but remember that this library does not rerender each time something in the array changes. When 2 array items get swapped, it does not rerender either, only when the array size changes, it rerenders. For this reason, it is not a problem (and it's recommended) to use index as the key. (This can change in the future)
 
@@ -89,7 +89,7 @@ function ShoppingListForm() {
 
                         {values.map((_, i) => (
                             // Create a child form for each item in the array, because each array item is an object.
-                            <ChildForm
+                            <ObjectField
                                 key={i} // You should index as key
                                 form={form} // Pass the parent form
                                 name={i} // Pass the current index as the name
@@ -171,7 +171,7 @@ function ShoppingListItemsForm(props: { parent: FormState<ShoppingList> }) {
 }
 
 function ShoppingListItemForm(props: { parent: FormState<ShoppingListItem[]>; index: number; remove: (i: number) => void }) {
-    const form = useChildForm(props.parent, props.index);
+    const form = useObjectField(props.parent, props.index);
     return (
         <div>
             <Field form={form} type="text" name="name" />
@@ -186,7 +186,7 @@ function ShoppingListItemForm(props: { parent: FormState<ShoppingListItem[]>; in
 
 ## Fixed array example
 
-A fixed array always has the same size, [`ChildForm`](/typed-react-form/reference/ChildForm) is used, and the index into the array is given using the name prop.
+A fixed array always has the same size, [`ObjectField`](/typed-react-form/reference/ObjectField) is used, and the index into the array is given using the name prop.
 
 ✔️ **Fixed array field containing strings**
 
@@ -203,7 +203,7 @@ function AnswerForm() {
                 console.log("submit", form.values);
             }}
         >
-            <ChildForm
+            <ObjectField
                 parent={form}
                 name="answers"
                 render={(form) => (

@@ -1,5 +1,5 @@
 import React from "react";
-import { AnyListener, ArrayForm, Field, FormState, useChildForm, useForm, useListener } from "typed-react-form";
+import { AnyListener, ArrayField, Field, FormState, useObjectField, useForm, useListener } from "typed-react-form";
 
 interface Apple {
     type: "apple";
@@ -40,7 +40,7 @@ export default function OneOfObjectArrayForm() {
             }}
         >
             <a href="https://github.com/CodeStix/typed-react-form/blob/master/example/src/OneOfObjectArrayForm.tsx">View source code</a>
-            <ArrayForm
+            <ArrayField
                 form={form}
                 name="objects"
                 render={({ form, values, append, remove }) => (
@@ -82,7 +82,7 @@ export default function OneOfObjectArrayForm() {
 
 function BreadOrAppleForm(props: { parent: FormState<FormDataObject[]>; index: number; remove: () => void }) {
     // Create a new child form with the array as the parent and index as the key
-    const form = useChildForm(props.parent, props.index);
+    const form = useObjectField(props.parent, props.index);
     // Listen for changes on the 'type' field, which contains 'apple' or 'bread'. This component will rerender when it changes
     const { value: type } = useListener(form, "type");
     return (
