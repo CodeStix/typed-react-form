@@ -2,6 +2,7 @@
 layout: default
 parent: Reference
 title: Field component
+nav_order: 1
 ---
 
 # `<Field />`

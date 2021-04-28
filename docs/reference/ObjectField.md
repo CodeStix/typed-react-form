@@ -2,6 +2,7 @@
 layout: default
 parent: Reference
 title: ObjectField component
+nav_order: 100
 ---
 
 # `<ObjectField />`

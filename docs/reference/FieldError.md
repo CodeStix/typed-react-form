@@ -2,6 +2,7 @@
 layout: default
 parent: Reference
 title: FieldError component
+nav_order: 5
 ---
 
 # `<FieldError />`
