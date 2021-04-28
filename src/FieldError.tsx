@@ -24,9 +24,9 @@ export function FieldError<
          *
          * **Examples**
          *
-         * `<FieldError as="textarea" rows={10} />`
+         * `<FieldError as="span" style={{color: "red"}} />`
          *
-         * `<FieldError as={CustomInput} {...} />`
+         * `<FieldError as={CustomError} {...} />`
          */
         as?: C;
         transformer?: (error: Error) => React.ReactNode;
