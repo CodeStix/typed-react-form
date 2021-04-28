@@ -199,7 +199,7 @@ export function useArrayForm<
 }
 
 /**
- * Listen for truthy changes (if a value becomes truthy or falsy) on a form's field. Behaves like useState.
+ * Listen for truthy changes (if a value becomes truthy or falsy) on a form's field.
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */

@@ -31,8 +31,8 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
     const { value, setValue, state } = useListener(form, props.name);
     const onChange = useCallback(
         (ev: any) => {
-            let [v, c] = "target" in ev ? [ev.target.value, ev.target.checked] : [ev, typeof ev === "boolean" ? ev : undefined];
-            setValue((deserializer ?? defaultDeserializer)(v, c, value, serializeProps));
+            let v = "target" in ev ? (["checkbox", "radio"].includes(props.type!) ? ev.target.checked : ev.target.value) : ev;
+            setValue((deserializer ?? defaultDeserializer)(v, value, serializeProps));
         },
         [setValue]
     );
@@ -66,7 +66,7 @@ export type SerializeType =
     | "range";
 
 export type Serializer<T> = (currentValue: T, props: SerializeProps<T>) => boolean | string;
-export type Deserializer<T> = (inputValue: string, inputChecked: boolean, currentValue: T, props: SerializeProps<T>) => T;
+export type Deserializer<T> = (inputValue: string | boolean, currentValue: T, props: SerializeProps<T>) => T;
 
 export type SerializeProps<V = any> = {
     dateAsNumber?: boolean;
@@ -77,7 +77,6 @@ export type SerializeProps<V = any> = {
 };
 
 export function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>): boolean | string {
-    console.log("serialize", currentValue, props);
     switch (props.type) {
         case "datetime-local":
         case "date": {
@@ -113,45 +112,44 @@ export function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>):
     }
 }
 
-export function defaultDeserializer<T>(inputValue: string, inputChecked: boolean, currentValue: T, props: SerializeProps<T>) {
-    console.log("deserialize", inputValue, inputChecked, props);
+export function defaultDeserializer<T>(inputValue: string | boolean, currentValue: T, props: SerializeProps<T>) {
     switch (props.type) {
         case "number": {
-            return parseFloat(inputValue) as any;
+            return parseFloat(inputValue as any);
         }
         case "datetime-local":
         case "date": {
             if (inputValue) {
-                let d = new Date(inputValue);
-                return (props.dateAsNumber ? d.getTime() : d) as any;
+                let d = new Date(inputValue as any);
+                return props.dateAsNumber ? d.getTime() : d;
             } else {
-                return null as any;
+                return null;
             }
         }
         case "radio": {
             // Enum field
-            if (inputChecked) {
-                return props.value as any;
+            if (inputValue) {
+                return props.value;
             }
             return currentValue;
         }
         case "checkbox": {
             if (props.setNullOnUncheck || props.setUndefinedOnUncheck) {
-                if (inputChecked && props.value === undefined && process.env.NODE_ENV === "development") {
+                if (inputValue && props.value === undefined && process.env.NODE_ENV === "development") {
                     console.error(
                         "Checkbox using setNullOnUncheck got checked but a value to set was not found, please provide a value to the value prop."
                     );
                 }
-                return inputChecked ? props.value : ((props.setNullOnUncheck ? null : undefined) as any);
+                return inputValue ? props.value : ((props.setNullOnUncheck ? null : undefined) as any);
             } else if (props.value !== undefined) {
                 // Primitive array field
                 let arr = Array.isArray(currentValue) ? [...currentValue] : [];
-                if (inputChecked) arr.push(props.value);
+                if (inputValue) arr.push(props.value);
                 else arr.splice(arr.indexOf(props.value), 1);
                 return arr as any;
             } else {
                 // Boolean field
-                return inputChecked as any;
+                return inputValue;
             }
         }
         default: {
