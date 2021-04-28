@@ -18,7 +18,7 @@ export type FieldProps<T extends object, K extends keyof T, C> = {
 };
 
 export function Field<T extends object, K extends keyof T, C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements = "input">(
-    props: FieldProps<T, K, C> & Omit<ElementProps<C>, "value" | "onChange" | keyof FieldProps<T, K, C> | keyof SerializeProps> & SerializeProps
+    props: FieldProps<T, K, C> & Omit<ElementProps<C>, "value" | "onChange" | keyof FieldProps<T, K, C> | keyof SerializeProps> & SerializeProps<T[K]>
 ) {
     const { form, as = "input", serializer, dateAsNumber, setNullOnUncheck, setUndefinedOnUncheck, deserializer, hideWhenNull, ...rest } = props;
     const serializeProps = {
@@ -32,16 +32,17 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
     const onChange = useCallback(
         (ev: any) => {
             let v = "target" in ev ? (["checkbox", "radio"].includes(props.type!) ? ev.target.checked : ev.target.value) : ev;
-            setValue((deserializer ?? defaultDeserializer)(v, value, serializeProps));
+            if (typeof v === "string" || typeof v === "boolean") setValue((deserializer ?? defaultDeserializer)(v, value, serializeProps));
+            else setValue(v);
         },
-        [setValue]
+        [setValue, props.type]
     );
     if (hideWhenNull && (value === undefined || value === null)) return null;
     let v = (serializer ?? defaultSerializer)(value, serializeProps);
     return React.createElement(as, {
         ...rest,
         checked: typeof v === "boolean" ? v : undefined,
-        value: typeof v === "boolean" ? undefined : value,
+        value: typeof v === "boolean" ? undefined : v,
         disabled: state.isSubmitting,
         onChange
     });
@@ -73,10 +74,10 @@ export type SerializeProps<V = any> = {
     setUndefinedOnUncheck?: boolean;
     setNullOnUncheck?: boolean;
     type?: SerializeType;
-    value?: V;
+    value?: V extends any[] ? V[number] : V;
 };
 
-export function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>): boolean | string {
+function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>): boolean | string {
     switch (props.type) {
         case "datetime-local":
         case "date": {
@@ -112,7 +113,7 @@ export function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>):
     }
 }
 
-export function defaultDeserializer<T>(inputValue: string | boolean, currentValue: T, props: SerializeProps<T>) {
+function defaultDeserializer<T>(inputValue: string | boolean, currentValue: T, props: SerializeProps<T>) {
     switch (props.type) {
         case "number": {
             return parseFloat(inputValue as any);

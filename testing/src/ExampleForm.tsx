@@ -79,7 +79,7 @@ export function ExampleForm() {
 
             {/* A simple text input */}
             <label>Deserializer text</label>
-            <Field form={form} name="customText" serializer={(e) => e?.toLowerCase()} deserializer={(e) => e.toUpperCase()} />
+            <Field form={form} name="customText" serializer={(e) => e?.toLowerCase()} deserializer={(e) => (e as string).toUpperCase()} />
             <pre>{`<Field form={form} name="fieldName" />`}</pre>
 
             {/* A textarea */}
