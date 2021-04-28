@@ -6,7 +6,9 @@ title: Field component
 
 # `<Field />`
 
-A stateful, type-checked form `input` element.
+A type-checked form field.
+
+This component renders an `input` by default. This can be changed to `textarea`, `select`, or a custom component by passing it to the `as` prop.
 
 The input transforms its value based on the `type` prop, which **currently supports the following input types**:
 

@@ -8,6 +8,8 @@ title: FieldError component
 
 This component renders an error for a specific form field.
 
+It renders a `<></>` (React.Fragment) containing the error by default. You can change what is rendered by passing a tag name (`"p"`) or custom component to the `as` prop.
+
 ```tsx
 const form = useForm(
     {
