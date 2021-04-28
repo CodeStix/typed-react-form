@@ -9,11 +9,39 @@ export type ElementProps<C extends React.FunctionComponent<any> | keyof JSX.Intr
     : never;
 
 export type FieldProps<T extends object, K extends keyof T, C> = {
+    /**
+     * The form to make a field for
+     */
     form: FormState<T>;
+    /**
+     * The name of the field
+     */
     name: K;
+    /**
+     * The element to create, this can be a string specifying "input", "select", "textarea" or a custom component. Is "input" by default. The props of the passed component are available on this field.
+     *
+     * **Examples**
+     *
+     * `<Field as="textarea" rows={10} />`
+     *
+     * `<Field as={CustomInput} {...} />`
+     */
     as?: C;
+    /**
+     * Wheter to hide this field if is set to undefined or null.
+     */
     hideWhenNull?: boolean;
+    /**
+     * A serializer is a function that converts the field value to a string/boolean value that can be passed to input. Leave undefined to use the default serializer.
+     *
+     * You can change the behaviour of the default serializer using the `type` prop.
+     */
     serializer?: Serializer<T[K]>;
+    /**
+     * A deserializer is a function that converts the string/boolean input value to the real form value. Leave undefined to use the default deserializer.
+     *
+     * You can change the behaviour of the default deserializer using the `type` prop.
+     */
     deserializer?: Deserializer<T[K]>;
 };
 
