@@ -15,7 +15,9 @@ The input transforms its value based on the `type` prop, which **currently suppo
 -   `checkbox`
 -   `radio`
 
-It is allowed to use multiple inputs on the same field, all of them will be synchronized. These inputs are given a `className` when errored (`typed-form-error`) or modified (`typed-form-dirty`) by default.
+It is allowed to use multiple inputs on the same field, all of them will be synchronized.
+
+These inputs are given a `className` when errored (`typed-form-error`) or modified (`typed-form-dirty`) by default.
 
 ## Examples
 
@@ -110,6 +112,14 @@ const form = useForm({
 ```
 
 ### Textarea
+
+```tsx
+const form = useForm({
+    description: "Ullamco velit eiusmod eiusmod veniam nulla exercitation fugiat."
+});
+
+<Field as="textarea" form={form} name="description" />;
+```
 
 ### Styling/custom component
 

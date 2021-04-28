@@ -85,7 +85,7 @@ export function ExampleForm() {
             {/* A textarea */}
             <label>Long text</label>
             <Field form={form} name="longText" as="textarea" />
-            <pre>{`<FormTextArea form={form} name="fieldName" />`}</pre>
+            <pre>{`<Field as="textarea" form={form} name="fieldName" />`}</pre>
 
             {/* A number input */}
             <label>Number</label>
