@@ -7,8 +7,8 @@ export function FieldError<
     T extends object,
     K extends keyof T,
     C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements,
-    Error extends string = DefaultError,
-    State = DefaultState
+    Error extends DefaultError = DefaultError,
+    State extends DefaultState = DefaultState
 >(
     props: {
         /**

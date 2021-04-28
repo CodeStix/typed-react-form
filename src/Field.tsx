@@ -1,5 +1,5 @@
 import { FormState } from "./form";
-import React, { useCallback } from "react";
+import React from "react";
 import { useListener } from "./hooks";
 
 export type ElementProps<C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements> = C extends React.FunctionComponent<infer P>
@@ -46,7 +46,9 @@ export type FieldProps<T extends object, K extends keyof T, C> = {
 };
 
 export function Field<T extends object, K extends keyof T, C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements = "input">(
-    props: FieldProps<T, K, C> & Omit<ElementProps<C>, "value" | "onChange" | keyof FieldProps<T, K, C> | keyof SerializeProps> & SerializeProps<T[K]>
+    props: FieldProps<T, K, C> &
+        Omit<ElementProps<C>, "value" | "checked" | "onChange" | "field" | keyof FieldProps<T, K, C> | keyof SerializeProps> &
+        SerializeProps<T[K]>
 ) {
     const { form, as = "input", serializer, dateAsNumber, setNullOnUncheck, setUndefinedOnUncheck, deserializer, hideWhenNull, ...rest } = props;
     const serializeProps = {
@@ -56,23 +58,21 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
         type: props.type,
         value: props.value
     };
-    const { value, setValue, state } = useListener(form, props.name);
-    const onChange = useCallback(
-        (ev: any) => {
-            let v = "target" in ev ? (["checkbox", "radio"].includes(props.type!) ? ev.target.checked : ev.target.value) : ev;
-            if (typeof v === "string" || typeof v === "boolean") setValue((deserializer ?? defaultDeserializer)(v, value, serializeProps));
-            else setValue(v);
-        },
-        [setValue, props.type]
-    );
-    if (hideWhenNull && (value === undefined || value === null)) return null;
-    let v = (serializer ?? defaultSerializer)(value, serializeProps);
+    const field = useListener(form, props.name);
+    if (hideWhenNull && (field.value === undefined || field.value === null)) return null;
+    let v = (serializer ?? defaultSerializer)(field.value, serializeProps);
     return React.createElement(as, {
         ...rest,
         checked: typeof v === "boolean" ? v : undefined,
         value: typeof v === "boolean" ? undefined : v,
-        disabled: state.isSubmitting,
-        onChange
+        disabled: field.state.isSubmitting || props.disabled,
+        field,
+        onChange: (ev: any) => {
+            let v = "target" in ev ? (["checkbox", "radio"].includes(props.type!) ? ev.target.checked : ev.target.value) : ev;
+            if (typeof v === "string" || typeof v === "boolean")
+                field.setValue((deserializer ?? defaultDeserializer)(v, field.value, serializeProps));
+            else field.setValue(v);
+        }
     });
 }
 

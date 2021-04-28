@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-import { DefaultState, DefaultError, FormState, ChildFormState, Validator, FieldsOfType, KeysOfType } from "./form";
+import { DefaultState, DefaultError, FormState, ChildFormState, Validator, FieldsOfType, KeysOfType, ErrorType } from "./form";
 
 /**
  * Creates a new root form.
@@ -71,16 +71,31 @@ export function useObjectField<
     return c.current;
 }
 
+export interface FormField<
+    T extends object = any,
+    K extends keyof T = never,
+    State extends DefaultState = DefaultState,
+    Error extends string = DefaultError
+> {
+    value: T[K];
+    defaultValue: T[K];
+    setValue: (value: T[K]) => void;
+    dirty: boolean;
+    error: ErrorType<T[K], Error> | undefined;
+    state: State;
+    form: FormState<T, State, Error>;
+}
+
 /**
  * Listen for changes on a form's field. Behaves like useState.
  * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <Listener /> instead.
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function useListener<T extends object, K extends keyof T, State = DefaultState, Error extends string = DefaultError>(
+export function useListener<T extends object, K extends keyof T, State extends DefaultState = DefaultState, Error extends string = DefaultError>(
     form: FormState<T, State, Error>,
     name: K
-) {
+): FormField<T, K, State, Error> {
     const [, setRender] = useState(0);
 
     useEffect(() => {
@@ -94,7 +109,7 @@ export function useListener<T extends object, K extends keyof T, State = Default
         value: form.values[name],
         defaultValue: form.defaultValues[name],
         setValue: (value: T[K]) => form.setValue(name, value),
-        dirty: form.dirtyMap[name],
+        dirty: form.dirtyMap[name] ?? false,
         error: form.errorMap[name],
         state: form.state,
         form

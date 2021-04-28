@@ -45,7 +45,7 @@ export function ArrayField<
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
-export function Listener<T extends object, K extends keyof T, State = DefaultState, Error extends string = DefaultError>(props: {
+export function Listener<T extends object, K extends keyof T, State extends DefaultState = DefaultState, Error extends string = DefaultError>(props: {
     form: FormState<T, State, Error>;
     name: K;
     render?: (props: {
