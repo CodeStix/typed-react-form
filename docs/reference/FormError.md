@@ -3,9 +3,9 @@ layout: default
 parent: Reference
 ---
 
-# `<FormError />`
+# `<FieldError />`
 
-A very simple field error component.
+This component renders an error for a specific form field.
 
 ```tsx
 const form = useForm(
@@ -17,28 +17,18 @@ const form = useForm(
 
 <Field form={form} name="name" />
 
+// Will render a `React.Fragment` (plain text) element on error.
+<FieldError form={form} name="name" />
+
 // Will render a `p` element on error.
-<FormError form={form} name="name" />
-```
+<FieldError as="p" form={form} name="name" />
 
-## Custom error component
-
-Because this component doesn't have a lot of functionality (only props are `form` and `name`), it is recommended to create a FormError component yourself.
-
-Below is an example of a custom form error component.
-
-```tsx
-// Use generics to create type-safe code
-function CustomFormError<T>(props: { form: FormState<T>; name: keyof T }) {
-    // Listen for changes on a form field, behaves like useState
-    const { error } = useListener(props.form, props.name);
-
-    // Render nothing when no error
-    if (!error) return null;
-
-    // Render a styled span on error.
-    return <span style={{ color: "red", fontWeight: "bold" }}>{error}</span>;
+function CustomError(props: {children?: React.ReactNode}) {
+    return <p style={{color: "red", margin: "0.3em"}}>
+        {props.children}
+    </p>
 }
-```
 
-You can also create custom input components, look [here](/typed-react-form/examples/Custom-input).
+// Will render `CustomError`, with the error passed in the children prop, on error.
+<FieldError as={CustomError} form={form} name="name" />
+```

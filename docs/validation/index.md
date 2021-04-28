@@ -23,7 +23,7 @@ You can ofcourse use every validation library there is, but the errors must be c
 ## Example
 
 ```tsx
-import { useForm, Field, FormError, AnyListener, ErrorMap } from "typed-react-form";
+import { useForm, Field, FieldError, AnyListener, ErrorMap } from "typed-react-form";
 
 interface LoginRequest {
     email: string;
