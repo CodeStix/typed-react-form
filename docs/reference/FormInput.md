@@ -86,6 +86,35 @@ Checkboxes behave like a boolean field by default, but when given a value, it be
 }/>
 ```
 
+### Select
+
+```tsx
+const form = useForm({
+    language: "english",
+    visitedCountries: ["sweden"]
+});
+
+// Enum field
+<Field as="select" form={form} name="language">
+    <option value="english">English</option>
+    <option value="dutch">Dutch</option>
+    <option value="french">French</option>
+</Field>
+
+// Primitive array field (primitive meaning non-object)
+<Field as="select" form={form} name="visitedCountries" multiple>
+    <option value="sweden">Sweden</option>
+    <option value="russia">Russia</option>
+    <option value="kroatia">Kroatia</option>
+</Field>
+```
+
+### Textarea
+
+### Styling/custom component
+
+TODO
+
 ### Submit
 
 You **cannot** use Field to create a submit button (type="submit"). Use one of the following alternatives:
