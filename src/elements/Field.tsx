@@ -8,7 +8,7 @@ export type ElementProps<C extends React.FunctionComponent<any> | keyof JSX.Intr
     ? JSX.IntrinsicElements[C]
     : never;
 
-export function Field<T extends object, K extends keyof T, C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements>(
+export function Field<T extends object, K extends keyof T, C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements = "input">(
     props: {
         form: FormState<T>;
         name: K;
