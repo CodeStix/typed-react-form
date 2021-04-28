@@ -40,8 +40,7 @@ export function ArrayField<
 
 /**
  * Wrapper around useListener
- * Listen for changes on a form's field. Behaves like useState.
- * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <Listener /> instead.
+ * Renders using the provided render function each time the provided field changes. When no render function is provided, the current field value will be rendered as a string.
  * @param form The form to listen on.
  * @param name The form's field to listen to.
  */
@@ -57,8 +56,7 @@ export function Listener<
 
 /**
  * Wrapper around useAnyListener.
- * Listens for any change on this form. Behaves like useState.
- * You shouldn't use this hook in large components, as it rerenders each time something changes. Use the wrapper <AnyListener /> instead.
+ * Renders using the provided render function each time something in the form changes. When no render function is provided, a JSON representation of the form values is displayed.
  * @param form The form that was passed in.
  */
 export function AnyListener<T extends object, State = DefaultState, Error extends DefaultError = DefaultError>(props: {

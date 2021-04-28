@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm, Field, AnyListener, FieldError, FormField } from "typed-react-form";
+import { useForm, Field, AnyListener, FieldError, FormField, Listener } from "typed-react-form";
 
 function Input(props: { value?: string; onChange?: (value: string) => void; style: React.CSSProperties }) {
     return <input style={{ padding: "0.3em", ...props.style }} value={props.value} onChange={(ev) => props.onChange?.(ev.target.value)} />;
@@ -39,6 +39,9 @@ export function FieldForm() {
                 <option value="male">male</option>
                 <option value="female">female</option>
             </Field>
+            <p>
+                value: <Listener form={form} name="firstName" />
+            </p>
             <pre>
                 <AnyListener form={form} render={() => JSON.stringify(form.values, null, 2)} />
             </pre>
