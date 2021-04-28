@@ -21,7 +21,7 @@ function Error(props: { children: React.ReactNode }) {
 }
 
 export function FieldForm() {
-    const form = useForm({ email: "", firstName: "", gender: "male" as "male" | "female" }, validate);
+    const form = useForm({ email: "", firstName: "", gender: "male" as "male" | "female", enableEmail: true }, validate);
 
     function submit() {
         console.log("this is epic");
@@ -29,7 +29,8 @@ export function FieldForm() {
 
     return (
         <form onSubmit={form.handleSubmit(submit)}>
-            <Field form={form} name="email" as="input" />
+            <Field form={form} name="firstName" as="input" />
+            <Field form={form} name="enableEmail" type="checkbox" />
             <Field form={form} name="email" style={{ margin: "2em" }} />
             <Field form={form} name="email" as={Input} style={{ margin: "2em" }} />
             <FieldError form={form} name="email" as={Error} />
