@@ -1,7 +1,7 @@
 {
   "name": "typed-react-form",
-  "version": "1.3.2",
-  "description": "A React form form builder, focussed on typescript integration and minimal rerenders.",
+  "version": "2.0.0",
+  "description": "A completely type-checked React form builder.",
   "author": "codestix",
   "license": "MIT",
   "repository": "CodeStix/typed-react-form",
