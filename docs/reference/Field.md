@@ -127,31 +127,63 @@ const form = useForm({
 
 ### Styling/custom component
 
-You can pass a custom component to the `as` prop of `Field`. The props required by your component will be placed on the `Field` component (will be type-checked).
+#### ❌ Inline styling
 
-Some props of your custom component will be filled in automatically by the `Field` component:
+You can pass the `style` and `className` props to the `Field` component, but this will get repetitive and annoying fast.
 
--   `onChange`: a change handler, this can be a `React.ChangeEventHandler` or a `(value: T) => void`, ready to be passed to your underlying input.
--   `value`: the current value in string format, ready to be passed to the underlying input element
--   `checked`: the current checked state as boolean, ready to be passed to the underlying input element
--   `disabled`: a boolean that will be true when submitting
--   `field`: a [`FormField`](/typed-react-form/reference/useListener.html#return-value) instance, which contains information about the field like the value, its error, the form it is part of and whether is has been modified.
+```tsx
+
+<Field className="input" errorClassName="input-error" name="field1" />
+<Field className="input" errorClassName="input-error" name="field2" />
+<Field className="input" errorClassName="input-error" name="field3" />
+
+<Field style={%raw%}{{...}}{%endraw%} errorStyle={%raw%}{{...}}{%endraw%} name="field1" />
+<Field style={%raw%}{{...}}{%endraw%} errorStyle={%raw%}{{...}}{%endraw%} name="field2" />
+<Field style={%raw%}{{...}}{%endraw%} errorStyle={%raw%}{{...}}{%endraw%} name="field3" />
+
+```
+
+You should only use the `errorStyle`, `dirtyStyle`, `errorClassName` and `dirtyClassName` props in rare situations where you need specific style overrides for a specific field.
+
+#### ✔️ Using custom component
+
+You should pass a custom component to the `as` prop of `Field`. The props required by your component will be placed on the `Field` component (will be type-checked).
 
 ```tsx
 function CustomInput(props: { value: any; onChange: React.ChangeEventHandler }) {
-    return <input value={props.value} onChange={props.onChange} style={{ padding: "0.3em" }} />;
+    return <input value={props.value} onChange={props.onChange} style={%raw%}{{ padding: "0.3em" }}{%endraw%} />;
 }
 
 // The value and onChange props are handled by Field
 <Field as={CustomInput} />;
 
 function StyledCustomInput(props: { value: any; onChange: React.ChangeEventHandler; style: React.CSSProperties }) {
-    return <input value={props.value} onChange={props.onChange} style={{ ...props.style, padding: "0.3em" }} />;
+    return <input value={props.value} onChange={props.onChange} style={%raw%}{{ ...props.style, padding: "0.3em" }}{%endraw%} />;
 }
 
 // Style prop must be given (because it is required on the CustomInput component), typescript error otherwise
-<Field as={StyledCustomInput} style={{ color: "gray" }} />;
+<Field as={StyledCustomInput} style={%raw%}{{ color: "gray" }}{%endraw%} />;
+
+// The field prop is passed by the Field component
+function CustomInput(props: { value: any; onChange: React.ChangeEventHandler; field: FormField }) {
+    return <input value={props.value} onChange={props.onChange} style={%raw%}{{ padding: "0.3em", color: props.field.error ? "red" : "gray" }}{%endraw%} />;
+}
+
+// The value and onChange props are handled by Field
+<Field as={CustomInput} />;
 ```
+
+Some props of your custom component will be filled in automatically by the `Field` component:
+
+|`onChange`|The change handler, this can be a `React.ChangeEventHandler` or a `(value: T) => void`, ready to be passed to your underlying input.
+|`value`|The current value in string format, ready to be passed to the underlying input element.
+|`checked`|The current checked state as boolean, ready to be passed to the underlying input element.
+|`disabled`|A boolean that will be true when submitting.
+|`field`|A [`FormField`](/typed-react-form/reference/useListener.html#return-value) instance, which contains information about the field like the value, its error, the form it is part of and whether is has been modified.
+|`style`|Will merge your passed `style` with `errorStyle` when there is an error on this field and `dirtyStyle` when the field has been modified.
+|`className`|Will merge your passed className with `field-error` when there is an error on this field and `field-dirty` when the field has been modified. (These classNames can be changed using the `errorClassName` and `dirtyClassName` props)
+
+**If you don't like this way of passing props**, you can also [create custom inputs](/typed-react-form/examples/Custom-input) using the useListener hook (advanced).
 
 ### Submit
 

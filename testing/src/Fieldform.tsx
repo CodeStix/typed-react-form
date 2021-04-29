@@ -1,8 +1,15 @@
 import React from "react";
-import { useForm, Field } from "typed-react-form";
+import { useForm, Field, FormField } from "typed-react-form";
 
-function CustomInput(props: { value: any; onChange: React.ChangeEventHandler; style?: React.CSSProperties; className?: string }) {
-    return <input value={props.value} onChange={props.onChange} style={{ ...props.style, padding: "0.3em" }} className={props.className} />;
+function CustomInput(props: { value: any; onChange: React.ChangeEventHandler; style?: React.CSSProperties; className?: string; field: FormField }) {
+    return (
+        <input
+            value={props.value}
+            onChange={props.onChange}
+            style={{ ...props.style, padding: "0.3em", color: props.field.error ? "yellow" : "unset" }}
+            className={props.className}
+        />
+    );
 }
 
 export function FieldForm() {
