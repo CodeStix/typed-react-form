@@ -103,7 +103,8 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
         style: { ...style, ...(field.dirty ? dirtyStyle : {}), ...(field.error ? errorStyle : {}) },
         field,
         onChange: (ev: any) => {
-            let v = "target" in ev ? (["checkbox", "radio"].includes(props.type!) ? ev.target.checked : ev.target.value) : ev;
+            let v =
+                typeof ev === "object" && "target" in ev ? (["checkbox", "radio"].includes(props.type!) ? ev.target.checked : ev.target.value) : ev;
             if (typeof v === "string" || typeof v === "boolean")
                 field.setValue((deserializer ?? defaultDeserializer)(v, field.value, serializeProps));
             else field.setValue(v);

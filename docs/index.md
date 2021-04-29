@@ -36,6 +36,13 @@ function MyForm() {
 }
 ```
 
+<iframe src="https://codesandbox.io/embed/basic-typed-react-form-example-zz7uw?fontsize=14&hidenavigation=1&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="basic typed-react-form example"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
 ### Creating the submit handler
 
 Use `form.handleSubmit` to validate before calling your function. It does not get called if there is a validation error, and prevents the page from reloading.
