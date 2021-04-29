@@ -88,7 +88,7 @@ function BreadForm() {
 
 ## Return value
 
-Returns a object containing the following fields, which you can destruct:
+Returns a `FormField` instance containing the following fields, which you can destruct:
 
 ```tsx
 return {
@@ -98,8 +98,8 @@ return {
     dirty, // True if the field is modified (if not default value anymore)
     error, // The error on this field
     state, // The state of the form (contains isSubmitting)
-    form; // The form this field belongs to
-}
+    form // The form this field belongs to (FormState instance)
+};
 
 // Example usage
 const { value, setValue, error } = useListener(form, "fieldname");

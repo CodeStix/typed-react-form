@@ -49,3 +49,16 @@ export function FieldForm() {
         </form>
     );
 }
+
+function CustomInput(props: { value: any; onChange: React.ChangeEventHandler; style: React.CSSProperties }) {
+    return <input value={props.value} onChange={props.onChange} style={{ ...props.style, padding: "0.3em" }} />;
+}
+
+function Testform() {
+    const form = useForm({ nice: "" });
+    return (
+        <form>
+            <Field form={form} name="nice" as={CustomInput} style={{ color: "gray" }} />;
+        </form>
+    );
+}

@@ -127,7 +127,31 @@ const form = useForm({
 
 ### Styling/custom component
 
-TODO
+You can pass a custom component to the `as` prop of `Field`. The props required by your component will be placed on the `Field` component (will be type-checked).
+
+Some props of your custom component will be filled in automatically by the `Field` component:
+
+-   `onChange`: a change handler, this can be a `React.ChangeEventHandler` or a `(value: T) => void`, ready to be passed to your underlying input.
+-   `value`: the current value in string format, ready to be passed to the underlying input element
+-   `checked`: the current checked state as boolean, ready to be passed to the underlying input element
+-   `disabled`: a boolean that will be true when submitting
+-   `field`: a [`FormField`](/typed-react-form/reference/useListener.html#return-value) instance, which contains information about the field like the value, its error, the form it is part of and whether is has been modified.
+
+```tsx
+function CustomInput(props: { value: any; onChange: React.ChangeEventHandler }) {
+    return <input value={props.value} onChange={props.onChange} style={{ padding: "0.3em" }} />;
+}
+
+// The value and onChange props are handled by Field
+<Field as={CustomInput} />;
+
+function StyledCustomInput(props: { value: any; onChange: React.ChangeEventHandler; style: React.CSSProperties }) {
+    return <input value={props.value} onChange={props.onChange} style={{ ...props.style, padding: "0.3em" }} />;
+}
+
+// Style prop must be given (because it is required on the CustomInput component), typescript error otherwise
+<Field as={StyledCustomInput} style={{ color: "gray" }} />;
+```
 
 ### Submit
 

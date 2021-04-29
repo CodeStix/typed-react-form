@@ -1,5 +1,5 @@
-# theme: "just-the-docs"
-# baseurl: "/typed-react-form"
+theme: "just-the-docs"
+baseurl: "/typed-react-form"
 remote_theme: pmarsceill/just-the-docs
 
 aux_links:
