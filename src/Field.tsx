@@ -66,6 +66,7 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
         checked: typeof v === "boolean" ? v : undefined,
         value: typeof v === "boolean" ? undefined : v,
         disabled: field.state.isSubmitting || props.disabled,
+        className: (field.dirty ? "field-dirty " : "") + (field.error ? "field-error " : "") + props.className,
         field,
         onChange: (ev: any) => {
             let v = "target" in ev ? (["checkbox", "radio"].includes(props.type!) ? ev.target.checked : ev.target.value) : ev;

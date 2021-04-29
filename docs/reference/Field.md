@@ -21,7 +21,7 @@ The input transforms its value based on the `type` prop, which **currently suppo
 
 It is allowed to use multiple inputs on the same field, all of them will be synchronized.
 
-These inputs are given a `className` when errored (`typed-form-error`) or modified (`typed-form-dirty`) by default.
+These inputs are given a `className` when errored (`field-error`) or modified (`field-dirty`) by default.
 
 ## Examples
 
@@ -180,11 +180,11 @@ The name of the field in the form that will be bound to this input.
 
 #### `errorClassName` and `errorStyle`
 
-The className and/or style to set when there is an error on this field. Default className is `typed-form-error`.
+The className and/or style to set when there is an error on this field. Default className is `field-error`.
 
 #### `dirtyClassName` and `dirtyStyle`
 
-The className and/or style to set when this field has been modified. Default className is `typed-form-dirty`.
+The className and/or style to set when this field has been modified. Default className is `field-dirty`.
 
 #### `dateAsNumber` (only type="date")
 

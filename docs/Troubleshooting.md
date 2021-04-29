@@ -36,11 +36,11 @@ When you use [styled-components](https://github.com/styled-components/styled-com
 ```tsx
 // Example styled CustomInput
 const StyledCustomInput: typeof CustomInput = styled(CustomInput)`
-    &.typed-form-dirty {
+    &.field-dirty {
         background-color: #0001;
     }
 
-    &.typed-form-error {
+    &.field-error {
         color: red;
         font-weight: bold;
     }
