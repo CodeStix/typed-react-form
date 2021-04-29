@@ -43,6 +43,22 @@ export type FieldProps<T extends object, K extends keyof T, C> = {
      * You can change the behaviour of the default deserializer using the `type` prop.
      */
     deserializer?: Deserializer<T[K]>;
+    /**
+     * The class to set when there is an error on this field.
+     */
+    errorClassName?: string;
+    /**
+     * The class to set when this field has been modified.
+     */
+    dirtyClassName?: string;
+    /**
+     * The style to set when where is an error on this field.
+     */
+    errorStyle?: React.CSSProperties;
+    /**
+     * The style to set when this field has been modified.
+     */
+    dirtyStyle?: React.CSSProperties;
 };
 
 export function Field<T extends object, K extends keyof T, C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements = "input">(
@@ -50,7 +66,24 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
         Omit<ElementProps<C>, "value" | "checked" | "onChange" | "field" | keyof FieldProps<T, K, C> | keyof SerializeProps> &
         SerializeProps<T[K]>
 ) {
-    const { form, as = "input", serializer, dateAsNumber, setNullOnUncheck, setUndefinedOnUncheck, deserializer, hideWhenNull, ...rest } = props;
+    const {
+        form,
+        as = "input",
+        serializer,
+        dateAsNumber,
+        setNullOnUncheck,
+        setUndefinedOnUncheck,
+        deserializer,
+        hideWhenNull,
+        disabled,
+        className,
+        style,
+        errorClassName,
+        errorStyle,
+        dirtyClassName,
+        dirtyStyle,
+        ...rest
+    } = props;
     const serializeProps = {
         dateAsNumber,
         setNullOnUncheck,
@@ -65,8 +98,9 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
         ...rest,
         checked: typeof v === "boolean" ? v : undefined,
         value: typeof v === "boolean" ? undefined : v,
-        disabled: field.state.isSubmitting || props.disabled,
-        className: (field.dirty ? "field-dirty " : "") + (field.error ? "field-error " : "") + props.className,
+        disabled: field.state.isSubmitting || disabled,
+        className: (field.dirty ? "field-dirty " : "") + (field.error ? "field-error " : "") + (className || ""),
+        style: { ...style, ...(field.dirty ? dirtyStyle : {}), ...(field.error ? errorStyle : {}) },
         field,
         onChange: (ev: any) => {
             let v = "target" in ev ? (["checkbox", "radio"].includes(props.type!) ? ev.target.checked : ev.target.value) : ev;

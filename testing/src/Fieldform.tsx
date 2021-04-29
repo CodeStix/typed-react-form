@@ -1,64 +1,30 @@
 import React from "react";
-import { useForm, Field, AnyListener, FieldError, FormField, Listener } from "typed-react-form";
+import { useForm, Field } from "typed-react-form";
 
-function Input(props: { value?: string; onChange?: (value: string) => void; style: React.CSSProperties }) {
-    return <input style={{ padding: "0.3em", ...props.style }} value={props.value} onChange={(ev) => props.onChange?.(ev.target.value)} />;
-}
-
-function validate(_: any) {
-    return {
-        email: "yikes"
-    };
-}
-
-function Error(props: { children: React.ReactNode; field: FormField }) {
-    return (
-        <p style={{ color: "red" }}>
-            <strong>
-                {props.children} ({props.field.dirty + ""})
-            </strong>
-        </p>
-    );
+function CustomInput(props: { value: any; onChange: React.ChangeEventHandler; style?: React.CSSProperties; className?: string }) {
+    return <input value={props.value} onChange={props.onChange} style={{ ...props.style, padding: "0.3em" }} className={props.className} />;
 }
 
 export function FieldForm() {
-    const form = useForm({ email: "", firstName: "", gender: "male" as "male" | "female", enableEmail: true }, validate);
+    const form = useForm({ nice: "" }, (values) => ({ nice: values.nice.length < 5 ? "Must be longer" : undefined }));
 
     function submit() {
-        console.log("this is epic");
+        console.log(form.values);
+        form.setDefaultValues(form.values);
     }
 
     return (
         <form onSubmit={form.handleSubmit(submit)}>
-            <Field form={form} name="firstName" as="input" />
-            <Field form={form} name="enableEmail" type="checkbox" />
-            <Field form={form} name="email" style={{ margin: "2em" }} />
-            <Field form={form} name="email" as={Input} style={{ margin: "2em" }} />
-            <FieldError form={form} name="email" as={Error} />
-            <Field form={form} name="gender" as="select">
-                <option value="male">male</option>
-                <option value="female">female</option>
-            </Field>
-            <p>
-                value: <Listener form={form} name="firstName" />
-            </p>
-            <pre>
-                <AnyListener form={form} render={() => JSON.stringify(form.values, null, 2)} />
-            </pre>
-            <button type="submit">Submit</button>
-        </form>
-    );
-}
-
-function CustomInput(props: { value: any; onChange: React.ChangeEventHandler; style: React.CSSProperties }) {
-    return <input value={props.value} onChange={props.onChange} style={{ ...props.style, padding: "0.3em" }} />;
-}
-
-function Testform() {
-    const form = useForm({ nice: "" });
-    return (
-        <form>
-            <Field form={form} name="nice" as={CustomInput} style={{ color: "gray" }} />;
+            <Field
+                form={form}
+                name="nice"
+                as={CustomInput}
+                style={{ color: "gray", fontSize: "2em" }}
+                className="blink"
+                dirtyStyle={{ fontWeight: "bold" }}
+                errorStyle={{ color: "red" }}
+            />
+            <button type="submit">Go</button>
         </form>
     );
 }
