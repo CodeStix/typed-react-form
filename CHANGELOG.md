@@ -1,3 +1,14 @@
+# 2.1.0 (29/04/2021)
+
+-   Support `errorClassName`, `dirtyClassName`, `dirtyStyle`, `errorStyle` on Field component
+
+# 2.0.0 (29/04/2021)
+
+-   Rewrite FormInput -> Field component
+-   Rewrite FormError -> FieldError
+-   Removed FormInput, FormSelect, FormTextarea, FormError
+-   Better naming: renamed useArrayForm -> useArrayField, useChildForm -> useObjectField
+
 # 1.3.2 (26/04/2021)
 
 -   Update documentation links.
