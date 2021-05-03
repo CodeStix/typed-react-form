@@ -149,29 +149,12 @@ You should only use the `errorStyle`, `dirtyStyle`, `errorClassName` and `dirtyC
 
 You should pass a custom component to the `as` prop of `Field`. The props required by your component will be placed on the `Field` component (will be type-checked).
 
-```tsx
-function CustomInput(props: { value: any; onChange: React.ChangeEventHandler }) {
-    return <input value={props.value} onChange={props.onChange} style={%raw%}{{ padding: "0.3em" }}{%endraw%} />;
-}
-
-// The value and onChange props are handled by Field
-<Field as={CustomInput} />;
-
-function StyledCustomInput(props: { value: any; onChange: React.ChangeEventHandler; style: React.CSSProperties }) {
-    return <input value={props.value} onChange={props.onChange} style={%raw%}{{ ...props.style, padding: "0.3em" }}{%endraw%} />;
-}
-
-// Style prop must be given (because it is required on the CustomInput component), typescript error otherwise
-<Field as={StyledCustomInput} style={%raw%}{{ color: "gray" }}{%endraw%} />;
-
-// The field prop is passed by the Field component
-function CustomInput(props: { value: any; onChange: React.ChangeEventHandler; field: FormField }) {
-    return <input value={props.value} onChange={props.onChange} style={%raw%}{{ padding: "0.3em", color: props.field.error ? "red" : "gray" }}{%endraw%} />;
-}
-
-// The value and onChange props are handled by Field
-<Field as={CustomInput} />;
-```
+<iframe src="https://codesandbox.io/embed/custom-input-typed-react-form-example-ck21d?fontsize=14&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="custom input typed-react-form example"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
 
 Some props of your custom component will be filled in automatically by the `Field` component:
 
