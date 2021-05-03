@@ -2,7 +2,7 @@
 
 
 <p align="center" width="100%">
-    <img width="33%" src="https://github.com/CodeStix/typed-react-form/raw/master/docs/images/thumbextrasmall.png"> 
+    <img src="https://github.com/CodeStix/typed-react-form/raw/master/docs/images/thumbextrasmall.png"> 
 </p>
 
 A fast, completely type-checked React form builder, focussed on typescript integration and minimal rerenders. Featuring:
