@@ -1,5 +1,3 @@
-
-
 <h1 align="center" width="100%">
     Typed React form
 </h1>
@@ -12,7 +10,6 @@
     <a href="https://www.npmjs.com/package/typed-react-form"><img alt="NPM" src="https://img.shields.io/npm/v/typed-react-form.svg" /></a>
     <a href="https://bundlephobia.com/result?p=typed-react-form"><img alt="NPM Size" src="https://img.shields.io/bundlephobia/minzip/typed-react-form" /></a>
 </p>
-
 
 - ✔️ **Completly type-checked**: make less errors, this library was built for Typescript. Supports nested objects/arrays.
 - 🤔 **Simple**: An intuitive, unclottered and easy to understand api. Well [documented](https://codestix.github.io/typed-react-form/) too (+JSDoc). 
