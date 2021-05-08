@@ -11,7 +11,7 @@ Creates a new form state manager. This hook does not cause a rerender.
 
 This hook must be called, unconditionally, at the start of your component, just like the normal React hooks.
 
-**Note for using `setState` along with `useForm`**: This library is built upon the fact that only the things that change should rerender. When using `setState` with the form, a state change causes the whole form to rerender. You can reduce this problem by creating components from the things that use the state, or you can use [custom form state](/typed-react-form/reference/useForm#defaultstate-optional-issubmitting-false).
+**Note for using `setState` along with `useForm`**: This library is built upon the fact that only the things that change should rerender. When using `setState` with the form, a state change causes the whole form to rerender. You can reduce this problem by creating components from the things that use the state, or you can use [custom form state](/typed-react-form/reference/useForm.html#defaultstate-optional).
 
 `useForm(defaultValues, validator?, validateOnChange = false, validateOnMount = false, defaultState = {isSubmitting: false})`
 
