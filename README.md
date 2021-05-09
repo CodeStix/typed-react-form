@@ -31,13 +31,13 @@ npm install typed-react-form
 ## Typescript demos
 
 ### Type-checked field names
-![type-checked field names](https://github.com/CodeStix/typed-react-form/raw/master/docs/images/demo-example.png)
+![type-checked field names](https://github.com/CodeStix/typed-react-form/raw/master/docs/images/demo-example.gif)
 
 ### Type-checked custom inputs
-![type-checked custom inputs](https://github.com/CodeStix/typed-react-form/raw/master/docs/images/demo-custom.png)
+![type-checked custom inputs](https://github.com/CodeStix/typed-react-form/raw/master/docs/images/demo-custom.gif)
 
 ### Type-checked object/array fields
-![type-checked object/array fields](https://github.com/CodeStix/typed-react-form/raw/master/docs/images/demo-objectfield.png)
+![type-checked object/array fields](https://github.com/CodeStix/typed-react-form/raw/master/docs/images/demo-objectfield.gif)
 
 ## Javascript/typescript React
 
