@@ -1,3 +1,8 @@
+# 2.2.0 (9/05/2021)
+
+-   `innerRef` prop on `Field` and `FieldError`
+-   Removed `FormState.setDefaultValues` -> merged with `FormState.setValues`
+
 # 2.1.0 (29/04/2021)
 
 -   Support `errorClassName`, `dirtyClassName`, `dirtyStyle`, `errorStyle` on Field component
