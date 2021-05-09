@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { useForm, Field, AnyListener } from "typed-react-form";
+import { useForm, Field, AnyListener, ObjectField } from "typed-react-form";
 
 const inputStyle: React.CSSProperties = {
     color: "gray",
@@ -22,7 +22,6 @@ export function FieldForm() {
     return (
         <form onSubmit={form.handleSubmit(submit)}>
             <Field form={form} name="firstName" as={CustomInput} myCustomProp={true} />
-            <Field form={form} name="lastName" as={CustomInput} />
             <Field form={form} name="firstName" innerRef={inputRef} />
             <button type="submit">Go</button>
             <button
