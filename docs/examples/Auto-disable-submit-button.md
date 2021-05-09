@@ -24,7 +24,7 @@ function FormExample() {
             onSubmit={(ev) => {
                 ev.preventDefault();
                 console.log("save", form.values);
-                form.setDefaultValues(form.values);
+                form.setValues(form.values);
             }}
         >
             <Field form={form} name="name" />

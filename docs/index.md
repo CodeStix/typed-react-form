@@ -86,10 +86,8 @@ function MyForm() {
     async function submit() {
         // Implement your submit logic here...
         console.log("submitting", form.values);
-        // Fake fetch, by waiting for 500ms
-        await new Promise((res) => setTimeout(res, 500));
         // Optional: set new default values
-        form.setDefaultValues(form.values);
+        form.setValues(form.values);
     }
 
     return (

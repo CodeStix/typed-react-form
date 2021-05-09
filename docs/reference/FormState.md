@@ -19,7 +19,7 @@ The values of the form. Can be set with `setValues()`.
 
 #### `defaultValues` **(readonly)**
 
-The default values of the form. Input elements do not change this. This gets used to reset the form and to calculate dirty flags. Can be set with `setDefaultValues()`.
+The default values of the form. Input elements do not change this. This gets used to reset the form and to calculate dirty flags. Can be set with `setValues(?,?,true)`.
 
 #### `childMap` **(readonly)**
 
@@ -78,14 +78,7 @@ Sets values _OR_ default values for a form.
 
 -   `values` **(required)**: The new values/default values to set on this form.
 -   `validate` **(optional)**: Validate? When defined, overrides `validateOnChange`.
--   `isDefault` **(optional, false)**: When true, updates the default values instead of the normal values. Only updates one or the other, to set both at the same time, use `setDefaultValues()` or 2 function calls.
-
-#### `setDefaultValues(values, validate = true, notifyChild = true, notifyParent = true)`
-
-Set both values _AND_ default values for a form. If you only want to set default values, use `setValues(...,...,true)`.
-
--   `values` **(required)**: The new values to set on this form.
--   `validate` **(optional)**: Validate? When defined, overrides `validateOnChange`.
+-   `isDefault` **(optional)**: Leave undefined to set both `values` and `defaultValues`. Set to true to only set `defaultValues` and false to only set `values`.
 
 #### `validate()`
 
