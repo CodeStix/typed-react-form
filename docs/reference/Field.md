@@ -193,6 +193,10 @@ The form or child form that contains the field to bind to this input.
 
 The name of the field in the form that will be bound to this input.
 
+#### `as` (`"input"` by default)
+
+The element/componment to render, this can be a string specifying "input", "select", "textarea" or a custom component. Is "input" by default. The props of the passed custom component are available on this Field component.
+
 #### `errorClassName` and `errorStyle`
 
 The className and/or style to set when there is an error on this field. Default className is `field-error`.
@@ -220,6 +224,9 @@ Make sure you pass along a `value` too, this is the value that will be set when 
 -   The value of the radio button when using multi-value fields.
 -   The value of the checkbox when using primitive arrays.
 -   The on-checked value of the checkbox when using the `setNullOnUncheck/setUndefinedOnUncheck` prop.
+
+#### `innerRef`
+The ref prop to pass to the underlaying component/input.
 
 ---
 
