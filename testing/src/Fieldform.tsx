@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useForm, Field, AnyListener } from "typed-react-form";
 
 const inputStyle: React.CSSProperties = {
@@ -13,6 +13,7 @@ function CustomInput(props: { value: string; onChange: (val: string) => void; my
 
 export function FieldForm() {
     const form = useForm({ firstName: "", lastName: "" });
+    const inputRef = useRef<HTMLInputElement>(null);
 
     function submit() {
         console.log(form.values);
@@ -22,6 +23,7 @@ export function FieldForm() {
         <form onSubmit={form.handleSubmit(submit)}>
             <Field form={form} name="firstName" as={CustomInput} myCustomProp={true} />
             <Field form={form} name="lastName" as={CustomInput} />
+            <Field form={form} name="firstName" innerRef={inputRef} />
             <button type="submit">Go</button>
             <button
                 type="button"
@@ -32,6 +34,14 @@ export function FieldForm() {
                 Set values
             </button>
             <AnyListener form={form} render={({ dirty }) => <pre>{String(dirty)}</pre>} />
+            <button
+                type="button"
+                onClick={() => {
+                    inputRef.current!.style.color = Math.random() > 0.5 ? "red" : "blue";
+                }}
+            >
+                Test
+            </button>
         </form>
     );
 }

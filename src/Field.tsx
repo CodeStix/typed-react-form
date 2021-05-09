@@ -14,7 +14,7 @@ export type FieldProps<T extends object, K extends keyof T, C> = {
      */
     form: FormState<T>;
     /**
-     * The name of the field
+     * The name of the field in form
      */
     name: K;
     /**
@@ -59,11 +59,17 @@ export type FieldProps<T extends object, K extends keyof T, C> = {
      * The style to set when this field has been modified.
      */
     dirtyStyle?: React.CSSProperties;
+    /**
+     * The ref to pass to your input component.
+     */
+    innerRef?: React.Ref<any>;
 };
+
+// Note on innerRef: React.forwardRef breaks type-checking
 
 export function Field<T extends object, K extends keyof T, C extends React.FunctionComponent<any> | keyof JSX.IntrinsicElements = "input">(
     props: FieldProps<T, K, C> &
-        Omit<ElementProps<C>, "value" | "checked" | "onChange" | "field" | keyof FieldProps<T, K, C> | keyof SerializeProps> &
+        Omit<ElementProps<C>, "value" | "checked" | "onChange" | "field" | "ref" | keyof FieldProps<T, K, C> | keyof SerializeProps> &
         SerializeProps<T[K]>
 ) {
     const {
@@ -82,6 +88,7 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
         errorStyle,
         dirtyClassName,
         dirtyStyle,
+        innerRef,
         ...rest
     } = props;
     const serializeProps = {
@@ -96,6 +103,7 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
     let v = (serializer ?? defaultSerializer)(field.value, serializeProps);
     return React.createElement(as, {
         ...rest,
+        ref: innerRef,
         checked: typeof v === "boolean" ? v : undefined,
         value: typeof v === "boolean" ? undefined : v,
         disabled: field.state.isSubmitting || disabled,
@@ -104,7 +112,11 @@ export function Field<T extends object, K extends keyof T, C extends React.Funct
         field,
         onChange: (ev: any) => {
             let v =
-                typeof ev === "object" && "target" in ev ? (["checkbox", "radio"].includes(props.type!) ? ev.target.checked : ev.target.value) : ev;
+                typeof ev === "object" && "target" in ev
+                    ? props.type === "checkbox" || props.type === "radio"
+                        ? ev.target.checked
+                        : ev.target.value
+                    : ev;
             if (typeof v === "string" || typeof v === "boolean")
                 field.setValue((deserializer ?? defaultDeserializer)(v, field.value, serializeProps));
             else field.setValue(v);

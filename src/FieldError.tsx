@@ -30,10 +30,14 @@ export function FieldError<
          */
         as?: C;
         transformer?: (error: ErrorType<T[K], Error>) => React.ReactNode;
-    } & Omit<ElementProps<C>, "transformer" | "as" | "name" | "form" | "children" | "field">
+        /**
+         * The ref to pass to your error component.
+         */
+        innerRef?: React.Ref<any>;
+    } & Omit<ElementProps<C>, "transformer" | "as" | "name" | "form" | "children" | "field" | "ref">
 ) {
-    const { form, as = React.Fragment, transformer, ...rest } = props;
+    const { form, as = React.Fragment, transformer, innerRef, ...rest } = props;
     const field = useListener(form, props.name);
     if (!field.error || typeof field.error === "object") return null;
-    return React.createElement(as, { ...rest, field, children: transformer ? transformer(field.error) : String(field.error) });
+    return React.createElement(as, { ...rest, ref: innerRef, field, children: transformer ? transformer(field.error) : String(field.error) });
 }

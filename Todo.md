@@ -2,6 +2,5 @@
 -   Nested validators in child forms to improve validation performance
 -   Combine array helpers into one object? This is usefull to pass to other components
 -   Require index for array fields
--   Add React.forwardRef to input elements
--   Let `comparePrimitiveObject` compare deep objects too
 -   Field on blur
+-   Use React.forwardRef instead of innerRef on Field/FieldError
