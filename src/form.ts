@@ -62,12 +62,12 @@ export class FormState<T extends object, State = DefaultState, Error extends str
     public validateOnMount: boolean;
 
     /**
-     * The values on this form. Use setValues() to set these.
+     * The values on this form. Use `setValues()` to set these.
      */
     public readonly values: T;
 
     /**
-     * The default values on this form. Use setDefaultValues(...) to set these.
+     * The default values on this form. Use `setValues(?,?,true)` to set these.
      */
     public readonly defaultValues: T;
 
@@ -236,17 +236,22 @@ export class FormState<T extends object, State = DefaultState, Error extends str
      * Set multiple values OR default values on this form.
      * @param values The new values to set on this form.
      * @param validate Validate? Overrides `validateOnChange`.
-     * @param isDefault Are these values the default values for this form? This function only updates values or defaultValues, not both! To set both, use `form.setDefaultValues()`.
+     * @param isDefault Leave undefined to set both `values` and `defaultValues`. Set to true to only set `defaultValues` and false to only set `values`.
      * @param notifyChild Should this form notify the child form about this change?
      * @param notifyParent Should this form notify the parent form about this change?
      */
     public setValues(
         values: Partial<T> | undefined,
         validate?: boolean,
-        isDefault: boolean = false,
+        isDefault?: boolean,
         notifyChild: boolean = true,
         notifyParent: boolean = true
     ) {
+        if (isDefault === undefined) {
+            this.setValues(values, false, true, notifyChild, notifyParent);
+            isDefault = false;
+        }
+
         let keys = Object.keys(isDefault ? this.defaultValues : this.values);
         let v: typeof values = values ?? {};
         addDistinct(keys, Object.keys(v));
@@ -285,18 +290,6 @@ export class FormState<T extends object, State = DefaultState, Error extends str
         }
 
         if (validate ?? (this.validateOnChange && this.validator)) this.validate();
-    }
-
-    /**
-     * Set both values and default values for this form. If you only want to set values, use setValues(...). If you only want to set default values, use `setValues(...,...,true)`.
-     * @param values The new default values to set on this form.
-     * @param validate Validate? Overrides `validateOnChange`.
-     * @param notifyChild Should this form notify the child form about this change?
-     * @param notifyParent Should this form notify the parent form about this change?
-     */
-    public setDefaultValues(values: Partial<T>, validate: boolean = true, notifyChild: boolean = true, notifyParent: boolean = true) {
-        this.setValues(values, false, true, notifyChild, notifyParent);
-        this.setValues(values, validate, false, notifyChild, notifyParent);
     }
 
     /**

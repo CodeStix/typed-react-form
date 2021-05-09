@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm, Field } from "typed-react-form";
+import { useForm, Field, AnyListener } from "typed-react-form";
 
 const inputStyle: React.CSSProperties = {
     color: "gray",
@@ -11,7 +11,7 @@ function CustomInput(props: { value: string; onChange: (val: string) => void; my
     return <input style={inputStyle} value={props.value} onChange={(ev) => props.onChange(ev.target.value)} />;
 }
 
-export default function ExampleForm() {
+export function FieldForm() {
     const form = useForm({ firstName: "", lastName: "" });
 
     function submit() {
@@ -23,6 +23,15 @@ export default function ExampleForm() {
             <Field form={form} name="firstName" as={CustomInput} myCustomProp={true} />
             <Field form={form} name="lastName" as={CustomInput} />
             <button type="submit">Go</button>
+            <button
+                type="button"
+                onClick={() => {
+                    form.setValues({ firstName: "test", lastName: "test2" }, false, true);
+                }}
+            >
+                Set values
+            </button>
+            <AnyListener form={form} render={({ dirty }) => <pre>{String(dirty)}</pre>} />
         </form>
     );
 }

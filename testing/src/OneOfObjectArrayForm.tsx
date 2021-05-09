@@ -36,7 +36,7 @@ export default function OneOfObjectArrayForm() {
                 await new Promise((res) => setTimeout(res, 500));
                 form.setState({ isSubmitting: false });
                 console.log(form.values);
-                form.setDefaultValues(form.values);
+                form.setValues(form.values);
             }}
         >
             <a href="https://github.com/CodeStix/typed-react-form/blob/master/example/src/OneOfObjectArrayForm.tsx">View source code</a>

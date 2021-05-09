@@ -3,6 +3,5 @@
 -   Combine array helpers into one object? This is usefull to pass to other components
 -   Require index for array fields
 -   Add React.forwardRef to input elements
--   Rename `setDefaultValues` to `setAllValues`
 -   Let `comparePrimitiveObject` compare deep objects too
 -   Field on blur
