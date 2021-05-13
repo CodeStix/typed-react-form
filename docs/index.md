@@ -19,7 +19,7 @@ yarn add typed-react-form
 
 This library works with both **Javascript** and **Typescript**. Typescript is certainly preferred because of the enforced type-checking!
 
-**Make sure to restart `react-scripts` after installing.**
+**Make sure to restart your project after installing. (restart `react-scripts`)**
 
 ## Step 2: Creating a form
 
