@@ -46,3 +46,9 @@ const StyledCustomInput: typeof CustomInput = styled(CustomInput)`
     }
 `;
 ```
+
+---
+
+## Element type is invalid: expected a string (for built-in components) or a class/function but got: undefined
+
+This sometimes happens after installing this package. Restart your project to fix it. (restart `react-scripts`)
