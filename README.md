@@ -12,7 +12,7 @@
 </p>
 
 <p align="center" width="100%">
-    <strong>A completely type-checked form builder for Typescript React</strong>
+    <strong>A completely type-checked form builder for React with Typescript</strong>
 </p>
 
 - ✔️ **Type-checked**: Make less errors, even field names are strongly typed.
