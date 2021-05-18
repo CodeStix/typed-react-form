@@ -15,9 +15,9 @@
     <strong>A completely type-checked form builder for React</strong>
 </p>
 
-- ✔️ **Type-checked**: Make less errors, this library was built for React with Typescript. 
-- 🤔 **Simple**: An intuitive and easy to understand api. Well [documented](https://codestix.github.io/typed-react-form/) too, also with JSDoc. 
-- :fire: **Fast**: It only rerenders the fields that change if used correctly. This allows you to create huge forms.
+- ✔️ **Type-checked**: Make less errors, this library was built for React with Typescript. Even field names are strongly typed.
+- 🤔 **Simple**: A well [documented](https://codestix.github.io/typed-react-form/), intuitive and easy to understand api. 
+- :fire: **Fast**: Only rerenders the fields that change if used correctly. This allows you to create huge forms.
 - 📦 **Pretty Small**: [![NPM Size](https://img.shields.io/bundlephobia/minzip/typed-react-form)](https://bundlephobia.com/result?p=typed-react-form)
 
 ## Install
