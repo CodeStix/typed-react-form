@@ -157,7 +157,7 @@ export function useArrayField<
     useEffect(() => {
         let id = parentForm.listen(name, () => {
             let val = parentForm.values[name] as any;
-            if (val.length !== oldLength.current) {
+            if (Array.isArray(val) && val.length !== oldLength.current) {
                 setRender((i) => i + 1);
                 oldLength.current = val.length;
             }

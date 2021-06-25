@@ -1,3 +1,7 @@
+# 2.2.1 (25/06/2021)
+
+-   Fix crash on undefined/null array when using useArrayField.
+
 # 2.2.0 (9/05/2021)
 
 -   `innerRef` prop on `Field` and `FieldError`
