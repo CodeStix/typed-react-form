@@ -5,6 +5,8 @@ remote_theme: pmarsceill/just-the-docs
 aux_links:
     "GitHub":
         - "https://github.com/CodeStix/typed-react-form"
+    "NPM":
+        - "https://www.npmjs.com/package/typed-react-form"
 
 aux_links_new_tab: true
 

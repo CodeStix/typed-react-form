@@ -4,3 +4,4 @@
 -   Require index for array fields
 -   Field on blur
 -   Use React.forwardRef instead of innerRef on Field/FieldError
+-   Rename `FormField` -> `FieldInfo` & better documentation on passed Field props
