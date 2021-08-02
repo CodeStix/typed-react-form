@@ -1,6 +1,6 @@
 {
   "name": "typed-react-form",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A completely type-checked React form builder.",
   "author": "codestix",
   "license": "MIT",
