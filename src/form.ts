@@ -209,21 +209,24 @@ export class FormState<T extends object, State = DefaultState, Error extends str
         fireAny: boolean = true
     ) {
         // value can contain the default value or normal value. (Determined by isDefault)
+        let other = isDefault ? this.values[key] : this.defaultValues[key];
         if (typeof value === "object" && value !== null) {
             let dirty: boolean | undefined = false;
-            if (value instanceof Date) {
-                // Compare date objects
-                dirty = value?.getTime() !== (isDefault ? this.values[key] : (this.defaultValues[key] as any))?.getTime();
-            } else if (!(key in this.childMap)) {
-                // Compare objects if there is no child form, because it calculates the dirty value for us
-                let other = isDefault ? this.values[key] : this.defaultValues[key];
-                dirty = JSON.stringify(value) !== JSON.stringify(other);
+
+            // Compare objects if there is no child form, because it calculates the dirty value for us
+            if (!(key in this.childMap)) {
+                if (value instanceof Date && other instanceof Date) {
+                    // Compare date objects
+                    dirty = value?.getTime() !== other?.getTime();
+                } else {
+                    dirty = JSON.stringify(value) !== JSON.stringify(other);
+                }
             }
 
             this.setValueInternal(key, value, dirty, validate, isDefault, notifyChild, notifyParent, fireAny);
         } else {
             // Compare value and existing value/defaultValue which determines dirty
-            let dirty = value !== (isDefault ? this.values[key] : this.defaultValues[key]);
+            let dirty = value !== other;
             if ((isDefault ? this.defaultValues[key] : this.values[key]) === value && this.dirtyMap[key] === dirty) {
                 return;
             }

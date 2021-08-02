@@ -158,6 +158,9 @@ export function defaultSerializer<T>(currentValue: T, props: SerializeProps<T>):
         case "datetime-local":
         case "date": {
             let dateValue = currentValue as any;
+            if (dateValue === null || dateValue === undefined || dateValue === "") {
+                return "";
+            }
             if (typeof dateValue === "string") {
                 let ni = parseInt(dateValue);
                 if (!isNaN(ni)) dateValue = ni;
