@@ -1,3 +1,7 @@
+# 2.2.2 (02/08/2021)
+
+-   Fix crash when comparing Date with null Date field.
+
 # 2.2.1 (25/06/2021)
 
 -   Fix crash on undefined/null array when using useArrayField.
