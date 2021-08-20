@@ -30,7 +30,7 @@ function memberCopy<T>(value: T): T {
     } else if (typeof value === "object") {
         return { ...value };
     } else {
-        throw new Error("Can only memberCopy() arrays and objects.");
+        throw new Error(`Can only memberCopy() arrays and objects, got '${String(value)}'. Probably due to invalid useForm() value.`);
     }
 }
 

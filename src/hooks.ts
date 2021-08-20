@@ -166,17 +166,17 @@ export function useArrayField<
     }, []);
 
     const append = useCallback((value: NonNullable<T[K]>[any]) => {
-        form.setValues([...(form.values as any), value] as any);
+        form.setValues([...(form.values as any), value] as any, true, false);
     }, []);
 
     const remove = useCallback((index: number) => {
         let newValues = [...(form.values as any)];
         newValues.splice(index, 1);
-        form.setValues(newValues as any);
+        form.setValues(newValues as any, true, false);
     }, []);
 
     const clear = useCallback(() => {
-        form.setValues([] as any);
+        form.setValues([] as any, true, false);
     }, []);
 
     const move = useCallback((from: number, to: number) => {
@@ -188,7 +188,7 @@ export function useArrayField<
             newArr[k] = newArr[k + increment];
         }
         newArr[to] = target;
-        form.setValues(newArr as any);
+        form.setValues(newArr as any, true, false);
     }, []);
 
     const swap = useCallback((index: number, newIndex: number) => {
@@ -197,7 +197,7 @@ export function useArrayField<
         }
         let values = [...(form.values as any)];
         [values[index], values[newIndex]] = [values[newIndex], values[index]];
-        form.setValues(values as any);
+        form.setValues(values as any, true, false);
     }, []);
 
     return {
