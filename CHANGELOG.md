@@ -1,3 +1,7 @@
+# 2.2.3 (02/08/2021)
+
+-   Fix bug where `form.defaultValues` and `form.values` got overwritten when using utility functions in `useArrayListener`.
+
 # 2.2.2 (02/08/2021)
 
 -   Fix crash when comparing Date with null Date field.
